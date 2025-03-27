@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MCP Builder - Model Context Protocol Builder Platform
+
+## Overview
+
+MCP Builder is a powerful platform that enables users to create, manage, and share Model Context Protocols (MCPs). It provides a seamless experience for building, hosting, and utilizing MCPs across different AI platforms.
+
+## Features
+
+### 🎯 Core Features
+
+- **User Authentication**: Secure login system for personalized experience
+- **Interactive Dashboard**:
+  - View all your created MCPs
+  - Monitor MCP status (online/offline)
+  - Quick access to community marketplace
+  - Real-time status indicators
+
+### 🚀 MCP Management
+
+- **Detailed MCP Views**:
+  - Comprehensive MCP information
+  - Deployment status monitoring
+  - Local setup instructions
+  - Online hosting capabilities
+  - Download options
+
+### 🔧 MCP Generation
+
+- **AI-Powered Creation**:
+  - Platform-specific MCP generation
+  - Support for multiple platforms:
+    - Cursor
+    - Claude Desktop
+    - And more...
+- **Interactive Creation Process**:
+  - Natural language prompt-based generation
+  - Iterative refinement through chat interface
+  - Custom feature integration
+  - Real-time preview
+
+### 🌐 Community Marketplace
+
+- Browse public MCP servers
+- Fork existing MCPs (GitHub-style)
+- Share your MCPs with the community
+- Collaborate with other developers
+
+### ⚙️ Deployment Options
+
+- One-click local setup
+- Cloud hosting capabilities
+- Seamless deployment workflow
+- Status monitoring
+
+## Tech Stack
+
+### Frontend
+
+- **Next.js**: React framework for production
+- **Tailwind CSS v4**: Utility-first CSS framework
+- **shadcn/ui**: High-quality UI components
+- **TypeScript**: Type-safe development
+
+### Backend
+
+- **Supabase**:
+  - Authentication
+  - Database
+  - Real-time subscriptions
+  - Storage
+
+### Payments
+
+- **Lemon Squeezy**: Secure payment processing
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env.local
+   ```
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Contributing
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## License
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Learn More
+## Support
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For support, please open an issue or contact our team at [support email].

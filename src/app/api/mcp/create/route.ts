@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import OpenAI from 'openai';
+import { generateMcpServer } from '@/lib/mcpServerGenerator';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -59,11 +60,126 @@ Working with Claude:
 - Have Claude help you test the server and handle edge cases
 `;
 
+// Parse the input to extract server requirements
+function parseUserInput(input: string): {
+  serverDescription: string;
+  targetClients: string[];
+  authRequirements: string;
+  deploymentPreference: 'local' | 'cloud' | 'both';
+  languagePreference?: string;
+} {
+  // Default values
+  const defaultRequirements = {
+    serverDescription: input,
+    targetClients: ['Claude Desktop', 'Cursor AI'],
+    authRequirements: 'None specified',
+    deploymentPreference: 'local' as const,
+  };
+
+  // Basic parsing logic - this could be improved with NLP/LLM assistance in a real implementation
+  const clientMatches = {
+    claude: input.match(/claude|anthropic/gi),
+    cursor: input.match(/cursor/gi),
+    vscode: input.match(/vscode|vs code/gi),
+    chatgpt: input.match(/chatgpt|gpt|openai/gi),
+  };
+
+  const targetClients = [];
+  if (clientMatches.claude && clientMatches.claude.length > 0) targetClients.push('Claude Desktop');
+  if (clientMatches.cursor && clientMatches.cursor.length > 0) targetClients.push('Cursor AI');
+  if (clientMatches.vscode && clientMatches.vscode.length > 0) targetClients.push('VS Code');
+  if (clientMatches.chatgpt && clientMatches.chatgpt.length > 0) targetClients.push('ChatGPT');
+  
+  // If no clients were matched, use the defaults
+  if (targetClients.length === 0) {
+    targetClients.push(...defaultRequirements.targetClients);
+  }
+
+  // Deployment preference parsing
+  let deploymentPreference: 'local' | 'cloud' | 'both' = 'local';
+  if (input.match(/cloud|remote|online|web/gi)) {
+    deploymentPreference = 'cloud';
+  }
+  if (input.match(/both|local and cloud|cloud and local/gi)) {
+    deploymentPreference = 'both';
+  }
+
+  // Language preference parsing
+  let languagePreference: string | undefined;
+  const languageMatches = {
+    python: input.match(/python/gi),
+    javascript: input.match(/javascript|js/gi),
+    typescript: input.match(/typescript|ts/gi),
+    node: input.match(/node\.?js/gi),
+  };
+
+  if (languageMatches.python && languageMatches.python.length > 0) {
+    languagePreference = 'Python';
+  } else if (
+    (languageMatches.javascript && languageMatches.javascript.length > 0) ||
+    (languageMatches.typescript && languageMatches.typescript.length > 0) ||
+    (languageMatches.node && languageMatches.node.length > 0)
+  ) {
+    languagePreference = 'Node.js';
+  }
+
+  // Authentication requirements parsing
+  let authRequirements = 'None specified';
+  if (input.match(/auth|authentication|login|secure/gi)) {
+    authRequirements = 'Requires authentication';
+  }
+  if (input.match(/api key|apikey|token/gi)) {
+    authRequirements = 'Requires API key or token';
+  }
+  if (input.match(/oauth/gi)) {
+    authRequirements = 'Requires OAuth';
+  }
+
+  return {
+    serverDescription: input,
+    targetClients,
+    authRequirements,
+    deploymentPreference,
+    languagePreference,
+  };
+}
+
 // Generate MCP config using ChatGPT API
 async function generateMcpConfig(input: string): Promise<string> {
   try {
     console.log(`Generating MCP config for: ${input}`);
     
+    // Parse the user input to extract requirements
+    const requirements = parseUserInput(input);
+    
+    // Generate the MCP server
+    const serverPackage = await generateMcpServer(
+      requirements.serverDescription,
+      requirements.targetClients,
+      requirements.authRequirements,
+      requirements.deploymentPreference,
+      requirements.languagePreference
+    );
+    
+    // For the UI, convert the server package to a JSON representation
+    return JSON.stringify({
+      description: requirements.serverDescription,
+      serverCode: serverPackage.serverCode,
+      clientConfigs: serverPackage.clientConfigs,
+      deploymentOptions: {
+        local: serverPackage.packages.local ? Object.keys(serverPackage.packages.local) : [],
+        cloud: serverPackage.packages.cloud ? Object.keys(serverPackage.packages.cloud) : [],
+      },
+      documentation: serverPackage.documentation,
+      metadata: {
+        generatedBy: 'mcp-server-generator',
+        timestamp: new Date().toISOString(),
+        requirements,
+      },
+    }, null, 2);
+
+    // The following code is kept as a fallback in case the generator fails
+    /*
     // Create a prompt for the LLM
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -141,6 +257,7 @@ The response should be formatted as valid JSON, with no markdown formatting or a
         },
       }, null, 2);
     }
+    */
   } catch (error) {
     console.error('Error generating MCP config:', error);
     // Return a fallback config in case of error

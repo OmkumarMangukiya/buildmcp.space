@@ -11,10 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import MCPConfigViewer from '@/components/mcp/MCPConfigViewer';
+import DeployMCPButton from '@/components/mcp/DeployMCPButton';
+import DeploymentResult from '@/components/mcp/DeploymentResult';
 
 // Import the planned components (will be created next)
 // import MCPForm from '@/components/mcp/MCPForm';
-// import MCPConfigViewer from '@/components/mcp/MCPConfigViewer';
 // import DeployMCPButton from '@/components/mcp/DeployMCPButton';
 
 export default function CreateMcpPage() {
@@ -27,6 +29,8 @@ export default function CreateMcpPage() {
   const [activeTab, setActiveTab] = useState("description");
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [deployTarget, setDeployTarget] = useState("local");
+  const [deploymentUrl, setDeploymentUrl] = useState<string | null>(null);
+  const [deploymentDetails, setDeploymentDetails] = useState<any>(null);
 
   // Templates for common MCP server types
   const templates = [
@@ -148,6 +152,17 @@ export default function CreateMcpPage() {
     } 
   };
 
+  const handleDeploySuccess = (url: string, details: any) => {
+    setDeploymentUrl(url);
+    setDeploymentDetails(details);
+    setDeploymentStatus('success');
+  };
+  
+  const handleDeployFailure = (errorMessage: string) => {
+    setError(errorMessage);
+    setDeploymentStatus(null);
+  };
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">MCP Server Builder</h1>
@@ -248,30 +263,15 @@ export default function CreateMcpPage() {
             
             {/* Step 2: Configuration */}
             <TabsContent value="config" className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              
-              {generatedConfig && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Generated Configuration</h3>
-                  <div className="bg-muted p-4 rounded-md overflow-x-auto">
-                    <pre className="text-sm">
-                      <code>{generatedConfig}</code>
-                    </pre>
-                  </div>
-                  
-                  <div className="flex gap-2 justify-end">
-                    <Button variant="outline" onClick={handleSave} disabled={isLoading}>
-                      Save Configuration
-                    </Button>
-                    <Button onClick={() => setActiveTab("deploy")} disabled={!mcpId}>
-                      Proceed to Deployment
-                    </Button>
-                  </div>
+              {generatedConfig ? (
+                <MCPConfigViewer 
+                  configJson={generatedConfig} 
+                  onSave={handleSave}
+                  onDeploy={() => setActiveTab("deploy")}
+                />
+              ) : (
+                <div className="flex justify-center items-center h-48">
+                  <p className="text-muted-foreground">No configuration generated yet.</p>
                 </div>
               )}
             </TabsContent>
@@ -316,57 +316,26 @@ export default function CreateMcpPage() {
                   </div>
                 </RadioGroup>
                 
-                <Button 
-                  onClick={handleDeploy}
-                  disabled={!mcpId || !!deploymentStatus && !error}
-                  className="w-full"
-                >
-                  {deploymentStatus === 'Deploying...' ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Server className="mr-2 h-4 w-4" />
-                  )}
-                  Deploy MCP Server
-                </Button>
-                
-                {deploymentStatus && deploymentStatus !== 'Deploying...' && (
-                  <Alert variant="default" className="border-green-500 bg-green-50 dark:bg-green-950/10 dark:border-green-500/30">
-                    <AlertTitle>Deployment Status</AlertTitle>
-                    <AlertDescription>{deploymentStatus}</AlertDescription>
-                  </Alert>
+                {deploymentStatus === 'success' && deploymentUrl ? (
+                  <DeploymentResult 
+                    deploymentUrl={deploymentUrl}
+                    deployTarget={deployTarget as 'local' | 'cloud'}
+                    details={deploymentDetails}
+                  />
+                ) : (
+                  <DeployMCPButton 
+                    mcpId={mcpId || ''}
+                    deployTarget={deployTarget as 'local' | 'cloud'}
+                    onDeploySuccess={handleDeploySuccess}
+                    onDeployFailure={handleDeployFailure}
+                  />
                 )}
                 
-                {deployTarget === 'local' && deploymentStatus && deploymentStatus !== 'Deploying...' && (
-                  <div className="mt-4">
-                    <h4 className="font-medium mb-2">Configuration Instructions</h4>
-                    <Accordion type="single" collapsible>
-                      <AccordionItem value="claude">
-                        <AccordionTrigger>Claude Desktop Configuration</AccordionTrigger>
-                        <AccordionContent>
-                          <ol className="list-decimal pl-5 text-sm space-y-1">
-                            <li>Download the MCP server files</li>
-                            <li>Extract the files to a directory on your computer</li>
-                            <li>Open Claude Desktop and go to Settings</li>
-                            <li>Navigate to the "Servers" section</li>
-                            <li>Add a new server with the path to the executable</li>
-                            <li>Save the configuration</li>
-                          </ol>
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="cursor">
-                        <AccordionTrigger>Cursor AI Configuration</AccordionTrigger>
-                        <AccordionContent>
-                          <ol className="list-decimal pl-5 text-sm space-y-1">
-                            <li>Download the MCP server files</li>
-                            <li>Extract the files to your project directory</li>
-                            <li>Create a .cursor directory in your project root if it doesn't exist</li>
-                            <li>Copy the mcp.json file to the .cursor directory</li>
-                            <li>Restart Cursor AI to pick up the new configuration</li>
-                          </ol>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-                  </div>
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
                 )}
               </div>
             </TabsContent>

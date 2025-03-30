@@ -70,9 +70,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
     // Format the response with expected structure
     return NextResponse.json({
       mcpId: id,
-      config: supabaseResult ? JSON.stringify(supabaseResult.config) : mcpData.config,
-      createdAt: supabaseResult ? supabaseResult.created_at : mcpData.createdAt,
-      userId: supabaseResult ? supabaseResult.user_id : mcpData.userId
+      config: supabaseResult ? JSON.stringify(supabaseResult.config) : (mcpData ? mcpData.config : null),
+      createdAt: supabaseResult ? supabaseResult.created_at : (mcpData ? mcpData.createdAt : null),
+      userId: supabaseResult ? supabaseResult.user_id : (mcpData ? mcpData.userId : null)
     });
   } catch (error) {
     console.error(`Error fetching MCP ${params.id}:`, error);

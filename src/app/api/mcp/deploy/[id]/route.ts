@@ -3,15 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import JSZip from 'jszip';
-
-// Placeholder for database interaction (shared or imported)
-const mockDatabase: Record<string, { config: string; createdAt: Date; userId?: string }> = {
-  'test-uuid-123': {
-    config: JSON.stringify({ description: 'Initial test MCP', resources: [], tools: [], prompts: [] }, null, 2),
-    createdAt: new Date(),
-    userId: 'mock-user-1'
-  }
-};
+import { getMcp } from '@/lib/mockDatabase';
 
 /**
  * Create a zip file containing all the server files
@@ -175,7 +167,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Invalid deployment target' }, { status: 400 });
     }
 
-    const mcpData = mockDatabase[id];
+    const mcpData = getMcp(id);
 
     if (!mcpData) {
       return NextResponse.json({ error: 'MCP not found' }, { status: 404 });

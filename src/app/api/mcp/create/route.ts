@@ -2,14 +2,12 @@ import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import OpenAI from 'openai';
 import { generateMcpServer } from '@/lib/mcpServerGenerator';
+import { createMcp } from '@/lib/mockDatabase';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '', // Make sure to set this in your environment variables
 });
-
-// Placeholder for database interaction
-const mockDatabase: Record<string, { config: string; createdAt: Date; userId?: string }> = {};
 
 // MCP documentation from the project
 const MCP_DOCS = `
@@ -76,9 +74,9 @@ function parseUserInput(input: string): {
     deploymentPreference: 'local' as const,
   };
 
-  // Basic parsing logic - this could be improved with NLP/LLM assistance in a real implementation
+  // More comprehensive matching patterns
   const clientMatches = {
-    claude: input.match(/claude|anthropic/gi),
+    claude: input.match(/claude|anthropic|desktop/gi),
     cursor: input.match(/cursor/gi),
     vscode: input.match(/vscode|vs code/gi),
     chatgpt: input.match(/chatgpt|gpt|openai/gi),
@@ -97,14 +95,18 @@ function parseUserInput(input: string): {
 
   // Deployment preference parsing
   let deploymentPreference: 'local' | 'cloud' | 'both' = 'local';
-  if (input.match(/cloud|remote|online|web/gi)) {
+  if (input.match(/cloud|remote|online|web|hosted|deploy|server/gi)) {
     deploymentPreference = 'cloud';
   }
   if (input.match(/both|local and cloud|cloud and local/gi)) {
     deploymentPreference = 'both';
   }
+  if (input.match(/local|desktop|my computer|my machine|locally/gi)) {
+    // If explicitly mentioned local, prioritize that over cloud
+    deploymentPreference = 'local';
+  }
 
-  // Language preference parsing
+  // More comprehensive language preference parsing
   let languagePreference: string | undefined;
   const languageMatches = {
     python: input.match(/python/gi),
@@ -116,27 +118,48 @@ function parseUserInput(input: string): {
   if (languageMatches.python && languageMatches.python.length > 0) {
     languagePreference = 'Python';
   } else if (
+    (languageMatches.typescript && languageMatches.typescript.length > 0)
+  ) {
+    languagePreference = 'TypeScript';
+  } else if (
     (languageMatches.javascript && languageMatches.javascript.length > 0) ||
-    (languageMatches.typescript && languageMatches.typescript.length > 0) ||
     (languageMatches.node && languageMatches.node.length > 0)
   ) {
-    languagePreference = 'Node.js';
+    languagePreference = 'JavaScript';
   }
 
-  // Authentication requirements parsing
+  // More comprehensive authentication requirements parsing
   let authRequirements = 'None specified';
-  if (input.match(/auth|authentication|login|secure/gi)) {
+  if (input.match(/auth|authentication|login|secure|credentials/gi)) {
     authRequirements = 'Requires authentication';
   }
-  if (input.match(/api key|apikey|token/gi)) {
+  if (input.match(/api key|apikey|token|secret|password/gi)) {
     authRequirements = 'Requires API key or token';
   }
-  if (input.match(/oauth/gi)) {
+  if (input.match(/oauth|oauth2|google auth|github auth|social login/gi)) {
     authRequirements = 'Requires OAuth';
   }
 
+  // Extract specific features mentioned in the input
+  const features = [];
+  if (input.match(/file|directory|folder|path|read file|write file/gi)) features.push('file access');
+  if (input.match(/database|sql|postgres|mysql|mongodb|sqlite/gi)) features.push('database access');
+  if (input.match(/web|http|api|rest|fetch|axios/gi)) features.push('web API access');
+  if (input.match(/image|photo|picture|vision/gi)) features.push('image processing');
+  if (input.match(/chat|conversation|message/gi)) features.push('conversation management');
+  if (input.match(/obsidian|vault|note|markdown/gi)) features.push('obsidian integration');
+  if (input.match(/pdf|document/gi)) features.push('PDF processing');
+  if (input.match(/code|git|github|repository/gi)) features.push('code analysis');
+  if (input.match(/search|find|query/gi)) features.push('search capabilities');
+
+  // Add features to the description for better LLM context
+  let enhancedDescription = input;
+  if (features.length > 0) {
+    enhancedDescription += `\n\nDetected features: ${features.join(', ')}`;
+  }
+
   return {
-    serverDescription: input,
+    serverDescription: enhancedDescription,
     targetClients,
     authRequirements,
     deploymentPreference,
@@ -290,12 +313,12 @@ export async function POST(request: Request) {
     const config = await generateMcpConfig(input);
     const mcpId = uuidv4();
 
-    // Simulate storing in database (replace with actual DB call)
-    mockDatabase[mcpId] = { 
+    // Store in database
+    createMcp(mcpId, { 
       config, 
       createdAt: new Date(),
       userId 
-    };
+    });
     console.log(`MCP created with ID: ${mcpId}`);
 
     return NextResponse.json({ mcpId, config });

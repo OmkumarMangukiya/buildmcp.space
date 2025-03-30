@@ -1,169 +1,102 @@
-#!/usr/bin/env node
+// Import necessary modules
+import { createServer, IncomingMessage, ServerResponse } from 'http';
+import { exec } from 'child_process';
+import { URL } from 'url';
+import fetch from 'node-fetch';
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  ListResourcesRequestSchema,
-  ReadResourceRequestSchema,
-  ListToolsRequestSchema,
-  CallToolRequestSchema,
-  Tool
-} from "@modelcontextprotocol/sdk/types.js";
+// Define the MCP server configuration
+const PORT = 8080;
+const BRAVE_SEARCH_API_URL = 'https://api.search.brave.com/res/v1/web/search';
+const BRAVE_SEARCH_API_KEY = 'YOUR_BRAVE_SEARCH_API_KEY'; // Replace with your Brave API key
 
-// Type definitions
-interface ResourceRequest {
-  params: {
-    uri: string;
-  };
+// Define the MCP Tool for web search
+interface MCPTool {
+  name: string;
+  description: string;
+  parameters: { [key: string]: string };
+  execute: (params: { [key: string]: string }) => Promise<any>;
 }
 
-interface ToolRequest {
-  params: {
-    name: string;
-    arguments: Record<string, any>;
-  };
-}
+// Define the search tool
+const searchTool: MCPTool = {
+  name: 'web.search',
+  description: 'Performs a web search using the Brave Search API.',
+  parameters: {
+    query: 'The search query string.',
+  },
+  async execute(params) {
+    const { query } = params;
+    if (!query) {
+      throw new Error('Query parameter is required.');
+    }
 
-// Define sample tool
-const SAMPLE_TOOL: Tool = {
-  name: "sample_tool",
-  description: "A sample tool for demonstration purposes",
-  inputSchema: {
-    type: "object",
-    properties: {
-      input: { 
-        type: "string",
-        description: "Input text to process"
-      }
-    },
-    required: ["input"]
-  }
+    const response = await fetch(`${BRAVE_SEARCH_API_URL}?q=${encodeURIComponent(query)}`, {
+      headers: {
+        'Authorization': `Bearer ${BRAVE_SEARCH_API_KEY}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Search API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  },
 };
 
-// Type guard for tool arguments
-function isSampleToolArgs(args: unknown): args is { input: string } {
-  return (
-    typeof args === "object" &&
-    args !== null &&
-    "input" in args &&
-    typeof (args as { input: string }).input === "string"
-  );
-}
+// Define the MCP server
+const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
+  if (req.method === 'POST' && req.url === '/execute') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
 
-// Initialize the server
-const server = new Server(
-  {
-    name: "example-mcp-server",
-    version: "1.0.0"
+    req.on('end', async () => {
+      try {
+        const { tool, params } = JSON.parse(body);
+        if (tool === searchTool.name) {
+          const result = await searchTool.execute(params);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ status: 'success', data: result }));
+        } else {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ status: 'error', message: 'Invalid tool name.' }));
+        }
+      } catch (error) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'error', message: error.message }));
+      }
+    });
+  } else {
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'error', message: 'Not found' }));
+  }
+});
+
+// Start the server
+server.listen(PORT, () => {
+  console.log(`MCP server running on port ${PORT}`);
+});
+
+// Sample Claude Desktop configuration
+const claudeDesktopConfig = {
+  tools: [
+    {
+      name: 'web.search',
+      description: 'Performs a web search using the Brave Search API.',
+      parameters: {
+        query: 'string',
+      },
+    },
+  ],
+  transport: 'stdio',
+  security: {
+    localExecution: true,
   },
-  {
-    capabilities: {
-      resources: {},
-      tools: {}
-    }
-  }
-);
+};
 
-// Resources implementation
-server.setRequestHandler(ListResourcesRequestSchema, async () => {
-  return {
-    resources: [
-      {
-        uri: "file:///sample/resource.txt",
-        name: "Sample Resource",
-        description: "A sample resource for demonstration",
-        mimeType: "text/plain"
-      }
-    ]
-  };
-});
-
-server.setRequestHandler(ReadResourceRequestSchema, async (request: ResourceRequest) => {
-  const uri = request.params.uri;
-  if (uri === "file:///sample/resource.txt") {
-    return {
-      contents: [
-        {
-          uri: uri,
-          mimeType: "text/plain",
-          text: "This is a sample resource content."
-        }
-      ]
-    };
-  }
-  return { contents: [] };
-});
-
-// Tools implementation
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [SAMPLE_TOOL]
-  };
-});
-
-server.setRequestHandler(CallToolRequestSchema, async (request: ToolRequest) => {
-  try {
-    const { name, arguments: args } = request.params;
-    
-    if (!args) {
-      throw new Error("No arguments provided");
-    }
-
-    switch (name) {
-      case "sample_tool": {
-        if (!isSampleToolArgs(args)) {
-          throw new Error("Invalid arguments for sample_tool");
-        }
-        
-        const { input } = args;
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Tool executed with input: ${input}`
-            }
-          ],
-          isError: false
-        };
-      }
-      
-      default:
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Unknown tool: ${name}`
-            }
-          ],
-          isError: true
-        };
-    }
-  } catch (error) {
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }
-      ],
-      isError: true
-    };
-  }
-});
-
-// Main entry point
-async function runServer() {
-  try {
-    const transport = new StdioServerTransport();
-    await server.connect(transport);
-    console.error("MCP Server connected and running on stdio");
-  } catch (error) {
-    console.error("Error starting MCP server:", error);
-    process.exit(1);
-  }
-}
-
-runServer().catch((error) => {
-  console.error("Fatal error running server:", error);
-  process.exit(1);
-});
+// Write the configuration to a file
+import { writeFileSync } from 'fs';
+writeFileSync('claude_desktop_config.json', JSON.stringify(claudeDesktopConfig, null, 2));

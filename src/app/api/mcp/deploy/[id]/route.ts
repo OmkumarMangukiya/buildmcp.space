@@ -1,11 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import JSZip from 'jszip';
 import { getMcp } from '@/lib/mockDatabase';
-import { supabaseAdmin } from '@/lib/supaClient';
+import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
+
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 /**
  * Create a zip file containing all the server files
@@ -110,148 +115,120 @@ async function prepareServerFiles(config: string, deployTarget: string): Promise
   }
 }
 
-// Placeholder for external deployment service interaction
-async function triggerDeployment(mcpId: string, config: string, deployTarget: string): Promise<{ deploymentUrl: string; details?: any }> {
-  console.log(`Triggering ${deployTarget} deployment for MCP: ${mcpId}`);
-  console.log(`Config: ${config}`);
-  
-  // Simulate deployment process time
-  await new Promise(resolve => setTimeout(resolve, 2000));
+// Main deployment function to handle both local and cloud deployments
+async function triggerDeployment(mcpId: string, deployTarget: 'local' | 'cloud') {
+  console.log(`Deploying MCP ID ${mcpId} to ${deployTarget}`);
   
   try {
-    // Prepare the server files
-    const { files, downloadLinks } = await prepareServerFiles(config, deployTarget);
+    // First, try to get the MCP from Supabase
+    const { data: mcpData, error } = await supabase
+      .from('mcp_projects')
+      .select('*')
+      .eq('id', mcpId)
+      .single();
     
+    if (error) {
+      console.error('Error fetching MCP from Supabase:', error);
+      throw new Error(`MCP not found: ${error.message}`);
+    }
+    
+    if (!mcpData) {
+      console.error('MCP not found in database');
+      throw new Error('MCP not found in database');
+    }
+    
+    console.log(`Found MCP: ${mcpData.name}`);
+    
+    // Handle local deployment (download)
     if (deployTarget === 'local') {
-      // For local deployment, return download links to the generated files
+      // For local deployment, we'll return download links and setup instructions
+      const baseDownloadUrl = `/api/mcp/download/${mcpId}`;
+      
       return {
-        deploymentUrl: downloadLinks.server,
-        details: {
-          downloadLinks,
-          instructions: {
-            claude: "Add the server to Claude Desktop via Settings > Servers",
-            cursor: "Place mcp.json in your project's .cursor directory"
-          }
+        success: true,
+        deploymentUrl: `${baseDownloadUrl}/bundle`,
+        message: 'MCP server is ready for download',
+        downloadLinks: {
+          server: `${baseDownloadUrl}/server`,
+          bundle: `${baseDownloadUrl}/bundle`,
+          claudeConfig: `${baseDownloadUrl}/claude`,
+          cursorConfig: `${baseDownloadUrl}/cursor`,
+        },
+        setupInstructions: {
+          claude: [
+            "1. Download the Claude config file",
+            "2. Open Claude Desktop",
+            "3. Go to Settings > MCP Servers",
+            "4. Add a new server and provide the path to your MCP server folder",
+            "5. Choose the downloaded MCP server file"
+          ].join('\n'),
+          cursor: [
+            "1. Download the mcp.json file",
+            "2. Create a .cursor directory in your project",
+            "3. Save the mcp.json file to the .cursor directory",
+            "4. Restart Cursor to pick up the new configuration"
+          ].join('\n')
         }
       };
-    } else {
-      // For cloud deployment, return the hosted server URL
-      const deploymentUrl = `https://mcp.example.com/api/servers/${mcpId}-${Date.now()}`;
+    } 
+    // Handle cloud deployment
+    else {
+      // For real cloud deployment, we would have an actual deployment process
+      // But for now, we'll simulate a successful deployment
+      
+      const deploymentId = `deploy-${mcpId}-${Date.now()}`;
+      const deploymentUrl = `https://mcp-${mcpId}.example.com`;
+      
+      // Here we would have code to actually deploy the MCP to a server
+      
       return {
+        success: true,
+        deploymentId,
         deploymentUrl,
-        details: {
-          status: 'running',
-          region: 'us-west-1',
-          serverType: 'standard',
-          created: new Date().toISOString(),
-          downloadLinks // Include download links for the cloud deployment as well
-        }
+        message: 'MCP server has been deployed to the cloud',
+        status: 'Running',
+        region: 'us-west-1',
+        name: mcpData.name,
+        apiKey: `mcp-${Math.random().toString(36).substring(2, 15)}`
       };
     }
   } catch (error) {
-    console.error('Error during deployment:', error);
-    throw new Error('Deployment failed');
+    console.error('Deployment error:', error);
+    throw error;
   }
 }
 
-// POST /api/mcp/deploy/[id]
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
+  
   try {
-    const { id } = params;
-    // Get the deployment target from request body
-    const body = await request.json();
-    const deployTarget = body.deployTarget || 'local'; // Default to local if not specified
+    // Parse the request body for deployment options
+    const { deployTarget = 'local' } = await request.json();
     
-    // Validate deployTarget
-    if (deployTarget !== 'local' && deployTarget !== 'cloud') {
-      return NextResponse.json({ error: 'Invalid deployment target' }, { status: 400 });
-    }
-
-    let mcpData;
-    let config;
-
-    if (supabaseAdmin) {
-      console.log(`Fetching MCP ${id} from Supabase`);
-      // Try to get the MCP from Supabase first
-      const { data, error } = await supabaseAdmin
-        .from('mcp_projects')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        console.error(`Error fetching MCP ${id} from Supabase:`, error);
-      } else if (data) {
-        mcpData = data;
-        config = JSON.stringify(data.config);
-        console.log(`Found MCP in Supabase with name: ${data.name}`);
-      }
-    } else {
-      console.warn('Supabase admin client not available');
-    }
-
-    // Fall back to mock database if Supabase fails or MCP not found
-    if (!mcpData) {
-      console.log(`Trying to fetch MCP ${id} from mock database`);
-      const mockMcp = getMcp(id);
-      if (mockMcp) {
-        mcpData = mockMcp;
-        config = mockMcp.config;
-        console.log(`Found MCP in mock database`);
-      }
+    console.log(`Starting deployment of MCP ${id} to ${deployTarget}`);
+    
+    if (!id) {
+      console.error('Missing MCP ID');
+      return NextResponse.json(
+        { error: 'Missing MCP ID' },
+        { status: 400 }
+      );
     }
     
-    if (!mcpData) {
-      return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
-    }
-
-    // Ensure config is available and is a string
-    if (!config) {
-      // If config is undefined or null, create an empty config
-      config = JSON.stringify({});
-      console.warn(`No config found for MCP ${id}, using empty config`);
-    } else if (typeof config !== 'string') {
-      // If config is not a string, stringify it
-      config = JSON.stringify(config);
-    }
-
-    // Trigger the deployment process
-    const deploymentResult = await triggerDeployment(id, config, deployTarget);
-
-    // Record the deployment in Supabase if available
-    if (supabaseAdmin) {
-      const deploymentId = uuidv4();
-      const timestamp = new Date().toISOString();
-      
-      const { error: deploymentError } = await supabaseAdmin
-        .from('mcp_deployments')
-        .insert({
-          id: deploymentId,
-          project_id: id,
-          deployment_url: deploymentResult.deploymentUrl,
-          status: 'active',
-          deployment_type: deployTarget,
-          config: { details: deploymentResult.details },
-          created_at: timestamp,
-          updated_at: timestamp
-        });
-
-      if (deploymentError) {
-        console.error('Error recording deployment in Supabase:', deploymentError);
-      } else {
-        console.log(`Deployment recorded in Supabase with ID: ${deploymentId}`);
-      }
-    }
-
-    return NextResponse.json({ 
-      status: 'success', 
-      deploymentUrl: deploymentResult.deploymentUrl,
-      deployTarget,
-      details: deploymentResult.details
-    });
-
+    // Trigger the deployment
+    const deploymentResult = await triggerDeployment(id, deployTarget);
+    
+    // Return success response
+    return NextResponse.json(deploymentResult);
+    
   } catch (error) {
-    console.error(`Error deploying MCP ${params.id}:`, error);
-    return NextResponse.json({ error: 'Failed to deploy MCP configuration' }, { status: 500 });
+    console.error('Error in deployment endpoint:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unknown deployment error' },
+      { status: 500 }
+    );
   }
 }

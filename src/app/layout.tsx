@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GeistSans, GeistMono } from "geist/font";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = GeistSans;
 const geistMono = GeistMono;
@@ -21,6 +22,7 @@ export default function RootLayout({
         className={`${geistSans.className} antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

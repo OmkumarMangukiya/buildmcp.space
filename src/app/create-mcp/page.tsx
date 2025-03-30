@@ -355,8 +355,7 @@ export default function CreateMcpPage() {
                   <DeployMCPButton 
                     mcpId={mcpId || ''}
                     deployTarget={deployTarget as 'local' | 'cloud'}
-                    onDeploySuccess={handleDeploySuccess}
-                    onDeployFailure={handleDeployFailure}
+                    className="w-full"
                   />
                 )}
                 

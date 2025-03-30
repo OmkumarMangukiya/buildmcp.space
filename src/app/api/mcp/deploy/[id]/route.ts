@@ -4,6 +4,8 @@ import * as path from 'path';
 import * as os from 'os';
 import JSZip from 'jszip';
 import { getMcp } from '@/lib/mockDatabase';
+import { supabaseAdmin } from '@/lib/supaClient';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Create a zip file containing all the server files
@@ -156,8 +158,6 @@ async function triggerDeployment(mcpId: string, config: string, deployTarget: st
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
-    // TODO: Add user validation to ensure user owns this MCP
-    
     // Get the deployment target from request body
     const body = await request.json();
     const deployTarget = body.deployTarget || 'local'; // Default to local if not specified
@@ -167,14 +167,81 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Invalid deployment target' }, { status: 400 });
     }
 
-    const mcpData = getMcp(id);
+    let mcpData;
+    let config;
 
+    if (supabaseAdmin) {
+      console.log(`Fetching MCP ${id} from Supabase`);
+      // Try to get the MCP from Supabase first
+      const { data, error } = await supabaseAdmin
+        .from('mcp_projects')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error(`Error fetching MCP ${id} from Supabase:`, error);
+      } else if (data) {
+        mcpData = data;
+        config = JSON.stringify(data.config);
+        console.log(`Found MCP in Supabase with name: ${data.name}`);
+      }
+    } else {
+      console.warn('Supabase admin client not available');
+    }
+
+    // Fall back to mock database if Supabase fails or MCP not found
+    if (!mcpData) {
+      console.log(`Trying to fetch MCP ${id} from mock database`);
+      const mockMcp = getMcp(id);
+      if (mockMcp) {
+        mcpData = mockMcp;
+        config = mockMcp.config;
+        console.log(`Found MCP in mock database`);
+      }
+    }
+    
     if (!mcpData) {
       return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
     }
 
+    // Ensure config is available and is a string
+    if (!config) {
+      // If config is undefined or null, create an empty config
+      config = JSON.stringify({});
+      console.warn(`No config found for MCP ${id}, using empty config`);
+    } else if (typeof config !== 'string') {
+      // If config is not a string, stringify it
+      config = JSON.stringify(config);
+    }
+
     // Trigger the deployment process
-    const deploymentResult = await triggerDeployment(id, mcpData.config, deployTarget);
+    const deploymentResult = await triggerDeployment(id, config, deployTarget);
+
+    // Record the deployment in Supabase if available
+    if (supabaseAdmin) {
+      const deploymentId = uuidv4();
+      const timestamp = new Date().toISOString();
+      
+      const { error: deploymentError } = await supabaseAdmin
+        .from('mcp_deployments')
+        .insert({
+          id: deploymentId,
+          project_id: id,
+          deployment_url: deploymentResult.deploymentUrl,
+          status: 'active',
+          deployment_type: deployTarget,
+          config: { details: deploymentResult.details },
+          created_at: timestamp,
+          updated_at: timestamp
+        });
+
+      if (deploymentError) {
+        console.error('Error recording deployment in Supabase:', deploymentError);
+      } else {
+        console.log(`Deployment recorded in Supabase with ID: ${deploymentId}`);
+      }
+    }
 
     return NextResponse.json({ 
       status: 'success', 

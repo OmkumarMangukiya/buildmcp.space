@@ -76,24 +76,53 @@ export default function CreateMcpPage() {
     setDeploymentStatus(null);
 
     try {
-      // Replace with actual user ID from auth
-      const userId = 'mock-user-1'; 
+      // Get current user from Supabase Auth with better error handling
+      let userId;
+      try {
+        const supabase = (await import('@/lib/supaClient')).default;
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          throw new Error(`Authentication error: ${sessionError.message}`);
+        }
+        
+        userId = session?.user?.id;
+        console.log("Current auth state:", userId ? "Authenticated" : "Not authenticated", userId);
+      } catch (authError: any) {
+        console.error("Auth initialization error:", authError);
+        // If there's an error initializing Supabase, redirect to login
+        window.location.href = '/auth/signin?redirect=/create-mcp';
+        return;
+      }
+
+      if (!userId) {
+        // Redirect to sign-in page if not authenticated
+        window.location.href = '/auth/signin?redirect=/create-mcp';
+        return;
+      }
+
+      console.log("Sending request to create MCP with description:", description.substring(0, 50) + "...");
       const response = await fetch('/api/mcp/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, input: description }),
       });
 
+      console.log("Response status:", response.status);
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("API error:", errorData);
         throw new Error(errorData.error || 'Failed to generate MCP');
       }
 
       const data = await response.json();
+      console.log("MCP created successfully with ID:", data.mcpId);
       setGeneratedConfig(data.config);
       setMcpId(data.mcpId);
       setActiveTab("config");
     } catch (err: any) {
+      console.error("MCP creation error:", err);
       setError(err.message || 'An unknown error occurred');
     } finally {
       setIsLoading(false);

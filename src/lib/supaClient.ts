@@ -1,25 +1,35 @@
 import { createClient } from '@supabase/supabase-js'
-import dotenv from 'dotenv';
-dotenv.config()
 
-if(!process.env.SUPABASE_PROJECT_URL || !process.env.SUPABASE_ANON_KEY){
-  throw new Error('Please provide SUPABASE_PROJECT_URL and SUPABASE_ANON_KEY in .env file')
+// For client-side usage in Next.js, we need to use NEXT_PUBLIC_ prefixed variables
+// or use a different strategy for client components
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_PROJECT_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+// Only log warnings in development, not in production
+if (!supabaseUrl || !supabaseAnonKey) {
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn('Supabase URL or anonymous key not provided. Authentication features will not work properly.');
+  }
 }
 
 // Regular client for authenticated operations
-const supabase = createClient(process.env.SUPABASE_PROJECT_URL, process.env.SUPABASE_ANON_KEY)
-
-// Check for service role key for admin operations
-if(!process.env.SUPABASE_SERVICE_ROLE_KEY){
-  console.warn('SUPABASE_SERVICE_ROLE_KEY not provided. Some admin operations may not work.');
-}
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});
 
 // Service role client for admin operations (bypasses RLS)
-export const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY 
-  ? createClient(
-      process.env.SUPABASE_PROJECT_URL, 
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    )
+// This should only be used in server components
+export const supabaseAdmin = supabaseServiceRoleKey 
+  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
   : null;
 
 export default supabase;

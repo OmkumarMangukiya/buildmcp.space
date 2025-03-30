@@ -307,19 +307,83 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing userId or input' }, { status: 400 });
     }
 
-    // Simulate user validation (replace with actual authentication check)
-    console.log(`Validating user: ${userId}`);
-
+    // Generate the MCP configuration
     const config = await generateMcpConfig(input);
     const mcpId = uuidv4();
 
-    // Store in database
-    createMcp(mcpId, { 
-      config, 
-      createdAt: new Date(),
-      userId 
-    });
-    console.log(`MCP created with ID: ${mcpId}`);
+    // Parse the config to extract relevant information
+    const configObj = JSON.parse(config);
+    const name = configObj.metadata?.requirements?.serverDescription?.split('\n')[0]?.substring(0, 100) || 'Untitled MCP';
+    
+    // Determine client and integration types from the config
+    const clientType = configObj.metadata?.requirements?.targetClients?.includes('Claude Desktop') ? 'claude' : 
+                     configObj.metadata?.requirements?.targetClients?.includes('Cursor AI') ? 'cursor' : 'custom';
+    
+    // Determine integration type based on detected features or content
+    let integrationType = 'custom';
+    const serverDesc = configObj.description || '';
+    if (serverDesc.match(/database|sql|postgres|mysql|mongodb|sqlite/gi)) {
+      integrationType = 'database';
+    } else if (serverDesc.match(/api|rest|http|web|fetch/gi)) {
+      integrationType = 'api';
+    } else if (serverDesc.match(/file|directory|folder|path/gi)) {
+      integrationType = 'files';
+    }
+
+    // Import supabase client
+    const { supabaseAdmin } = await import('@/lib/supaClient');
+    
+    if (!supabaseAdmin) {
+      throw new Error('Supabase admin client not initialized');
+    }
+
+    // Insert into mcp_projects table
+    const { data, error } = await supabaseAdmin
+      .from('mcp_projects')
+      .insert({
+        id: mcpId,
+        user_id: userId,
+        name: name,
+        description: configObj.description || input.substring(0, 200),
+        client_type: clientType,
+        integration_type: integrationType,
+        config: configObj,
+        is_public: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error storing MCP in Supabase:', error);
+      
+      // Fall back to mock database if Supabase fails
+      createMcp(mcpId, { 
+        config, 
+        createdAt: new Date(),
+        userId 
+      });
+      console.log(`MCP created with ID (mock): ${mcpId}`);
+    } else {
+      console.log(`MCP stored in Supabase with ID: ${mcpId}`);
+      
+      // Also create an initial version in mcp_versions
+      const { error: versionError } = await supabaseAdmin
+        .from('mcp_versions')
+        .insert({
+          project_id: mcpId,
+          version: 1,
+          config: configObj,
+          notes: 'Initial version',
+          created_at: new Date().toISOString(),
+          created_by: userId
+        });
+        
+      if (versionError) {
+        console.error('Error storing MCP version in Supabase:', versionError);
+      }
+    }
 
     return NextResponse.json({ mcpId, config });
   } catch (error) {

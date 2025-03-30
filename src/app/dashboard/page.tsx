@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { LayoutDashboard, Plus, Settings, Globe, Share2, Server, Download, Laptop, Cloud, Terminal, Code, GitFork, ExternalLink } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 export default function Dashboard() {
   // Sample MCPs for the dashboard
@@ -44,10 +45,12 @@ export default function Dashboard() {
         </nav>
         
         <div className="absolute bottom-4 w-full px-4">
-          <Button className="w-full gap-2">
-            <Plus className="h-4 w-4" />
-            Create New MCP
-          </Button>
+          <Link href="/create-mcp" className="w-full">
+            <Button className="w-full gap-2">
+              <Plus className="h-4 w-4" />
+              Create New MCP
+            </Button>
+          </Link>
         </div>
       </aside>
 
@@ -63,10 +66,12 @@ export default function Dashboard() {
           <h1 className="text-lg font-semibold">Dashboard</h1>
           
           <div className="ml-auto flex items-center gap-4">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Plus className="h-4 w-4" />
-              Create MCP
-            </Button>
+            <Link href="/create-mcp">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Create MCP
+              </Button>
+            </Link>
             <Avatar>
               <AvatarImage src="https://avatar.vercel.sh/user.png" />
               <AvatarFallback>JP</AvatarFallback>

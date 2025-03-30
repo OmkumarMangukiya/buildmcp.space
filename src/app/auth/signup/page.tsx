@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,28 @@ export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('redirect') || '/dashboard';
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = (await import('@/lib/supaClient')).default;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          // Already logged in, redirect
+          router.push(redirectPath);
+        }
+      } catch (authError) {
+        console.error("Auth check error:", authError);
+        // Don't redirect, just show the signup form
+        setError('Authentication service is temporarily unavailable. Please try again later.');
+      }
+    };
+
+    checkAuth();
+  }, [redirectPath, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,21 +45,34 @@ export default function SignUp() {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+      // Try to initialize Supabase client with error handling
+      let supabase;
+      try {
+        supabase = (await import('@/lib/supaClient')).default;
+      } catch (initError: any) {
+        console.error("Supabase initialization error:", initError);
+        throw new Error('Failed to initialize authentication. Please check your internet connection and try again.');
+      }
+      
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name
+          }
+        }
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to sign up');
+      if (signUpError) {
+        throw new Error(signUpError.message || 'Failed to sign up');
       }
 
-      // On success, redirect to sign in
-      router.push('/auth/signin?registered=true');
+      console.log('Sign up successful, redirecting to signin with redirect parameter');
+      // On success, redirect to sign in with the redirect parameter
+      router.push(`/auth/signin?registered=true&redirect=${encodeURIComponent(redirectPath)}`);
     } catch (err: any) {
+      console.error("Sign up error:", err);
       setError(err.message || 'An error occurred during sign up');
     } finally {
       setIsLoading(false);
@@ -104,7 +139,7 @@ export default function SignUp() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-center">
             Already have an account?{' '}
-            <Link href="/auth/signin" className="font-medium text-primary hover:underline">
+            <Link href={`/auth/signin?redirect=${encodeURIComponent(redirectPath)}`} className="font-medium text-primary hover:underline">
               Sign in
             </Link>
           </p>

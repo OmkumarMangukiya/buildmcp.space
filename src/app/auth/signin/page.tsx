@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,8 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('redirect') || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,26 +24,54 @@ export default function SignIn() {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      // Try to initialize Supabase client with error handling
+      let supabase;
+      try {
+        supabase = (await import('@/lib/supaClient')).default;
+      } catch (initError: any) {
+        console.error("Supabase initialization error:", initError);
+        throw new Error('Failed to initialize authentication. Please check your internet connection and try again.');
+      }
+      
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to sign in');
+      if (signInError) {
+        throw new Error(signInError.message || 'Failed to sign in');
       }
 
-      // On success, redirect to dashboard
-      router.push('/dashboard');
+      console.log(`Sign in successful, redirecting to: ${redirectPath}`);
+      // On success, redirect to the original requested page or dashboard
+      router.push(redirectPath);
     } catch (err: any) {
+      console.error("Sign in error:", err);
       setError(err.message || 'An error occurred during sign in');
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = (await import('@/lib/supaClient')).default;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          // Already logged in, redirect
+          router.push(redirectPath);
+        }
+      } catch (authError) {
+        console.error("Auth check error:", authError);
+        // Don't redirect, just show the login form
+        setError('Authentication service is temporarily unavailable. Please try again later.');
+      }
+    };
+
+    checkAuth();
+  }, [redirectPath, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
@@ -96,7 +126,7 @@ export default function SignIn() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-center">
             Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="font-medium text-primary hover:underline">
+            <Link href={`/auth/signup?redirect=${encodeURIComponent(redirectPath)}`} className="font-medium text-primary hover:underline">
               Sign up
             </Link>
           </p>

@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Download, Cloud, Terminal, Settings, Share2, GitFork } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Download, Cloud, Terminal, Settings, Share2, GitFork, MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import supabase from "@/lib/supaClient";
 
@@ -18,6 +19,7 @@ interface MCP {
   created_at: string;
   config?: any;
   is_public: boolean;
+  code?: string;
 }
 
 export default function McpDetailsPage() {
@@ -68,17 +70,6 @@ export default function McpDetailsPage() {
     }
   }, [params.id]);
 
-  // Function to format date
-  function formatDate(dateString: string) {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -107,112 +98,76 @@ export default function McpDetailsPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-6">
+        {/* Header with Actions */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
             <Link href="/dashboard">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <h1 className="text-3xl font-bold">{mcp.name}</h1>
-            <div className={`w-2 h-2 rounded-full ${mcp.status === 'online' ? 'bg-green-500' : 'bg-red-500'}`} />
-          </div>
-          <p className="text-muted-foreground">{mcp.description}</p>
-        </div>
-
-        {/* Main content */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Left column */}
-          <div className="space-y-6">
-            {/* Details Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="text-sm font-medium">Client Type</div>
-                  <div className="text-sm text-muted-foreground">{mcp.client_type || 'Custom'}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Status</div>
-                  <div className="text-sm text-muted-foreground capitalize">{mcp.status}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Created</div>
-                  <div className="text-sm text-muted-foreground">{formatDate(mcp.created_at)}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Last Updated</div>
-                  <div className="text-sm text-muted-foreground">{formatDate(mcp.updated_at)}</div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Configuration Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Configuration</CardTitle>
-                <CardDescription>MCP server configuration and settings</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <pre className="bg-muted p-4 rounded-lg text-sm overflow-auto max-h-96">
-                  {JSON.stringify(mcp.config, null, 2)}
-                </pre>
-              </CardContent>
-            </Card>
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                {mcp.name}
+                <div className={`w-2 h-2 rounded-full ${mcp.status === 'online' ? 'bg-green-500' : 'bg-red-500'}`} />
+              </h1>
+              <p className="text-sm text-muted-foreground">{mcp.client_type || 'Custom'} MCP</p>
+            </div>
           </div>
 
-          {/* Right column */}
-          <div className="space-y-6">
-            {/* Actions Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Actions</CardTitle>
-                <CardDescription>Manage your MCP server</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button className="w-full gap-2">
-                  <Terminal className="h-4 w-4" />
-                  Deploy Locally
+          <div className="flex items-center gap-2">
+            <Button className="gap-2" variant="outline">
+              <Terminal className="h-4 w-4" />
+              Deploy
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MoreHorizontal className="h-5 w-5" />
                 </Button>
-                <Button className="w-full gap-2" variant="outline">
-                  <Cloud className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem>
+                  <Cloud className="h-4 w-4 mr-2" />
                   Deploy to Cloud
-                </Button>
-                <Button className="w-full gap-2" variant="outline">
-                  <Download className="h-4 w-4" />
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Download className="h-4 w-4 mr-2" />
                   Download Files
-                </Button>
-                <Button className="w-full gap-2" variant="outline">
-                  <Share2 className="h-4 w-4" />
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Share2 className="h-4 w-4 mr-2" />
                   Share
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Settings Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Settings</CardTitle>
-                <CardDescription>Configure your MCP server</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button className="w-full gap-2" variant="outline">
-                  <Settings className="h-4 w-4" />
-                  Edit Settings
-                </Button>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </DropdownMenuItem>
                 {!mcp.is_public && (
-                  <Button className="w-full gap-2" variant="outline">
-                    <GitFork className="h-4 w-4" />
+                  <DropdownMenuItem>
+                    <GitFork className="h-4 w-4 mr-2" />
                     Make Public
-                  </Button>
+                  </DropdownMenuItem>
                 )}
-              </CardContent>
-            </Card>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
+
+        {/* Main Content - Code */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Server Implementation</CardTitle>
+            <CardDescription>Generated MCP server code</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <pre className="bg-muted p-4 rounded-lg text-sm overflow-auto max-h-[calc(100vh-300px)]">
+              {mcp.code || 'No code available'}
+            </pre>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

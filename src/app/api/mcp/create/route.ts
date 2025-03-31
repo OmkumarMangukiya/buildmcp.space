@@ -378,6 +378,7 @@ export async function POST(request: Request) {
         client_type: clientType,
         integration_type: integrationType,
         config: configObj,
+        code: configObj.serverCode,
         is_public: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()

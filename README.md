@@ -2,7 +2,7 @@
 
 ## Overview
 
-MCP Builder is a powerful platform that enables users to create, manage, and share Model Context Protocols (MCPs). It provides a seamless experience for building, hosting, and utilizing MCPs across different AI platforms.
+MCP Builder is a powerful platform that enables users to create, manage, and share Model Context Protocols (MCPs). It provides a seamless experience for building, and utilizing MCPs across different AI platforms.
 
 ## Features
 
@@ -11,17 +11,13 @@ MCP Builder is a powerful platform that enables users to create, manage, and sha
 - **User Authentication**: Secure login system for personalized experience
 - **Interactive Dashboard**:
   - View all your created MCPs
-  - Monitor MCP status (online/offline)
-  - Quick access to community marketplace
-  - Real-time status indicators
+  - Create new MCPs
 
 ### 🚀 MCP Management
 
 - **Detailed MCP Views**:
   - Comprehensive MCP information
-  - Deployment status monitoring
   - Local setup instructions
-  - Online hosting capabilities
   - Download options
 
 ### 🔧 MCP Generation
@@ -34,23 +30,12 @@ MCP Builder is a powerful platform that enables users to create, manage, and sha
     - And more...
 - **Interactive Creation Process**:
   - Natural language prompt-based generation
-  - Iterative refinement through chat interface
   - Custom feature integration
-  - Real-time preview
 
-### 🌐 Community Marketplace
-
-- Browse public MCP servers
-- Fork existing MCPs (GitHub-style)
-- Share your MCPs with the community
-- Collaborate with other developers
 
 ### ⚙️ Deployment Options
 
 - One-click local setup
-- Cloud hosting capabilities
-- Seamless deployment workflow
-- Status monitoring
 
 ## Tech Stack
 

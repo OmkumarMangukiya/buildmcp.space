@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Download, Cloud, Terminal, Settings, Share2, GitFork, MoreHorizontal } from "lucide-react";
+import { ArrowLeft, Download, Share2, GitFork, MoreHorizontal, Settings } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import supabase from "@/lib/supaClient";
+import { useToast } from "@/components/ui/use-toast";
 
 interface MCP {
   id: string;
@@ -24,9 +25,11 @@ interface MCP {
 
 export default function McpDetailsPage() {
   const params = useParams();
+  const { toast } = useToast();
   const [mcp, setMcp] = useState<MCP | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMakingPublic, setIsMakingPublic] = useState(false);
 
   useEffect(() => {
     async function fetchMcpDetails() {
@@ -69,6 +72,48 @@ export default function McpDetailsPage() {
       fetchMcpDetails();
     }
   }, [params.id]);
+
+  const handleDownload = async () => {
+    try {
+      window.location.href = `/api/mcp/download/${params.id}/bundle`;
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to download MCP files. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMakePublic = async () => {
+    try {
+      setIsMakingPublic(true);
+      const { error } = await supabase
+        .from('mcp_projects')
+        .update({ is_public: true })
+        .eq('id', params.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setMcp(prev => prev ? { ...prev, is_public: true } : null);
+      toast({
+        title: "Success",
+        description: "MCP is now public",
+      });
+    } catch (error) {
+      console.error('Error making MCP public:', error);
+      toast({
+        title: "Failed to Make Public",
+        description: "Failed to make MCP public. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsMakingPublic(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -116,9 +161,13 @@ export default function McpDetailsPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button className="gap-2" variant="outline">
-              <Terminal className="h-4 w-4" />
-              Deploy
+            <Button 
+              className="gap-2" 
+              variant="outline"
+              onClick={handleDownload}
+            >
+              <Download className="h-4 w-4" />
+              Download Files
             </Button>
             
             <DropdownMenu>
@@ -129,14 +178,6 @@ export default function McpDetailsPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem>
-                  <Cloud className="h-4 w-4 mr-2" />
-                  Deploy to Cloud
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Files
-                </DropdownMenuItem>
-                <DropdownMenuItem>
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </DropdownMenuItem>
@@ -146,9 +187,12 @@ export default function McpDetailsPage() {
                   Settings
                 </DropdownMenuItem>
                 {!mcp.is_public && (
-                  <DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={handleMakePublic}
+                    disabled={isMakingPublic}
+                  >
                     <GitFork className="h-4 w-4 mr-2" />
-                    Make Public
+                    {isMakingPublic ? 'Making Public...' : 'Make Public'}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>

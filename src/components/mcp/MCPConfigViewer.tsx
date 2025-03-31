@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Code, Server, BookText, Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface ClientConfig {
   name: string;
@@ -36,7 +36,6 @@ interface MCPConfig {
 interface MCPConfigViewerProps {
   configJson: string;
   onSave?: () => void;
-  onDeploy?: () => void;
 }
 
 /**
@@ -62,144 +61,77 @@ function processMarkdown(markdown: string): string {
   return html;
 }
 
-export default function MCPConfigViewer({ configJson, onSave, onDeploy }: MCPConfigViewerProps) {
+export default function MCPConfigViewer({ configJson, onSave }: MCPConfigViewerProps) {
   const [activeTab, setActiveTab] = useState("server");
-  
-  let config: MCPConfig;
-  try {
-    config = JSON.parse(configJson);
-  } catch (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Error Parsing Configuration</CardTitle>
-          <CardDescription>The configuration could not be parsed.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <pre className="text-xs overflow-x-auto p-4 bg-black/5 rounded-md">
-            {configJson}
-          </pre>
-        </CardContent>
-      </Card>
-    );
+  const [config, setConfig] = useState<any>(null);
+
+  useEffect(() => {
+    try {
+      const parsedConfig = JSON.parse(configJson);
+      setConfig(parsedConfig);
+    } catch (error) {
+      console.error('Error parsing config:', error);
+    }
+  }, [configJson]);
+
+  if (!config) {
+    return <div>Loading configuration...</div>;
   }
-  
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>MCP Server Configuration</CardTitle>
-          <CardDescription>
-            Review the generated server configuration for your MCP.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="server" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="server" className="flex items-center gap-1">
-                <Code className="h-4 w-4" /> Server Code
-              </TabsTrigger>
-              <TabsTrigger value="clients" className="flex items-center gap-1">
-                <Server className="h-4 w-4" /> Client Configs
-              </TabsTrigger>
-              <TabsTrigger value="docs" className="flex items-center gap-1">
-                <BookText className="h-4 w-4" /> Documentation
-              </TabsTrigger>
-              <TabsTrigger value="files" className="flex items-center gap-1">
-                <Download className="h-4 w-4" /> Files
-              </TabsTrigger>
-            </TabsList>
-            
-            {/* Server Code Tab */}
-            <TabsContent value="server" className="space-y-4">
-              <pre className="text-xs overflow-x-auto p-4 bg-black/5 rounded-md max-h-96">
-                {config.serverCode}
+    <div className="space-y-4">
+      <Tabs defaultValue="server" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="server">Server Code</TabsTrigger>
+          <TabsTrigger value="client">Client Config</TabsTrigger>
+          <TabsTrigger value="tools">Tools</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="server">
+          <Card>
+            <CardHeader>
+              <CardTitle>Server Implementation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <pre className="bg-muted p-4 rounded-lg text-sm overflow-auto max-h-[400px]">
+                {config.serverCode || 'No server code available'}
               </pre>
-            </TabsContent>
-            
-            {/* Client Configs Tab */}
-            <TabsContent value="clients" className="space-y-4">
-              {Object.entries(config.clientConfigs).map(([clientName, clientConfig]) => (
-                <div key={clientName} className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">{clientConfig.name} Configuration</h3>
-                  <pre className="text-xs overflow-x-auto p-4 bg-black/5 rounded-md">
-                    {JSON.stringify(clientConfig.configuration, null, 2)}
-                  </pre>
-                </div>
-              ))}
-              
-              {Object.keys(config.clientConfigs).length === 0 && (
-                <p className="text-muted-foreground">No client configurations available.</p>
-              )}
-            </TabsContent>
-            
-            {/* Documentation Tab */}
-            <TabsContent value="docs" className="space-y-4">
-              <div className="prose max-w-none dark:prose-invert">
-                <div dangerouslySetInnerHTML={{ 
-                  __html: processMarkdown(config.documentation)
-                }} />
-              </div>
-            </TabsContent>
-            
-            {/* Files Tab */}
-            <TabsContent value="files" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Local Deployment Files */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Local Deployment Files</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {config.deploymentOptions?.local?.length > 0 ? (
-                      <ul className="list-disc pl-5 space-y-1 text-sm">
-                        {config.deploymentOptions.local.map((file) => (
-                          <li key={file}>{file}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No local deployment files available.</p>
-                    )}
-                  </CardContent>
-                </Card>
-                
-                {/* Cloud Deployment Files */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Cloud Deployment Files</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {config.deploymentOptions?.cloud?.length > 0 ? (
-                      <ul className="list-disc pl-5 space-y-1 text-sm">
-                        {config.deploymentOptions.cloud.map((file) => (
-                          <li key={file}>{file}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No cloud deployment files available.</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <div className="text-sm text-muted-foreground">
-                <p>These files will be available for download after deployment.</p>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="client">
+          <Card>
+            <CardHeader>
+              <CardTitle>Client Configuration</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <pre className="bg-muted p-4 rounded-lg text-sm overflow-auto max-h-[400px]">
+                {JSON.stringify(config.clientConfigs || {}, null, 2)}
+              </pre>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="tools">
+          <Card>
+            <CardHeader>
+              <CardTitle>Available Tools</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <pre className="bg-muted p-4 rounded-lg text-sm overflow-auto max-h-[400px]">
+                {JSON.stringify(config.tools || [], null, 2)}
+              </pre>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
       
       {/* Action Buttons */}
       <div className="flex gap-4 justify-end">
         {onSave && (
           <Button onClick={onSave} variant="outline">
             Save Configuration
-          </Button>
-        )}
-        {onDeploy && (
-          <Button onClick={onDeploy}>
-            Continue to Deployment
           </Button>
         )}
       </div>

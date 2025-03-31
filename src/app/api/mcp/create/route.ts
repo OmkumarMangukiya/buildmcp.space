@@ -212,6 +212,20 @@ async function generateMcpConfig(input: string): Promise<string> {
       requirements.languagePreference
     );
     
+    // Extract tools from the server code
+    const toolsMatch = serverPackage.serverCode.match(/server\.tool\([\s\S]*?\)/g);
+    const tools = toolsMatch ? toolsMatch.map(tool => {
+      const nameMatch = tool.match(/"(.*?)"/);
+      const descMatch = tool.match(/description:\s*"(.*?)"/);
+      const paramsMatch = tool.match(/parameters:\s*({[\s\S]*?})/);
+      
+      return {
+        name: nameMatch ? nameMatch[1] : '',
+        description: descMatch ? descMatch[1] : '',
+        parameters: paramsMatch ? JSON.parse(paramsMatch[1]) : {}
+      };
+    }) : [];
+    
     // For the UI, convert the server package to a JSON representation
     return JSON.stringify({
       description: requirements.serverDescription,
@@ -227,88 +241,10 @@ async function generateMcpConfig(input: string): Promise<string> {
         timestamp: new Date().toISOString(),
         requirements,
       },
+      tools,
+      resources: [],
+      prompts: []
     }, null, 2);
-
-    // The following code is kept as a fallback in case the generator fails
-    /*
-    // Create a prompt for the LLM
-    const chatCompletion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are an expert MCP (Model Context Protocol) server developer. Your task is to create a complete, working MCP server configuration based on the user's requirements. 
-          
-Follow these guidelines:
-1. The configuration should include appropriate resources, tools, prompts, and metadata
-2. Resources should have URIs, names, descriptions, and content types
-3. Tools should have names, descriptions, parameter schemas, and return types
-4. Prompts should include names, descriptions, and argument definitions
-5. The output must be in valid JSON format
-6. Include proper client configuration for both Claude Desktop and Cursor AI
-7. Focus on creating a practical, working configuration that follows MCP standards`
-        },
-        {
-          role: "user",
-          content: `I want to create an MCP configuration. Here's the documentation and my input:
-          
-## MCP Documentation
-${MCP_DOCS}
-
-## Creating MCP Servers
-${PROMPT_GUIDANCE}
-
-## User Input
-${input}
-
-Based on the above documentation and my input, please generate a complete MCP configuration in JSON format. The configuration should include appropriate resources, tools, prompts, and metadata sections.
-
-The response should be formatted as valid JSON, with no markdown formatting or additional text.`
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 4000,
-    });
-
-    // Extract the generated config
-    const generatedConfig = chatCompletion.choices[0]?.message?.content || '{}';
-    
-    // Ensure the response is valid JSON
-    try {
-      // Try to parse the response to ensure it's valid JSON
-      const parsedConfig = JSON.parse(generatedConfig);
-      return JSON.stringify(parsedConfig, null, 2);
-    } catch (error) {
-      console.error("Error parsing generated config:", error);
-      // Extract JSON if it's embedded in markdown or other text
-      const jsonMatch = generatedConfig.match(/```json\n([\s\S]*?)\n```/) || 
-                        generatedConfig.match(/```\n([\s\S]*?)\n```/) ||
-                        generatedConfig.match(/{[\s\S]*}/);
-      
-      if (jsonMatch) {
-        try {
-          const extractedJson = jsonMatch[1] || jsonMatch[0];
-          const parsedJson = JSON.parse(extractedJson);
-          return JSON.stringify(parsedJson, null, 2);
-        } catch (e) {
-          console.error("Error parsing extracted JSON:", e);
-        }
-      }
-      
-      // Fallback to a basic structure if parsing fails 
-      return JSON.stringify({
-        description: input,
-        resources: [],
-        tools: [],
-        prompts: [],
-        metadata: {
-          generatedBy: 'chatgpt-fallback',
-          timestamp: new Date().toISOString(),
-          error: 'Failed to parse AI response',
-        },
-      }, null, 2);
-    }
-    */
   } catch (error) {
     console.error('Error generating MCP config:', error);
     // Return a fallback config in case of error

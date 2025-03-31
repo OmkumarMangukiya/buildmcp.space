@@ -30,6 +30,7 @@ export default function McpDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMakingPublic, setIsMakingPublic] = useState(false);
+  const [isMakingPrivate, setIsMakingPrivate] = useState(false);
 
   useEffect(() => {
     async function fetchMcpDetails() {
@@ -166,6 +167,35 @@ export default function McpDetailsPage() {
     }
   };
 
+  const handleMakePrivate = async () => {
+    try {
+      setIsMakingPrivate(true);
+      const { error } = await supabase
+        .from('mcp_projects')
+        .update({ is_public: false })
+        .eq('id', params.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setMcp(prev => prev ? { ...prev, is_public: false } : null);
+      toast({
+        title: "Success",
+        description: "MCP is now private",
+      });
+    } catch (error) {
+      console.error('Error making MCP private:', error);
+      toast({
+        title: "Failed to Make Private",
+        description: "Failed to make MCP private. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsMakingPrivate(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -254,13 +284,21 @@ export default function McpDetailsPage() {
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </DropdownMenuItem>
-                {!mcp.is_public && (
+                {!mcp.is_public ? (
                   <DropdownMenuItem 
                     onClick={handleMakePublic}
                     disabled={isMakingPublic}
                   >
                     <GitFork className="h-4 w-4 mr-2" />
                     {isMakingPublic ? 'Making Public...' : 'Make Public'}
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem 
+                    onClick={handleMakePrivate}
+                    disabled={isMakingPrivate}
+                  >
+                    <GitFork className="h-4 w-4 mr-2" />
+                    {isMakingPrivate ? 'Making Private...' : 'Make Private'}
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>

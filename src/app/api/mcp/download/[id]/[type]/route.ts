@@ -262,11 +262,15 @@ export async function GET(request: Request, { params }: { params: { id: string, 
           .eq('id', id)
           .single();
           
+        let projectId = id;
+        let mcpConfig = null;
+        let mcpCode = null;
+        
         if (deploymentError || !deploymentData) {
           // If not a deployment, try to find the MCP project directly
           const { data: mcpData, error: mcpError } = await supabaseAdmin
             .from('mcp_projects')
-            .select('config, id, code')
+            .select('config, id, code, is_public, user_id')
             .eq('id', id)
             .single();
             
@@ -275,34 +279,47 @@ export async function GET(request: Request, { params }: { params: { id: string, 
             return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
           }
           
-          // Add the original code to the config if it exists
-          if (mcpData.code) {
-            mcpData.config.serverCode = mcpData.code;
+          // Check if MCP is public or verify authentication
+          if (!mcpData.is_public) {
+            // Get the auth header and verify user's permission to download
+            const authHeader = request.headers.get('authorization');
+            
+            if (!authHeader) {
+              return NextResponse.json({ 
+                error: 'This MCP is private. Authentication required to download.', 
+                isPrivate: true 
+              }, { status: 401 });
+            }
+            
+            const token = authHeader.replace('Bearer ', '');
+            const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+            
+            if (authError || !user) {
+              return NextResponse.json({ 
+                error: 'Invalid authentication. This MCP is private.', 
+                isPrivate: true 
+              }, { status: 401 });
+            }
+            
+            // Verify user has permission (either owns the MCP or has access)
+            if (user.id !== mcpData.user_id) {
+              // TODO: Add additional permission check logic here if needed
+              return NextResponse.json({ 
+                error: 'You do not have permission to download this private MCP.', 
+                isPrivate: true 
+              }, { status: 403 });
+            }
           }
           
-          // Store in cache using the MCP data directly
-          await storeDownloadData(id, {
-            config: mcpData.config,
-            serverFiles: {
-              'src/server.ts': generateServerTs(mcpData.config),
-              'tsconfig.json': generateTsConfig(),
-              'package.json': generatePackageJson(mcpData.id),
-              'README.md': generateReadme(mcpData.id),
-              'install.bat': generateInstallScripts().windows,
-              'install.sh': generateInstallScripts().unix
-            },
-            claudeConfig: {
-              'claude_desktop_config.json': generateClaudeConfig(mcpData.id)
-            },
-            cursorConfig: {
-              'mcp.json': generateCursorConfig(mcpData.id)
-            }
-          });
+          // Add the original code to the config if it exists
+          mcpConfig = mcpData.config;
+          mcpCode = mcpData.code;
+          projectId = mcpData.id;
         } else {
           // We found a deployment, get the associated MCP project
           const { data: mcpData, error: mcpError } = await supabaseAdmin
             .from('mcp_projects')
-            .select('config, code')
+            .select('config, code, is_public, user_id')
             .eq('id', deploymentData.project_id)
             .single();
             
@@ -310,30 +327,67 @@ export async function GET(request: Request, { params }: { params: { id: string, 
             return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
           }
           
-          // Add the original code to the config if it exists
-          if (mcpData.code) {
-            mcpData.config.serverCode = mcpData.code;
+          // Check if MCP is public or verify authentication
+          if (!mcpData.is_public) {
+            // Get the auth header and verify user's permission to download
+            const authHeader = request.headers.get('authorization');
+            
+            if (!authHeader) {
+              return NextResponse.json({ 
+                error: 'This MCP is private. Authentication required to download.', 
+                isPrivate: true 
+              }, { status: 401 });
+            }
+            
+            const token = authHeader.replace('Bearer ', '');
+            const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+            
+            if (authError || !user) {
+              return NextResponse.json({ 
+                error: 'Invalid authentication. This MCP is private.', 
+                isPrivate: true 
+              }, { status: 401 });
+            }
+            
+            // Verify user has permission (either owns the MCP or has access)
+            if (user.id !== mcpData.user_id) {
+              // TODO: Add additional permission check logic here if needed
+              return NextResponse.json({ 
+                error: 'You do not have permission to download this private MCP.', 
+                isPrivate: true 
+              }, { status: 403 });
+            }
           }
           
-          // Store in cache
-          await storeDownloadData(id, {
-            config: mcpData.config,
-            serverFiles: {
-              'src/server.ts': generateServerTs(mcpData.config),
-              'tsconfig.json': generateTsConfig(),
-              'package.json': generatePackageJson(deploymentData.project_id),
-              'README.md': generateReadme(deploymentData.project_id),
-              'install.bat': generateInstallScripts().windows,
-              'install.sh': generateInstallScripts().unix
-            },
-            claudeConfig: {
-              'claude_desktop_config.json': generateClaudeConfig(deploymentData.project_id)
-            },
-            cursorConfig: {
-              'mcp.json': generateCursorConfig(deploymentData.project_id)
-            }
-          });
+          // Add the original code to the config if it exists
+          mcpConfig = mcpData.config;
+          mcpCode = mcpData.code;
+          projectId = deploymentData.project_id;
         }
+        
+        // If we have code, add it to the config
+        if (mcpCode && mcpConfig) {
+          mcpConfig.serverCode = mcpCode;
+        }
+        
+        // Store in cache
+        await storeDownloadData(id, {
+          config: mcpConfig,
+          serverFiles: {
+            'src/server.ts': generateServerTs(mcpConfig),
+            'tsconfig.json': generateTsConfig(),
+            'package.json': generatePackageJson(projectId),
+            'README.md': generateReadme(projectId),
+            'install.bat': generateInstallScripts().windows,
+            'install.sh': generateInstallScripts().unix
+          },
+          claudeConfig: {
+            'claude_desktop_config.json': generateClaudeConfig(projectId)
+          },
+          cursorConfig: {
+            'mcp.json': generateCursorConfig(projectId)
+          }
+        });
       } else {
         return NextResponse.json({ error: 'Download not available' }, { status: 404 });
       }

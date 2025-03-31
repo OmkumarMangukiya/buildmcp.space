@@ -14,17 +14,78 @@ export async function GET(request: Request, { params }: { params: { id: string }
     
     if (supabaseAdmin) {
       console.log(`Fetching MCP ${id} from Supabase`);
-      // Try to fetch from Supabase first
-      const { data, error } = await supabaseAdmin
+      
+      // Check if the MCP exists and what its public status is
+      const { data: mcpPublicData, error: publicCheckError } = await supabaseAdmin
         .from('mcp_projects')
-        .select('*')
+        .select('id, is_public, user_id')
         .eq('id', id)
-        .single();
-
-      if (error) {
-        console.warn(`Error fetching MCP ${id} from Supabase:`, error);
-      } else if (data) {
-        supabaseResult = data;
+        .maybeSingle();
+        
+      if (publicCheckError) {
+        console.warn(`Error checking MCP ${id}:`, publicCheckError);
+      } else if (mcpPublicData) {
+        // MCP exists, now handle permissions
+        if (mcpPublicData.is_public) {
+          // Public MCP - fetch full details
+          const { data, error } = await supabaseAdmin
+            .from('mcp_projects')
+            .select('*')
+            .eq('id', id)
+            .single();
+            
+          if (!error && data) {
+            supabaseResult = data;
+          }
+        } else {
+          // Private MCP - check if user is authorized
+          const { headers } = request;
+          const authHeader = headers.get('authorization');
+          
+          if (!authHeader) {
+            return NextResponse.json({ 
+              error: 'This MCP is private', 
+              isPrivate: true 
+            }, { status: 403 });
+          }
+          
+          try {
+            const token = authHeader.replace('Bearer ', '');
+            const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+            
+            if (authError || !user) {
+              return NextResponse.json({ 
+                error: 'This MCP is private', 
+                isPrivate: true 
+              }, { status: 403 });
+            }
+            
+            // Verify user has permission
+            if (user.id !== mcpPublicData.user_id) {
+              return NextResponse.json({ 
+                error: 'You do not have permission to access this private MCP', 
+                isPrivate: true 
+              }, { status: 403 });
+            }
+            
+            // User is authorized, fetch full details
+            const { data, error } = await supabaseAdmin
+              .from('mcp_projects')
+              .select('*')
+              .eq('id', id)
+              .single();
+              
+            if (!error && data) {
+              supabaseResult = data;
+            }
+          } catch (authError) {
+            console.error('Auth error:', authError);
+            return NextResponse.json({ 
+              error: 'Authentication error', 
+              isPrivate: true 
+            }, { status: 401 });
+          }
+        }
       }
     } else {
       console.warn('Supabase admin client not available, falling back to mock database');
@@ -36,12 +97,20 @@ export async function GET(request: Request, { params }: { params: { id: string }
       mockResult = mcpData;
     }
 
+    // Standard response flow - choose the appropriate data source
+    const data = supabaseResult || mcpData;
+
+    if (!data) {
+      return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
+    }
+
     // If the debug parameter is true, return detailed information about where the MCP was found
     if (debug) {
       return NextResponse.json({
         mcpId: id,
         foundInSupabase: !!supabaseResult,
         foundInMockDb: !!mockResult,
+        isPublic: supabaseResult ? supabaseResult.is_public : false,
         supabaseData: supabaseResult ? {
           id: supabaseResult.id,
           name: supabaseResult.name,
@@ -60,19 +129,14 @@ export async function GET(request: Request, { params }: { params: { id: string }
       });
     }
 
-    // Standard response flow - choose the appropriate data source
-    const data = supabaseResult || mcpData;
-
-    if (!data) {
-      return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
-    }
-
     // Format the response with expected structure
     return NextResponse.json({
       mcpId: id,
+      name: supabaseResult ? supabaseResult.name : (mcpData ? JSON.parse(mcpData.config).description || `MCP ${id.substring(0, 6)}` : null),
       config: supabaseResult ? JSON.stringify(supabaseResult.config) : (mcpData ? mcpData.config : null),
       createdAt: supabaseResult ? supabaseResult.created_at : (mcpData ? mcpData.createdAt : null),
-      userId: supabaseResult ? supabaseResult.user_id : (mcpData ? mcpData.userId : null)
+      userId: supabaseResult ? supabaseResult.user_id : (mcpData ? mcpData.userId : null),
+      isPublic: supabaseResult ? supabaseResult.is_public : false
     });
   } catch (error) {
     console.error(`Error fetching MCP ${params.id}:`, error);
@@ -96,6 +160,37 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     
     // Check if Supabase admin client is available
     if (supabaseAdmin) {
+      // Verify the user has permission to update this MCP (only the owner can update)
+      const { headers } = request;
+      const authHeader = headers.get('authorization');
+      
+      if (!authHeader) {
+        return NextResponse.json({ error: 'Authorization required' }, { status: 401 });
+      }
+      
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+      
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 });
+      }
+      
+      // Get MCP to verify ownership
+      const { data: mcpData, error: mcpError } = await supabaseAdmin
+        .from('mcp_projects')
+        .select('user_id')
+        .eq('id', id)
+        .single();
+      
+      if (mcpError) {
+        return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
+      }
+      
+      // Verify ownership
+      if (mcpData.user_id !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized to modify this MCP' }, { status: 403 });
+      }
+      
       // Try to update in Supabase
       const { data, error } = await supabaseAdmin
         .from('mcp_projects')
@@ -159,6 +254,37 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     
     // Check if Supabase admin client is available
     if (supabaseAdmin) {
+      // Verify the user has permission to delete this MCP (only the owner can delete)
+      const { headers } = request;
+      const authHeader = headers.get('authorization');
+      
+      if (!authHeader) {
+        return NextResponse.json({ error: 'Authorization required' }, { status: 401 });
+      }
+      
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+      
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 });
+      }
+      
+      // Get MCP to verify ownership
+      const { data: mcpData, error: mcpError } = await supabaseAdmin
+        .from('mcp_projects')
+        .select('user_id')
+        .eq('id', id)
+        .single();
+      
+      if (mcpError) {
+        return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
+      }
+      
+      // Verify ownership
+      if (mcpData.user_id !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized to delete this MCP' }, { status: 403 });
+      }
+      
       // Try to delete from Supabase
       const { error } = await supabaseAdmin
         .from('mcp_projects')

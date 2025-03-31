@@ -34,32 +34,83 @@ export default function McpDetailsPage() {
   useEffect(() => {
     async function fetchMcpDetails() {
       try {
-        // Get current user session
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-          window.location.href = '/auth/signin?redirect=/mcp/' + params.id;
+        const mcpId = params.id;
+        
+        // First check if MCP is public without using RLS
+        const { data: publicCheck, error: publicCheckError } = await supabase
+          .from('mcp_projects')
+          .select('is_public')
+          .eq('id', mcpId)
+          .maybeSingle();
+          
+        // If the MCP exists but we get a permission error (PGRST116)
+        if (publicCheckError && publicCheckError.code === 'PGRST116') {
+          // Get current user session
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (!session) {
+            setError('This MCP is private. You must be signed in and have permission to view it.');
+            setLoading(false);
+            return;
+          }
+          
+          // Try the request again, this time it will use the authenticated user's permissions
+          const { data: mcpData, error: mcpError } = await supabase
+            .from('mcp_projects')
+            .select('*')
+            .eq('id', mcpId)
+            .single();
+            
+          if (mcpError) {
+            // Still getting an error means the user doesn't have permission
+            setError('This MCP is private. You do not have permission to view it.');
+            setLoading(false);
+            return;
+          }
+          
+          setMcp(mcpData);
+          setLoading(false);
           return;
         }
-
-        // Fetch MCP details
-        const { data, error } = await supabase
+        
+        // If the MCP doesn't exist at all
+        if (!publicCheck && publicCheckError) {
+          setError('MCP not found');
+          setLoading(false);
+          return;
+        }
+        
+        // MCP exists and is public - or we have permission to view it
+        const { data: mcpData, error: mcpError } = await supabase
           .from('mcp_projects')
           .select('*')
-          .eq('id', params.id)
+          .eq('id', mcpId)
           .single();
-
-        if (error) {
-          console.error('Error fetching MCP:', error);
-          setError('Failed to load MCP details');
+          
+        if (mcpError) {
+          // Check if it's a permission error
+          if (mcpError.code === 'PGRST116') {
+            // Get current user session
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+              setError('This MCP is private. You must be signed in and have permission to view it.');
+            } else {
+              setError('This MCP is private. You do not have permission to view it.');
+            }
+          } else {
+            console.error('Error fetching MCP:', mcpError);
+            setError('Failed to load MCP details');
+          }
           return;
         }
-
-        if (!data) {
+        
+        if (!mcpData) {
           setError('MCP not found');
           return;
         }
-
-        setMcp(data);
+        
+        setMcp(mcpData);
       } catch (err) {
         console.error('Error:', err);
         setError('An unexpected error occurred');
@@ -130,10 +181,27 @@ export default function McpDetailsPage() {
       <div className="min-h-screen bg-background p-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-2">{error || 'MCP not found'}</h2>
-            <Link href="/dashboard">
-              <Button variant="link">Return to Dashboard</Button>
-            </Link>
+            <h2 className="text-xl font-semibold mb-4">{error || 'MCP not found'}</h2>
+            
+            {error && error.includes('private') ? (
+              <div className="space-y-4">
+                <p className="text-muted-foreground">
+                  This MCP is set to private by its owner. You need to be signed in with an account that has permission to view it.
+                </p>
+                <div className="flex justify-center gap-4 mt-4">
+                  <Link href="/auth/signin">
+                    <Button>Sign In</Button>
+                  </Link>
+                  <Link href="/dashboard">
+                    <Button variant="outline">Go to Dashboard</Button>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <Link href="/dashboard">
+                <Button variant="link">Return to Dashboard</Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>

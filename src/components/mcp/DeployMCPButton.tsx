@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Loader2, Rocket } from "lucide-react";
+import { Loader2, Rocket, Code } from "lucide-react";
 import DeploymentResult from './DeploymentResult';
 import { useToast } from "@/components/ui/use-toast";
 
@@ -79,14 +79,18 @@ export default function DeployMCPButton({
           },
           installationGuide: {
             windows: {
-              node: "1. Install Node.js from https://nodejs.org/\n2. Extract the downloaded zip\n3. Open Command Prompt in that folder\n4. Run: npm install\n5. Run: npm start"
+              node: "1. Install Node.js from https://nodejs.org/\n2. Extract the downloaded zip\n3. Open Command Prompt in that folder\n4. Run: npm install\n5. Run: npm run build to compile TypeScript\n6. Run: npm start"
             },
             mac: {
-              node: "1. Install Node.js from https://nodejs.org/\n2. Extract the downloaded zip\n3. Open Terminal in that folder\n4. Run: npm install\n5. Run: npm start"
+              node: "1. Install Node.js from https://nodejs.org/\n2. Extract the downloaded zip\n3. Open Terminal in that folder\n4. Run: npm install\n5. Run: npm run build to compile TypeScript\n6. Run: npm start"
             },
             linux: {
-              node: "1. Install Node.js using your package manager\n2. Extract the downloaded zip\n3. Open Terminal in that folder\n4. Run: npm install\n5. Run: npm start"
+              node: "1. Install Node.js using your package manager\n2. Extract the downloaded zip\n3. Open Terminal in that folder\n4. Run: npm install\n5. Run: npm run build to compile TypeScript\n6. Run: npm start"
             }
+          },
+          features: {
+            typescript: true,
+            mcp: true
           }
         });
       } else {
@@ -114,6 +118,10 @@ export default function DeployMCPButton({
                 }
               }
             }
+          },
+          features: {
+            typescript: true,
+            mcp: true
           }
         });
       }
@@ -121,7 +129,7 @@ export default function DeployMCPButton({
       toast({
         title: "Deployment Successful",
         description: deployTarget === 'local' 
-          ? "Your MCP server is ready for download" 
+          ? "Your TypeScript MCP server is ready for download" 
           : "Your MCP server is now running in the cloud",
       });
       
@@ -164,8 +172,17 @@ export default function DeployMCPButton({
         </>
       ) : (
         <>
-          <Rocket className="mr-2 h-4 w-4" />
-          {deployTarget === 'local' ? 'Download' : 'Deploy'} MCP Server
+          {deployTarget === 'local' ? (
+            <>
+              <Code className="mr-2 h-4 w-4" />
+              Download TypeScript MCP
+            </>
+          ) : (
+            <>
+              <Rocket className="mr-2 h-4 w-4" />
+              Deploy MCP Server
+            </>
+          )}
         </>
       )}
     </Button>

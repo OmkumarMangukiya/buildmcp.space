@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Download, Server, CheckCircle, Terminal, Laptop, Check, FileDown } from 'lucide-react';
+import { ExternalLink, Download, Server, CheckCircle, Terminal, Laptop, Check, FileDown, FileCode } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -61,6 +61,9 @@ interface DeploymentDetails {
       apiKey?: string;
     };
     cursor?: any;
+  };
+  features?: {
+    typescript?: boolean;
   };
 }
 
@@ -144,6 +147,16 @@ export default function DeploymentResult({
                   Choose what to download based on your needs
                 </p>
                 
+                {details?.features?.typescript && (
+                  <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 rounded-md p-3 mb-4 flex items-center gap-2">
+                    <FileCode className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-blue-800 dark:text-blue-300">TypeScript Enabled</p>
+                      <p className="text-xs text-blue-700 dark:text-blue-400">This MCP server is built with TypeScript for improved developer experience</p>
+                    </div>
+                  </div>
+                )}
+
                 <Tabs value={activeDownloadTab} onValueChange={setActiveDownloadTab} className="w-full">
                   <TabsList className="grid grid-cols-4 mb-4">
                     <TabsTrigger value="bundle">Complete Bundle</TabsTrigger>
@@ -249,8 +262,23 @@ export default function DeploymentResult({
                         </Alert>
                       </div>
                       
+                      {details?.features?.typescript && (
+                        <div>
+                          <h4 className="font-medium mb-2">Step 3: Compile TypeScript</h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Compile the TypeScript code to JavaScript:
+                          </p>
+                          <Alert>
+                            <FileCode className="h-4 w-4" />
+                            <AlertDescription className="font-mono text-xs mt-2">
+                              npm run build
+                            </AlertDescription>
+                          </Alert>
+                        </div>
+                      )}
+                      
                       <div>
-                        <h4 className="font-medium mb-2">Step 3: Run the Server</h4>
+                        <h4 className="font-medium mb-2">Step {details?.features?.typescript ? '4' : '3'}: Run the Server</h4>
                         <p className="text-sm text-muted-foreground mb-2">
                           Start the MCP server:
                         </p>
@@ -429,26 +457,26 @@ export default function DeploymentResult({
                       <div>
                         <p className="text-sm font-medium mb-2">Server URL:</p>
                         <div className="flex items-center justify-between p-2 bg-muted rounded-md">
-                          <code className="text-xs">{details.connectionConfigs.claude.serverUrl}</code>
+                          <code className="text-xs">{details?.connectionConfigs?.claude.serverUrl}</code>
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            onClick={() => handleCopy(details.connectionConfigs.claude.serverUrl, "Claude URL")}
+                            onClick={() => handleCopy(details?.connectionConfigs?.claude.serverUrl || '', "Claude URL")}
                           >
                             {copiedText === "Claude URL" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                           </Button>
                         </div>
                       </div>
                       
-                      {details.connectionConfigs.claude.apiKey && (
+                      {details?.connectionConfigs?.claude.apiKey && (
                         <div>
                           <p className="text-sm font-medium mb-2">API Key (if required):</p>
                           <div className="flex items-center justify-between p-2 bg-muted rounded-md">
-                            <code className="text-xs">{details.connectionConfigs.claude.apiKey}</code>
+                            <code className="text-xs">{details?.connectionConfigs?.claude.apiKey}</code>
                             <Button 
                               variant="ghost" 
                               size="icon"
-                              onClick={() => handleCopy(details.connectionConfigs.claude.apiKey, "Claude API Key")}
+                              onClick={() => handleCopy(details?.connectionConfigs?.claude.apiKey || "", "Claude API Key")}
                             >
                               {copiedText === "Claude API Key" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                             </Button>
@@ -467,13 +495,13 @@ export default function DeploymentResult({
                   {details?.connectionConfigs?.cursor && (
                     <div className="relative">
                       <Code className="text-xs p-4 bg-muted">
-                        {JSON.stringify(details.connectionConfigs.cursor, null, 2)}
+                        {JSON.stringify(details?.connectionConfigs?.cursor, null, 2)}
                       </Code>
                       <Button 
                         variant="ghost" 
                         size="icon" 
                         className="absolute top-2 right-2"
-                        onClick={() => handleCopy(JSON.stringify(details.connectionConfigs.cursor, null, 2), "Cursor config")}
+                        onClick={() => handleCopy(JSON.stringify(details?.connectionConfigs?.cursor || {}, null, 2), "Cursor config")}
                       >
                         {copiedText === "Cursor config" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                       </Button>

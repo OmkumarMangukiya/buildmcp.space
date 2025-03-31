@@ -9,6 +9,34 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '', // Make sure to set this in your environment variables
 });
 
+// Function to generate a concise name for the MCP
+async function generateMcpName(description: string): Promise<string> {
+  try {
+    const chatCompletion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "You are a naming expert. Generate a short, concise, and descriptive name (max 3-4 words) for an MCP (Model Context Protocol) server based on its description. The name should be clear and professional, focusing on the main functionality. Don't use special characters except hyphens if needed."
+        },
+        {
+          role: "user",
+          content: `Generate a short name for this MCP server: ${description}`
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 50,
+    });
+
+    const generatedName = chatCompletion.choices[0]?.message?.content?.trim() || 'Untitled MCP';
+    // Ensure the name is not too long
+    return generatedName.substring(0, 50);
+  } catch (error) {
+    console.error('Error generating MCP name:', error);
+    return 'Untitled MCP';
+  }
+}
+
 // MCP documentation from the project
 const MCP_DOCS = `
 # Model Context Protocol Documentation
@@ -313,7 +341,9 @@ export async function POST(request: Request) {
 
     // Parse the config to extract relevant information
     const configObj = JSON.parse(config);
-    const name = configObj.metadata?.requirements?.serverDescription?.split('\n')[0]?.substring(0, 100) || 'Untitled MCP';
+    
+    // Generate a concise name using AI
+    const name = await generateMcpName(input);
     
     // Determine client and integration types from the config
     const clientType = configObj.metadata?.requirements?.targetClients?.includes('Claude Desktop') ? 'claude' : 

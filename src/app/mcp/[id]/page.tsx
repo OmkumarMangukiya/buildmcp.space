@@ -250,9 +250,8 @@ export default function McpDetailsPage() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
+              <h1 className="text-3xl font-bold">
                 {mcp.name}
-                <div className={`w-2 h-2 rounded-full ${mcp.status === 'online' ? 'bg-green-500' : 'bg-red-500'}`} />
               </h1>
               <p className="text-sm text-muted-foreground">{mcp.client_type || 'Custom'} MCP</p>
             </div>

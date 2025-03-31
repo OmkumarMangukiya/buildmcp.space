@@ -1,10 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { LayoutDashboard, Plus, Settings, Globe, Share2, Server, Download, Laptop, Cloud, Terminal, Code, GitFork, ExternalLink } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Code } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import supabase from "@/lib/supaClient";
 import { useEffect, useState } from "react";
@@ -14,7 +13,6 @@ interface MCP {
   id: string;
   name: string;
   platform: string;
-  status: string;
   updated_at: string;
   client_type?: string;
   description?: string;
@@ -67,7 +65,6 @@ export default function Dashboard() {
             id: mcp.id,
             name: mcp.name || 'Untitled MCP',
             platform: mcp.client_type || 'Custom',
-            status: mcp.status || 'offline',
             updated_at: mcp.updated_at,
             description: mcp.description
           })));
@@ -100,53 +97,10 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-10 w-64 border-r border-border bg-card hidden lg:block animate-fade-in">
-        <div className="flex h-14 items-center border-b px-4">
-          <h1 className="text-xl font-bold text-primary">MCP Builder</h1>
-        </div>
-        <nav className="space-y-1 p-2">
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <LayoutDashboard className="h-4 w-4" />
-            Dashboard
-          </Button>
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <Code className="h-4 w-4" />
-            My MCPs
-          </Button>
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <Globe className="h-4 w-4" />
-            Marketplace
-          </Button>
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <Server className="h-4 w-4" />
-            Deployments
-          </Button>
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <Settings className="h-4 w-4" />
-            Settings
-          </Button>
-        </nav>
-        
-        <div className="absolute bottom-4 w-full px-4">
-          <Link href="/create-mcp" className="w-full">
-            <Button className="w-full gap-2">
-              <Plus className="h-4 w-4" />
-              Create New MCP
-            </Button>
-          </Link>
-        </div>
-      </aside>
-
       {/* Main content */}
-      <main className="lg:pl-64">
+      <main>
         {/* Header */}
         <header className="sticky top-0 z-10 flex h-14 items-center border-b bg-background px-4 animate-fade-in">
-          <Button variant="ghost" size="icon" className="mr-4 lg:hidden">
-            <LayoutDashboard className="h-5 w-5" />
-            <span className="sr-only">Toggle menu</span>
-          </Button>
-          
           <h1 className="text-lg font-semibold">Dashboard</h1>
           
           <div className="ml-auto flex items-center gap-4">
@@ -202,7 +156,6 @@ export default function Dashboard() {
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
                           <CardTitle className="font-medium">{mcp.name}</CardTitle>
-                          <div className={`w-2 h-2 rounded-full ${mcp.status === 'online' ? 'bg-green-500' : 'bg-red-500'}`}></div>
                         </div>
                         <CardDescription>{mcp.description || mcp.platform}</CardDescription>
                       </CardHeader>
@@ -217,28 +170,6 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Marketplace */}
-          <div className="mt-8">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Marketplace</CardTitle>
-                  <Button variant="ghost" size="sm">
-                    <Globe className="h-4 w-4 mr-1" />
-                    Browse All
-                  </Button>
-                </div>
-                <CardDescription>Discover and use MCPs from the community</CardDescription>
-              </CardHeader>
-              <CardFooter className="border-t p-3">
-                <Button variant="ghost" size="sm" className="gap-2 w-full">
-                  <GitFork className="h-4 w-4" />
-                  Explore Marketplace
-                </Button>
-              </CardFooter>
-            </Card>
           </div>
         </div>
       </main>

@@ -345,8 +345,18 @@ function validateMcpCompliance(serverCode: string, language?: string): { isValid
       issues.push('Should use Zod (z) for parameter validation');
     }
     
+    // Check for try/catch error handling
     if (!serverCode.includes('try {') || !serverCode.includes('catch (')) {
       issues.push('Missing try/catch error handling');
+    }
+    
+    // Check for error type handling in TypeScript
+    const hasExplicitErrorAny = serverCode.includes('catch (error: any') || 
+                              serverCode.includes('error: Error | any') ||
+                              serverCode.includes('error: any');
+    
+    if (!hasExplicitErrorAny && serverCode.includes('catch (')) {
+      issues.push('Error types in catch blocks should use "any" type (e.g., catch (error: any) or error: Error | any)');
     }
   } else {
     // Generic or Python checks
@@ -377,22 +387,26 @@ function createRefinementPrompt(issues: string[], language?: string): string {
 When refining TypeScript MCP server implementations:
 1. Ensure all imports use the .js extension (e.g., '@modelcontextprotocol/sdk/server/index.js')
 2. Add proper type definitions for request parameters
-3. Use explicit error handling with try/catch blocks
-4. Implement type guards for validating tool arguments
-5. Use ES modules syntax with "type": "module" in package.json
-6. Prefer async/await over callbacks
-7. Use proper TypeScript configurations for NodeNext modules
-8. CRITICAL: Implement all search functions with case-insensitivity using .toLowerCase() on both the search term and the target
-9. IMPORTANT: For complex or unknown types, use 'any' type to avoid compilation errors:
+3. Add proper error handling with try/catch blocks
+4. CRITICAL: Always use 'any' type for error variables in catch blocks: catch (error: any) { ... }
+5. Implement type guards for validating tool arguments
+6. Use ES modules syntax with "type": "module" in package.json
+7. Prefer async/await over callbacks
+8. Use proper TypeScript configurations for NodeNext modules
+9. CRITICAL: Implement all search functions with case-insensitivity using .toLowerCase() on both the search term and the target
+10. IMPORTANT: For complex or unknown types, use 'any' type to avoid compilation errors:
    - Use ': any' when declaring variables with unknown types
    - Use 'as any' for type assertions when working with external libraries
    - Use '<any>' for generic type parameters when specific types are not known
    - Add 'Record<string, any>' for objects with unknown property types
-10. CRITICAL: For path operations, ALWAYS use String() conversion:
+   - Define error types as 'any' or 'Error | any' in all functions that might throw errors
+11. CRITICAL: For path operations, ALWAYS use String() conversion:
    - path.join(baseDir, String(variable)) to avoid string | string[] type errors
    - Use helper functions like safePathJoin to handle mixed type arguments
    - Always use explicit String() conversion, NOT toString() which can fail on null/undefined
    - When working with Obsidian vault paths, always use String() conversion
+12. CRITICAL: For fs.promises.readdir and other fs functions, ALWAYS use String() conversion:
+   - fs.promises.readdir(String(directory)) to prevent 'Argument of type string | string[] is not assignable to parameter of type PathLike' errors
 `;
   } else if (language?.toLowerCase().includes('python')) {
     additionalGuidance = `
@@ -885,7 +899,7 @@ ${mcpDocs}
       });
       
       const chatCompletion = await openai.chat.completions.create({
-        model: "gpt-4.5-preview-2025-02-27", // Using GPT-4o for sophisticated code generation
+        model: "gpt-4o-2024-08-06", // Using GPT-4o for sophisticated code generation
         messages: [
           {
             role: "system",
@@ -935,6 +949,7 @@ Follow these guidelines to create high-quality code:
    - Include proper TypeScript typing throughout
    - For any external API, include necessary authentication handling
    - IMPORTANT: When types are not known or complex, use 'any' type to avoid type errors
+   - CRITICAL: Always define error types as 'any' in TypeScript implementations to avoid type errors
 
 4. TECHNICAL REQUIREMENTS:
    - For TypeScript, use .js extension in imports for ESM compatibility
@@ -946,6 +961,7 @@ Follow these guidelines to create high-quality code:
    - Use type assertions (as any) when necessary to avoid compilation errors
    - IMPORTANT: Never use top-level await in CommonJS modules - always wrap async code in functions
    - Use proper async function wrappers with explicit function calls to avoid top-level await errors
+   - CRITICAL: Always define error variables as 'any' or 'Error | any' to handle all error types safely
    
 5. SEARCH FUNCTIONALITY:
    - IMPORTANT: Make ALL search functions case-insensitive by default
@@ -964,6 +980,7 @@ Follow these guidelines to create high-quality code:
    - CRITICAL: For union types like 'string | string[]', always add type guards or use Array.isArray() to handle both cases
    - When functions expect strings, explicitly convert arrays to strings when needed (e.g., using .join())
    - Use type narrowing techniques to safely handle different possible types
+   - CRITICAL: ALWAYS use 'any' type for error variables in catch blocks: catch (error: any) or catch (error) when dealing with errors
 
 7. MODULE STRUCTURE:
    - For TypeScript code, ensure proper module configuration in package.json ("type": "module")
@@ -978,9 +995,11 @@ Follow these guidelines to create high-quality code:
    - Always initialize variables with appropriate default values
    - Use optional chaining (?.) and nullish coalescing (??) operators to handle potential undefined values
    - CRITICAL: When using path.join(), ALWAYS convert all arguments to strings: path.join(dir, String(filename))
+   - CRITICAL: For fs.promises.readdir() and similar fs.promises functions, ALWAYS use String() conversion: fs.promises.readdir(String(directory)) to prevent 'Argument of type string | string[] is not assignable to parameter of type PathLike' errors
    - For any Node.js path operations (path.join, path.resolve, etc.), explicitly cast parameters to string using String()
    - When working with Obsidian vault paths, always use String() on note names or paths to avoid type errors
    - Prefer explicit String() conversion over toString() to avoid null/undefined errors
+   - CRITICAL: Use 'error: any' or just 'error' (without type) in all catch blocks to ensure compatibility with all error types
 
 The output should be ONLY the code with NO explanations, markdown formatting, or additional text outside the code. Focus on creating production-ready code that closely resembles real-world examples.`
           },
@@ -1142,7 +1161,8 @@ server.tool(
       console.error(\`Searching for "\${query}" in \${directory} with extensions: \${Array.isArray(extensions) ? extensions.join(', ') : extensions || 'any'}\`);
       
       // Simple file search implementation (would be more sophisticated in production)
-      const files = await fs.readdir(directory);
+      // IMPORTANT: Use String() to avoid 'Argument of type string | string[] is not assignable to parameter of type PathLike' errors
+      const files = await fs.readdir(String(directory));
       const matchingFiles = files.filter(file => {
         // Case-insensitive comparison
         const matchesQuery = file.toLowerCase().includes(queryLower);
@@ -1176,7 +1196,7 @@ server.tool(
           }
         ]
       };
-    } catch (error) {
+    } catch (error: any) { // IMPORTANT: Using 'any' type for error to handle all possible error types
       return {
         content: [
           {
@@ -1724,8 +1744,8 @@ async def call_tool(request):
                             
                 except Exception as file_error:
                     all_matches.append(f"Error reading {file_path}: {str(file_error)}")
-            
-            return {
+              
+              return {
                 "content": [
                     {
                         "type": "text",

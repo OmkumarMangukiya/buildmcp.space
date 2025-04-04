@@ -108,7 +108,7 @@ export default function ContactPage() {
                   <h3 className="font-medium mb-1">Phone</h3>
                   <p className="text-white/70 text-sm mb-2">Mon-Fri from 9am to 5pm</p>
                   <a href="tel:+11234567890" className="text-rose-400 hover:text-rose-300 transition-colors">
-                    +1 (123) 456-7890
+                    
                   </a>
                 </div>
               </div>
@@ -123,8 +123,7 @@ export default function ContactPage() {
                   <h3 className="font-medium mb-1">Office</h3>
                   <p className="text-white/70 text-sm mb-2">Visit us at our headquarters</p>
                   <address className="not-italic text-amber-400">
-                    123 AI Drive<br />
-                    San Francisco, CA 94103
+                    MCP.Build<br />
                   </address>
                 </div>
               </div>

@@ -13,7 +13,7 @@ const downloadCache: Record<string, {
 }> = {};
 
 // Store download data in cache
-export async function storeDownloadData(id: string, data: any): Promise<void> {
+async function storeDownloadData(id: string, data: any): Promise<void> {
   // Set expiration to 1 hour from now
   const expires = new Date();
   expires.setHours(expires.getHours() + 1);

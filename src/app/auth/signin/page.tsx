@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-export default function SignIn() {
+// Create a client component that uses useSearchParams
+function SignInForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -126,12 +127,25 @@ export default function SignIn() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-center">
             Don&apos;t have an account?{' '}
-            <Link href={`/auth/signup?redirect=${encodeURIComponent(redirectPath)}`} className="font-medium text-primary hover:underline">
+            <Link href="/auth/signup" className="font-medium text-primary hover:underline">
               Sign up
             </Link>
           </p>
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+// Main page component with Suspense
+export default function SignIn() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    }>
+      <SignInForm />
+    </Suspense>
   );
 }

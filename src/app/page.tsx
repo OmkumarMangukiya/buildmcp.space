@@ -564,15 +564,85 @@ export default function Home() {
               MCP.Build
             </Link>
           </div>
-          <div className="flex flex-wrap justify-center gap-8 text-white/50 text-sm mb-8">
-            <Link href="#" className="hover:text-white transition-colors">Terms</Link>
-            <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
-            <Link href="#" className="hover:text-white transition-colors">Contact</Link>
-            <Link href="#" className="hover:text-white transition-colors">Blog</Link>
-            <Link href="#" className="hover:text-white transition-colors">About</Link>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12 text-sm">
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Product</h4>
+              <ul className="space-y-2 text-white/50">
+                <li><Link href="#features" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="#platforms" className="hover:text-white transition-colors">Platforms</Link></li>
+                <li><Link href="#about" className="hover:text-white transition-colors">How It Works</Link></li>
+                <li><Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Company</h4>
+              <ul className="space-y-2 text-white/50">
+                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Legal</h4>
+              <ul className="space-y-2 text-white/50">
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/refund-policy" className="hover:text-white transition-colors">Refund Policy</Link></li>
+                <li><Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Connect</h4>
+              <ul className="space-y-2 text-white/50">
+                <li><Link href="https://github.com/mcp-builder" className="hover:text-white transition-colors flex items-center gap-2"><Github className="h-4 w-4" /> GitHub</Link></li>
+                <li><Link href="https://twitter.com/mcpbuilder" className="hover:text-white transition-colors">Twitter</Link></li>
+                <li><Link href="https://discord.gg/mcpbuilder" className="hover:text-white transition-colors">Discord</Link></li>
+                <li><a href="mailto:support@buildmcp.space" className="hover:text-white transition-colors">Email Us</a></li>
+              </ul>
+            </div>
           </div>
-          <div className="text-center text-white/50 text-sm">
-            © 2023 MCP Builder. All rights reserved.
+          
+          {/* Terms Summary */}
+          <div className="border border-white/10 rounded-lg p-6 mb-8 bg-white/[0.03]">
+            <h4 className="font-semibold mb-3 text-white">Subscription Terms Summary</h4>
+            <ul className="space-y-2 text-white/60 text-sm">
+              <li className="flex items-start gap-2">
+                <span className="text-rose-400 mt-1">•</span>
+                <span>MCP.Build is a <span className="text-white font-medium">subscription-based service</span> with monthly or annual billing options</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-rose-400 mt-1">•</span>
+                <span>Our service has <span className="text-white font-medium">usage limitations</span> for MCP generation based on your subscription plan</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-rose-400 mt-1">•</span>
+                <span>Subscriptions can be cancelled at any time through your account dashboard</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-rose-400 mt-1">•</span>
+                <span><span className="text-white font-medium">No refunds are provided</span> for subscription payments or unused portions of subscriptions</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-rose-400 mt-1">•</span>
+                <span>By using our service, you agree to our <Link href="/terms" className="text-indigo-400 hover:text-indigo-300 underline">Terms & Conditions</Link> and <Link href="/privacy" className="text-indigo-400 hover:text-indigo-300 underline">Privacy Policy</Link></span>
+              </li>
+            </ul>
+          </div>
+          
+          <div className="flex flex-col md:flex-row justify-between items-center text-white/50 text-sm border-t border-white/10 pt-8">
+            <div className="mb-4 md:mb-0">
+              © 2023 MCP Builder. All rights reserved.
+            </div>
+            <div className="flex items-center gap-4">
+              <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+              <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+              <Link href="/refund-policy" className="hover:text-white transition-colors">Refunds</Link>
+            </div>
           </div>
         </div>
       </footer>

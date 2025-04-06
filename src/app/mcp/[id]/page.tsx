@@ -129,36 +129,66 @@ export default function McpDetailsPage() {
   const handleDownload = async () => {
     try {
       setIsLoading(true);
-      // Get the current session token
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-
-      if (!token) {
-        throw new Error('Authentication required to download MCP');
+      
+      // Get the current session token with explicit refresh if needed
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error || !session) {
+        console.error('Session error:', error);
+        throw new Error('Authentication required to download MCP. Please sign in again.');
       }
-
-      console.log('Downloading with token:', token.substring(0, 10) + '...');
-
-      // Create a blob URL for the file with the auth token in the headers
-      const response = await fetch(`/api/mcp/download/${params.id}/bundle`, {
+      
+      const token = session.access_token;
+      console.log('Starting download with token:', token.substring(0, 15) + '...');
+      
+      // Force token refresh if it might be expired
+      if (session.expires_at && session.expires_at * 1000 < Date.now() + 300000) {
+        console.log('Token might be expiring soon, refreshing...');
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        
+        if (!refreshError && refreshData.session) {
+          console.log('Token refreshed successfully');
+        } else {
+          console.error('Token refresh failed:', refreshError);
+        }
+      }
+      
+      // Create a URL for the file download
+      const downloadUrl = `/api/mcp/download/${params.id}/bundle`;
+      console.log('Download URL:', downloadUrl);
+      
+      // Make the request with auth header
+      const response = await fetch(downloadUrl, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/zip'
         },
-        credentials: 'include' // Include cookies in the request
+        credentials: 'include'
       });
 
-      // Log the response status for debugging
       console.log('Download response status:', response.status);
-
+      
+      // Handle errors
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Download error data:', errorData);
-        throw new Error(errorData.error || 'Failed to download MCP');
+        try {
+          const errorData = await response.json();
+          console.error('Download error data:', errorData);
+          throw new Error(errorData.error || 'Failed to download MCP');
+        } catch (parseError) {
+          console.error('Error parsing response:', parseError);
+          throw new Error(`Download failed with status ${response.status}`);
+        }
       }
 
       // Get the file as a blob
       const blob = await response.blob();
+      
+      if (!blob || blob.size === 0) {
+        throw new Error('Downloaded file is empty');
+      }
+      
+      console.log('Download successful, file size:', blob.size);
       
       // Create a download link and trigger it
       const url = window.URL.createObjectURL(blob);
@@ -170,6 +200,11 @@ export default function McpDetailsPage() {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Download Started",
+        description: "Your MCP download has started.",
+      });
     } catch (error) {
       console.error('Download error:', error);
       toast({
@@ -306,10 +341,53 @@ export default function McpDetailsPage() {
               className="gap-2" 
               variant="outline"
               onClick={handleDownload}
+              disabled={isLoading}
             >
               <Download className="h-4 w-4" />
-              Download Files
+              {isLoading ? 'Downloading...' : 'Download Files'}
             </Button>
+            
+            {/* Add debug button */}
+            {process.env.NODE_ENV !== 'production' && (
+              <Button
+                className="gap-2"
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    // Get the current session token
+                    const { data } = await supabase.auth.getSession();
+                    const token = data.session?.access_token;
+                    
+                    // Test authentication
+                    const response = await fetch('/api/mcp/auth-test', {
+                      headers: token ? {
+                        'Authorization': `Bearer ${token}`
+                      } : {},
+                      credentials: 'include'
+                    });
+                    
+                    const authData = await response.json();
+                    console.log('Auth test results:', authData);
+                    
+                    toast({
+                      title: authData.authenticated ? "Authentication Successful" : "Authentication Failed",
+                      description: `User ID: ${authData.authInfo.user?.id || 'None'}. See console for details.`,
+                      variant: authData.authenticated ? "default" : "destructive",
+                    });
+                  } catch (error) {
+                    console.error('Auth test error:', error);
+                    toast({
+                      title: "Auth Test Failed",
+                      description: error instanceof Error ? error.message : "Unknown error",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                Test Auth
+              </Button>
+            )}
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

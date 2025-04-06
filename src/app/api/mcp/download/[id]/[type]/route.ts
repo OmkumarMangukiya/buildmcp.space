@@ -249,53 +249,82 @@ echo "Run 'npm start' to start the server"
 // Improved function to extract token from request
 async function authenticate(request: Request): Promise<{ user: any | null, error: string | null }> {
   try {
+    console.log('Starting authentication process...');
+    const cookieHeader = request.headers.get('cookie');
+    console.log('Cookie header exists:', !!cookieHeader);
+    
+    let token = null;
+    
     // Method 1: Try the Authorization header
     const authHeader = request.headers.get('authorization');
     if (authHeader) {
-      const token = authHeader.replace('Bearer ', '');
-      console.log('Auth token found in header');
+      token = authHeader.replace('Bearer ', '');
+      console.log('Auth token found in header:', token.substring(0, 15) + '...');
       
+      // Validate token
       const { data, error } = await supabaseAdmin!.auth.getUser(token);
       
       if (error) {
         console.error('Auth error from header token:', error);
-        return { user: null, error: 'Invalid authentication' };
+      } else if (data.user) {
+        console.log('Valid auth from header token, user ID:', data.user.id);
+        return { user: data.user, error: null };
       }
-      
-      return { user: data.user, error: null };
+    } else {
+      console.log('No Authorization header present');
     }
     
-    // Method 2: Try cookies
-    const cookieHeader = request.headers.get('cookie');
+    // Method 2: Try extracting from cookies
     if (cookieHeader) {
-      // Try several possible cookie names
-      const cookieMatches = [
-        cookieHeader.match(/sb-access-token=([^;]+)/),
-        cookieHeader.match(/sb-access-token-client=([^;]+)/)
+      // Log all cookies for debugging
+      console.log('Cookies:', cookieHeader);
+      
+      // Try to match any of these possible cookie patterns
+      const cookiePatterns = [
+        /sb-access-token=([^;]+)/,
+        /sb-access-token-client=([^;]+)/,
+        /access_token=([^;]+)/
       ];
       
-      for (const match of cookieMatches) {
+      for (const pattern of cookiePatterns) {
+        const match = cookieHeader.match(pattern);
         if (match && match[1]) {
-          const token = match[1];
-          console.log('Auth token found in cookie');
+          token = match[1];
+          console.log('Auth token found in cookie:', token.substring(0, 15) + '...');
           
+          // Validate token
           const { data, error } = await supabaseAdmin!.auth.getUser(token);
           
           if (error) {
             console.error('Auth error from cookie token:', error);
-            continue; // Try next cookie
+          } else if (data.user) {
+            console.log('Valid auth from cookie token, user ID:', data.user.id);
+            return { user: data.user, error: null };
           }
-          
-          return { user: data.user, error: null };
         }
       }
     }
     
-    console.log('No valid authentication method found');
-    return { user: null, error: 'Authorization required' };
+    // Additional method: Try with supabaseAdmin's built-in session parsing
+    try {
+      console.log('Trying built-in session parsing...');
+      const { data, error } = await supabaseAdmin!.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session from request:', error);
+      } else if (data.session?.user) {
+        console.log('Valid session from request, user ID:', data.session.user.id);
+        return { user: data.session.user, error: null };
+      }
+    } catch (sessionError) {
+      console.error('Error during session parsing:', sessionError);
+    }
+    
+    console.log('No valid authentication token found');
+    return { user: null, error: 'Authorization required. Please sign in.' };
   } catch (error) {
     console.error('Authentication error:', error);
-    return { user: null, error: 'Authentication failed' };
+    return { user: null, error: 'Authentication failed due to server error' };
   }
 }
 

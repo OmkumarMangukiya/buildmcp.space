@@ -31,6 +31,7 @@ export default function McpDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isMakingPublic, setIsMakingPublic] = useState(false);
   const [isMakingPrivate, setIsMakingPrivate] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function fetchMcpDetails() {
@@ -127,14 +128,49 @@ export default function McpDetailsPage() {
 
   const handleDownload = async () => {
     try {
-      window.location.href = `/api/mcp/download/${params.id}/bundle`;
+      setIsLoading(true);
+      // Get the current session token
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+
+      if (!token) {
+        throw new Error('Authentication required to download MCP');
+      }
+
+      // Create a blob URL for the file with the auth token in the headers
+      const response = await fetch(`/api/mcp/download/${params.id}/bundle`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to download MCP');
+      }
+
+      // Get the file as a blob
+      const blob = await response.blob();
+      
+      // Create a download link and trigger it
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      // Ensure params.id is treated as a string
+      const mcpId = typeof params.id === 'string' ? params.id : params.id[0];
+      a.download = `mcp-${mcpId.substring(0, 6)}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Download error:', error);
       toast({
         title: "Download Failed",
-        description: "Failed to download MCP files. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to download MCP files. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -36,6 +36,7 @@ function SignInForm() {
           password,
           redirect: redirectPath
         }),
+        credentials: 'include', // Important for cookies to be set
       });
 
       const data = await response.json();
@@ -44,14 +45,32 @@ function SignInForm() {
         throw new Error(data.error || 'Failed to sign in');
       }
 
-      // If we have a redirect URL from the server, use it
-      if (data.redirect) {
-        console.log(`Sign in successful, redirecting to: ${data.redirect}`);
-        router.push(data.redirect);
-      } else {
-        console.log('Sign in successful, redirecting to dashboard');
-        router.push('/dashboard');
+      // Manually initialize the supabase client
+      const supabase = (await import('@/lib/supaClient')).default;
+      
+      // Use the returned session data to set the session
+      if (data.session && data.session.access_token && data.session.refresh_token) {
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
+        
+        if (sessionError) {
+          console.error('Error setting session:', sessionError);
+          throw new Error('Failed to initialize session. Please try again.');
+        }
       }
+      
+      // Verify the session was set correctly
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        console.error('Session not set after login');
+        throw new Error('Failed to establish a session. Please try again.');
+      }
+      
+      console.log('Sign in successful, redirecting to:', data.redirect || '/dashboard');
+      // Redirect to dashboard or the specified redirect path
+      router.push(data.redirect || '/dashboard');
     } catch (err: any) {
       console.error("Sign in error:", err);
       setError(err.message || 'An error occurred during sign in');

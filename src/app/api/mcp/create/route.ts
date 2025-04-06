@@ -3,6 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import OpenAI from 'openai';
 import { generateMcpServer } from '@/lib/mcpServerGenerator';
 import { createMcp } from '@/lib/mockDatabase';
+import { checkSubscription, recordMcpUsage } from '@/app/api/middleware/checkSubscription';
+import { NextRequest } from 'next/server';
+import { supabaseAdmin } from '@/lib/supaClient';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -271,6 +274,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing userId or input' }, { status: 400 });
     }
 
+    // Check if the user has an active subscription and available MCP generations
+    const subscriptionCheck = await checkSubscription(request as NextRequest, userId);
+    const subscriptionData = await subscriptionCheck.json();
+
+    // If subscription check failed, return the error
+    if (!subscriptionData.success) {
+      return subscriptionCheck;
+    }
+
     // Generate the MCP configuration
     const config = await generateMcpConfig(input);
     const mcpId = uuidv4();
@@ -296,9 +308,7 @@ export async function POST(request: Request) {
       integrationType = 'files';
     }
 
-    // Import supabase client
-    const { supabaseAdmin } = await import('@/lib/supaClient');
-    
+    // Import supabase client if it wasn't already imported at the top
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not initialized');
     }
@@ -350,9 +360,17 @@ export async function POST(request: Request) {
       if (versionError) {
         console.error('Error storing MCP version in Supabase:', versionError);
       }
+      
+      // Record MCP usage for subscription tracking
+      await recordMcpUsage(userId, mcpId);
     }
 
-    return NextResponse.json({ mcpId, config });
+    // Return the remaining MCP generations along with the response
+    return NextResponse.json({ 
+      mcpId, 
+      config,
+      remainingGenerations: subscriptionData.remaining - 1 // Decrement by 1 to account for this generation
+    });
   } catch (error) {
     console.error('Error creating MCP:', error);
     return NextResponse.json({ error: 'Failed to create MCP configuration' }, { status: 500 });

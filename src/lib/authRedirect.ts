@@ -1,42 +1,38 @@
 import { getSessionWithRefresh } from './supaClient';
 
 /**
- * Helper function to handle auth redirection with explicit token refresh
+ * Helper function to redirect unauthorized users to login
  * @param redirectPath The path to redirect to after successful auth
  */
 export async function handleAuthRedirect(redirectPath = '/dashboard') {
   try {
-    // First try to get a valid session using our custom refresh helper
-    const { data: { session }, error: sessionError } = await getSessionWithRefresh();
+    // Get the current session with refresh attempt
+    const { data: { session }, error } = await getSessionWithRefresh();
     
-    if (sessionError || !session) {
-      // If normal refresh fails, try explicit refresh
-      const refreshResponse = await fetch(`/api/auth/refresh?redirect=${encodeURIComponent(redirectPath)}`);
-      const refreshData = await refreshResponse.json();
+    if (error || !session) {
+      console.log('No active session, redirecting to login page');
       
-      if (!refreshResponse.ok) {
-        // If explicit refresh fails, redirect to sign in
+      // Redirect to login page
+      if (typeof window !== 'undefined') {
         window.location.href = `/auth/signin?redirect=${encodeURIComponent(redirectPath)}`;
-        return false;
       }
-      
-      // If explicit refresh succeeds, redirect to the requested page
-      window.location.href = refreshData.redirect || redirectPath;
-      return true;
+      return false;
     }
     
-    // If we already have a valid session, we're good
     return true;
   } catch (error) {
-    console.error('Authentication redirect error:', error);
-    // On any error, redirect to sign in
-    window.location.href = `/auth/signin?redirect=${encodeURIComponent(redirectPath)}`;
+    console.error('Auth redirect error:', error);
+    
+    // On error, redirect to login
+    if (typeof window !== 'undefined') {
+      window.location.href = `/auth/signin?redirect=${encodeURIComponent(redirectPath)}`;
+    }
     return false;
   }
 }
 
 /**
- * Simple function to check if the error is a JWT expiration error
+ * Check if the error is a JWT expiration error
  * @param error Error object or message
  */
 export function isJwtExpiredError(error: any): boolean {
@@ -47,6 +43,7 @@ export function isJwtExpiredError(error: any): boolean {
     : error.message || error.error || JSON.stringify(error);
   
   return errorMessage.includes('JWT expired') || 
+         errorMessage.includes('token expired') ||
          errorMessage.includes('PGRST301') || 
          errorMessage.includes('token is expired');
 } 

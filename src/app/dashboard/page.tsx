@@ -52,33 +52,62 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Function to ensure authentication is properly established
+  async function ensureAuth() {
+    try {
+      // Get the current session
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session:', error);
+        return null;
+      }
+      
+      if (!data.session) {
+        console.log('No session found');
+        return null;
+      }
+      
+      return data.session;
+    } catch (e) {
+      console.error('Error in ensureAuth:', e);
+      return null;
+    }
+  }
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // Get current user with token refresh
-        const { data: { session }, error: sessionError } = await getSessionWithRefresh();
+        setLoading(true);
+        setAuthError(null);
         
-        if (sessionError || !session) {
-          console.error('Session error:', sessionError);
-          // Use our new auth helper for redirection
-          await handleAuthRedirect('/dashboard');
+        // Ensure we have a valid session
+        const session = await ensureAuth();
+        
+        if (!session) {
+          console.log('No valid session found, redirecting to login');
+          setAuthError('Session expired. Please sign in again.');
+          window.location.href = `/auth/signin?redirect=${encodeURIComponent('/dashboard')}`;
           return;
         }
-
+        
+        console.log('Session found, user ID:', session.user.id);
+        
         // Get user profile
         const { data: userData, error: userError } = await supabase
           .from('users')
           .select('name, avatar_url')
           .eq('id', session.user.id)
           .single();
-
+          
         if (userError) {
           console.error('Error fetching user:', userError);
         } else if (userData) {
           setUser(userData);
         }
-
+        
         // Get active subscription
         const { data: subscriptionData, error: subscriptionError } = await supabase
           .from('user_plans')
@@ -97,11 +126,16 @@ export default function Dashboard() {
           .order('expires_at', { ascending: false })
           .limit(1)
           .single();
-
-        if (subscriptionError && subscriptionError.code !== 'PGRST116') { // PGRST116 is "Results Not Found"
-          console.error('Error fetching subscription:', subscriptionError);
+          
+        if (subscriptionError) {
+          if (subscriptionError.code !== 'PGRST116') { // PGRST116 is "Results Not Found"
+            console.error('Error fetching subscription:', subscriptionError);
+          } else {
+            console.log('No active subscription found.');
+          }
         } else if (subscriptionData) {
           const userPlan = subscriptionData as unknown as UserPlan;
+          
           // Get remaining MCPs if applicable
           let mcpRemaining;
           if (userPlan.plans && userPlan.plans.mcp_limit) {
@@ -110,7 +144,7 @@ export default function Dashboard() {
             });
             mcpRemaining = remaining;
           }
-
+          
           setSubscription({
             id: userPlan.id,
             plan_name: userPlan.plans.name,
@@ -121,14 +155,14 @@ export default function Dashboard() {
             is_active: new Date(userPlan.expires_at) > new Date()
           });
         }
-
-        // Get user's MCPs - using the correct table name 'mcp_projects'
+        
+        // Get user's MCPs
         const { data: mcpData, error: mcpError } = await supabase
           .from('mcp_projects')
           .select('*')
           .eq('user_id', session.user.id)
           .order('updated_at', { ascending: false });
-
+          
         if (mcpError) {
           console.error('Error fetching MCPs:', mcpError);
         } else if (mcpData) {
@@ -141,7 +175,8 @@ export default function Dashboard() {
           })));
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error in dashboard:', error);
+        setAuthError('An unexpected error occurred. Please try refreshing the page.');
       } finally {
         setLoading(false);
       }
@@ -174,6 +209,41 @@ export default function Dashboard() {
       day: 'numeric'
     });
   }
+  
+  // Handle sign out with proper cleanup
+  async function handleSignOut() {
+    try {
+      setLoading(true);
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error signing out:', error);
+        return;
+      }
+      
+      // Clear local storage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('sb');
+        localStorage.removeItem('sb-access-token');
+        localStorage.removeItem('sb-refresh-token');
+        
+        // Clear cookies by setting expiration in the past
+        document.cookie = 'sb-access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'sb-refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'sb-access-token-client=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'sb-refresh-token-client=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      }
+      
+      // Redirect to sign in page
+      window.location.href = '/auth/signin';
+    } catch (error) {
+      console.error('Error in sign out:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -190,6 +260,14 @@ export default function Dashboard() {
                 Create MCP
               </Button>
             </Link>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleSignOut}
+              disabled={loading}
+            >
+              Sign out
+            </Button>
             <div className="flex items-center gap-2">
               {user?.name && (
                 <span className="text-sm text-muted-foreground">{user.name}</span>
@@ -208,6 +286,35 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold tracking-tight">Welcome back{user?.name ? `, ${user.name}` : ''}!</h1>
             <p className="text-muted-foreground">Your MCP dashboard overview</p>
           </div>
+
+          {/* Authentication Error */}
+          {authError && (
+            <div className="mb-8">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
+                <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="text-sm font-medium text-red-800">Authentication Error</h3>
+                  <p className="text-sm text-red-700 mt-1">{authError}</p>
+                  <div className="mt-3">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="mr-3"
+                      onClick={() => window.location.reload()}
+                    >
+                      Refresh Page
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={() => window.location.href = "/auth/signin?redirect=/dashboard"}
+                    >
+                      Sign In Again
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Subscription Status */}
           <div className="mb-8">
@@ -237,14 +344,22 @@ export default function Dashboard() {
                       <div className="mt-4">
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm font-medium">MCP Generations Remaining</span>
-                          <span className="text-sm font-bold">{subscription.mcp_remaining} / {subscription.mcp_limit}</span>
+                          <span className={`text-sm font-bold ${subscription.mcp_remaining! <= 5 ? 'text-red-600' : 'text-blue-600'}`}>
+                            {subscription.mcp_remaining} / {subscription.mcp_limit}
+                          </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2.5">
                           <div 
-                            className="bg-blue-600 h-2.5 rounded-full" 
-                            style={{ width: `${(subscription.mcp_remaining! / subscription.mcp_limit!) * 100}%` }}
+                            className={`h-2.5 rounded-full ${
+                              subscription.mcp_remaining! / subscription.mcp_limit! < 0.2 ? 'bg-red-600' : 
+                              subscription.mcp_remaining! / subscription.mcp_limit! < 0.5 ? 'bg-orange-500' : 'bg-blue-600'
+                            }`}
+                            style={{ width: `${Math.max(5, (subscription.mcp_remaining! / subscription.mcp_limit!) * 100)}%` }}
                           ></div>
                         </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          This count decreases each time you generate a new MCP.
+                        </p>
                       </div>
                     )}
 

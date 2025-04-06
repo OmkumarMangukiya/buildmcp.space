@@ -285,29 +285,52 @@ export async function GET(request: Request, { params }: { params: { id: string, 
             const authHeader = request.headers.get('authorization');
             
             if (!authHeader) {
-              return NextResponse.json({ 
-                error: 'This MCP is private. Authentication required to download.', 
-                isPrivate: true 
-              }, { status: 401 });
-            }
-            
-            const token = authHeader.replace('Bearer ', '');
-            const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-            
-            if (authError || !user) {
-              return NextResponse.json({ 
-                error: 'Invalid authentication. This MCP is private.', 
-                isPrivate: true 
-              }, { status: 401 });
-            }
-            
-            // Verify user has permission (either owns the MCP or has access)
-            if (user.id !== mcpData.user_id) {
-              // TODO: Add additional permission check logic here if needed
-              return NextResponse.json({ 
-                error: 'You do not have permission to download this private MCP.', 
-                isPrivate: true 
-              }, { status: 403 });
+              // Try to get token from cookie as a fallback
+              const cookieHeader = request.headers.get('cookie');
+              const accessToken = cookieHeader?.match(/sb-access-token=([^;]+)/)?.[1];
+              
+              if (!accessToken) {
+                return NextResponse.json({ 
+                  error: 'Authorization required', 
+                  isPrivate: true 
+                }, { status: 401 });
+              }
+              
+              // Use token from cookie
+              const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(accessToken);
+              
+              if (authError || !user) {
+                return NextResponse.json({ 
+                  error: 'Invalid authentication', 
+                  isPrivate: true 
+                }, { status: 401 });
+              }
+              
+              // Verify user has permission
+              if (user.id !== mcpData.user_id) {
+                return NextResponse.json({ 
+                  error: 'You do not have permission to download this MCP', 
+                  isPrivate: true 
+                }, { status: 403 });
+              }
+            } else {
+              const token = authHeader.replace('Bearer ', '');
+              const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+              
+              if (authError || !user) {
+                return NextResponse.json({ 
+                  error: 'Invalid authentication', 
+                  isPrivate: true 
+                }, { status: 401 });
+              }
+              
+              // Verify user has permission
+              if (user.id !== mcpData.user_id) {
+                return NextResponse.json({ 
+                  error: 'You do not have permission to download this MCP', 
+                  isPrivate: true 
+                }, { status: 403 });
+              }
             }
           }
           
@@ -333,29 +356,52 @@ export async function GET(request: Request, { params }: { params: { id: string, 
             const authHeader = request.headers.get('authorization');
             
             if (!authHeader) {
-              return NextResponse.json({ 
-                error: 'This MCP is private. Authentication required to download.', 
-                isPrivate: true 
-              }, { status: 401 });
-            }
-            
-            const token = authHeader.replace('Bearer ', '');
-            const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-            
-            if (authError || !user) {
-              return NextResponse.json({ 
-                error: 'Invalid authentication. This MCP is private.', 
-                isPrivate: true 
-              }, { status: 401 });
-            }
-            
-            // Verify user has permission (either owns the MCP or has access)
-            if (user.id !== mcpData.user_id) {
-              // TODO: Add additional permission check logic here if needed
-              return NextResponse.json({ 
-                error: 'You do not have permission to download this private MCP.', 
-                isPrivate: true 
-              }, { status: 403 });
+              // Try to get token from cookie as a fallback
+              const cookieHeader = request.headers.get('cookie');
+              const accessToken = cookieHeader?.match(/sb-access-token=([^;]+)/)?.[1];
+              
+              if (!accessToken) {
+                return NextResponse.json({ 
+                  error: 'Authorization required', 
+                  isPrivate: true 
+                }, { status: 401 });
+              }
+              
+              // Use token from cookie
+              const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(accessToken);
+              
+              if (authError || !user) {
+                return NextResponse.json({ 
+                  error: 'Invalid authentication', 
+                  isPrivate: true 
+                }, { status: 401 });
+              }
+              
+              // Verify user has permission
+              if (user.id !== mcpData.user_id) {
+                return NextResponse.json({ 
+                  error: 'You do not have permission to download this MCP', 
+                  isPrivate: true 
+                }, { status: 403 });
+              }
+            } else {
+              const token = authHeader.replace('Bearer ', '');
+              const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+              
+              if (authError || !user) {
+                return NextResponse.json({ 
+                  error: 'Invalid authentication', 
+                  isPrivate: true 
+                }, { status: 401 });
+              }
+              
+              // Verify user has permission
+              if (user.id !== mcpData.user_id) {
+                return NextResponse.json({ 
+                  error: 'You do not have permission to download this MCP', 
+                  isPrivate: true 
+                }, { status: 403 });
+              }
             }
           }
           

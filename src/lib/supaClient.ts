@@ -20,7 +20,6 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     detectSessionInUrl: true,
     storageKey: 'sb',
-    flowType: 'pkce',
   }
 });
 
@@ -32,6 +31,10 @@ if (typeof window !== 'undefined') {
       console.log('Token has been refreshed');
     } else if (event === 'SIGNED_OUT') {
       console.log('User signed out');
+      // Clear any remaining session data
+      localStorage.removeItem('sb');
+      localStorage.removeItem('sb-access-token');
+      localStorage.removeItem('sb-refresh-token');
     } else if (event === 'SIGNED_IN') {
       console.log('User signed in');
     } else if (event === 'USER_UPDATED') {
@@ -53,38 +56,51 @@ export const supabaseAdmin = supabaseServiceRoleKey
 
 // Helper to get session with auto-refresh attempt
 export async function getSessionWithRefresh() {
-  const { data, error } = await supabase.auth.getSession();
-  
-  if (error || !data.session) {
-    console.error('Error getting session or no session found:', error);
-    return { data: { session: null }, error };
-  }
-  
-  // If session exists but access token is expired or about to expire
-  const expiresAt = data.session.expires_at;
-  const isExpiringSoon = expiresAt && (expiresAt - Math.floor(Date.now() / 1000)) < 300; // 5 minutes
-  
-  if (isExpiringSoon) {
-    console.log('Token is expiring soon, attempting refresh');
-    try {
-      // Try to refresh the token
-      const refreshResult = await supabase.auth.refreshSession();
+  try {
+    // First check if we have a session
+    const { data, error } = await supabase.auth.getSession();
+    
+    if (error) {
+      console.error('Error getting session:', error);
+      return { data: { session: null }, error };
+    }
+    
+    if (!data.session) {
+      console.log('No session found');
+      return { data: { session: null }, error: new Error('No session found') };
+    }
+    
+    // If session exists but access token is expired or about to expire
+    const expiresAt = data.session.expires_at;
+    const currentTime = Math.floor(Date.now() / 1000);
+    const isExpired = expiresAt && expiresAt < currentTime;
+    const isExpiringSoon = expiresAt && (expiresAt - currentTime) < 300; // 5 minutes
+    
+    if (isExpired || isExpiringSoon) {
+      console.log(`Token is ${isExpired ? 'expired' : 'expiring soon'}, attempting refresh`);
       
-      if (refreshResult.error) {
-        console.error('Failed to refresh token:', refreshResult.error);
-      } else {
-        console.log('Token refreshed successfully');
+      // Try to refresh the token
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError) {
+        console.error('Failed to refresh token:', refreshError);
+        return { data: { session: null }, error: refreshError };
       }
       
-      // Return the latest session state
-      return await supabase.auth.getSession();
-    } catch (refreshError) {
-      console.error('Error during token refresh:', refreshError);
-      return { data: { session: null }, error: refreshError as Error };
+      if (!refreshData.session) {
+        console.error('Refresh succeeded but no session returned');
+        return { data: { session: null }, error: new Error('No session after refresh') };
+      }
+      
+      console.log('Token refreshed successfully');
+      return { data: refreshData, error: null };
     }
+    
+    return { data, error };
+  } catch (refreshError) {
+    console.error('Error during session check/refresh:', refreshError);
+    return { data: { session: null }, error: refreshError as Error };
   }
-  
-  return { data, error };
 }
 
 export default supabase;

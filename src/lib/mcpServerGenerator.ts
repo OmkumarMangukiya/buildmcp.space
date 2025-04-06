@@ -962,7 +962,7 @@ Follow these guidelines to create high-quality code:
    - IMPORTANT: Never use top-level await in CommonJS modules - always wrap async code in functions
    - Use proper async function wrappers with explicit function calls to avoid top-level await errors
    - CRITICAL: Always define error variables as 'any' or 'Error | any' to handle all error types safely
-   
+
 5. SEARCH FUNCTIONALITY:
    - IMPORTANT: Make ALL search functions case-insensitive by default
    - When implementing string matching or file search functions, always use case-insensitive comparisons
@@ -997,9 +997,42 @@ Follow these guidelines to create high-quality code:
    - CRITICAL: When using path.join(), ALWAYS convert all arguments to strings: path.join(dir, String(filename))
    - CRITICAL: For fs.promises.readdir() and similar fs.promises functions, ALWAYS use String() conversion: fs.promises.readdir(String(directory)) to prevent 'Argument of type string | string[] is not assignable to parameter of type PathLike' errors
    - For any Node.js path operations (path.join, path.resolve, etc.), explicitly cast parameters to string using String()
-   - When working with Obsidian vault paths, always use String() on note names or paths to avoid type errors
    - Prefer explicit String() conversion over toString() to avoid null/undefined errors
    - CRITICAL: Use 'error: any' or just 'error' (without type) in all catch blocks to ensure compatibility with all error types
+
+9. KNOWLEDGE TOOL INTEGRATION:
+   - For knowledge base tools (Obsidian, Notion, etc.), NEVER include a hardcoded default path with a specific user directory
+   - Use a pattern like: const KNOWLEDGE_BASE_PATH = providedPath || process.env.KNOWLEDGE_BASE_PATH || "./docs"
+   - For file path parameters, make it clear in the description that users must specify their own path
+   - Example: filePath: z.string().describe("Path to the file within your knowledge base. You must specify the path to your document storage.")
+   - Clearly communicate in tool descriptions that users need to provide their document storage path
+   - Make all path parameters required by default, with clear instructions that they need to be specified
+   - Implement path validation to ensure users provide valid paths
+   - For document/note paths, design the interface to ask for the path if not provided
+   - Keep tool naming generic (e.g., use "kb_read" instead of "obsidian_read")
+
+10. SECURITY AND ARCHITECTURE BEST PRACTICES:
+   - Implement thorough path validation to prevent directory traversal attacks
+   - Normalize paths with path.normalize() and handle case-sensitivity issues
+   - Add command-line argument parsing for configuration values instead of hardcoding
+   - Create security utilities like validatePath() to ensure files are only accessed within allowed directories
+   - Handle symlinks securely with fs.realpath() to prevent access outside allowed directories
+   - Implement configurable limits (e.g., SEARCH_LIMIT) to prevent performance issues with large datasets
+   - Use batch processing for operations on multiple files to prevent memory issues
+   - Organize code with clear separation of concerns (validation, business logic, API handling)
+   - Add informative error messages that don't leak sensitive information
+   - Implement proper logging with console.error for server operations and diagnostics
+   - Support functionality to work with multiple files in a single operation when appropriate
+
+11. PERFORMANCE OPTIMIZATION:
+   - Use asynchronous operations with Promise.all for parallel processing when appropriate
+   - Add pagination or result limits for functions that might return large datasets
+   - Implement caching for frequently accessed data or expensive operations
+   - Use streams for reading large files instead of loading entire files into memory
+   - Add early termination options for expensive operations
+   - Include options to filter results to reduce data transfer
+   - Use appropriate data structures for fast lookups and searches
+   - Consider adding command-line flags for performance tuning and debug options
 
 The output should be ONLY the code with NO explanations, markdown formatting, or additional text outside the code. Focus on creating production-ready code that closely resembles real-world examples.`
           },
@@ -1210,34 +1243,32 @@ server.tool(
   }
 );
 
-// Obsidian vault file tool - demonstrates proper path handling
+// Knowledge base file reading tool - demonstrates proper path handling
 server.tool(
-  "obsidian_read",
+  "kb_read",
   { 
-    note_name: z.union([z.string(), z.array(z.string())])
-      .describe("Name of the note to read - can be string or array of path segments"),
-    vault_path: z.string().optional()
-      .describe("Optional path to Obsidian vault, defaults to configured path")
+    document_path: z.union([z.string(), z.array(z.string())])
+      .describe("Path to the document within your knowledge base - can be string or array of path segments"),
+    kb_path: z.string()
+      .describe("Path to your knowledge base. You must specify the full path to your document storage.")
   },
-  async ({ note_name, vault_path }) => {
+  async ({ document_path, kb_path }) => {
     try {
-      const OBSIDIAN_VAULT_PATH = vault_path || process.env.OBSIDIAN_VAULT_PATH || "./vault";
+      // Use provided knowledge base path - no default fallback to avoid hardcoded paths
+      const KNOWLEDGE_BASE_PATH = kb_path;
       
       // IMPORTANT: Use String() to avoid type errors with path.join
-      // This is the correct way to handle string | string[] union types with path operations
-      const filePath = path.join(OBSIDIAN_VAULT_PATH, String(note_name));
+      // This is the proper way to handle string | string[] union types with path operations
+      const filePath = path.join(KNOWLEDGE_BASE_PATH, String(document_path));
       
-      // Alternative safer approach using helper function
-      // const filePath = safePathJoin(OBSIDIAN_VAULT_PATH, note_name);
-      
-      // Read the note content
+      // Read the document content
       const content = await fs.readFile(filePath, 'utf-8');
       
       return {
         content: [
           {
             type: "text",
-            text: \`Content of note "\${note_name}":\n\${content}\`
+            text: \`Content of document "\${document_path}":\n\${content}\`
           }
         ]
       };
@@ -1246,7 +1277,7 @@ server.tool(
         content: [
           {
             type: "text",
-            text: \`Error reading note: \${error instanceof Error ? error.message : String(error)}\`
+            text: \`Error reading document: \${error instanceof Error ? error.message : String(error)}\`
           }
         ],
         isError: true
@@ -1575,27 +1606,6 @@ async def list_tools(request):
                 }
             },
             {
-                "name": "obsidian_read",
-                "description": "Read a note from an Obsidian vault with proper path handling",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "note_name": {
-                            "oneOf": [
-                                {"type": "string"},
-                                {"type": "array", "items": {"type": "string"}}
-                            ],
-                            "description": "Name of the note to read - can be string or array of path segments"
-                        },
-                        "vault_path": {
-                            "type": "string",
-                            "description": "Optional path to Obsidian vault, defaults to configured path"
-                        }
-                    },
-                    "required": ["note_name"]
-                }
-            },
-            {
                 "name": "content_search",
                 "description": "Search for text within files with case-insensitive matching",
                 "inputSchema": {
@@ -1637,88 +1647,6 @@ async def call_tool(request):
                 }
             ]
         }
-    elif tool_name == "obsidian_read":
-        note_name = arguments.get("note_name", "")
-        vault_path = arguments.get("vault_path", os.environ.get("OBSIDIAN_VAULT_PATH", "./vault"))
-        
-        try:
-            # IMPORTANT: Use str() to ensure path components are strings
-            # This is the proper way to handle potential list inputs with os.path.join
-            file_path = os.path.join(vault_path, str(note_name))
-            
-            # Alternative approach using helper function
-            # file_path = safe_path_join(vault_path, note_name)
-            
-            with open(file_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            return {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"Content of note '{note_name}':\\n{content}"
-                    }
-                ]
-            }
-        except Exception as e:
-            return {
-                "isError": True,
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"Error reading note: {str(e)}"
-                    }
-                ]
-            }
-    elif tool_name == "file_search":
-        query = arguments.get("query", "")
-        directory = arguments.get("directory", ".")
-        extensions = arguments.get("extensions", [])
-        
-        try:
-            # Handle string or list for extensions
-            extension_list = ensure_list(extensions)
-            
-            # Case-insensitive file search
-            files = os.listdir(directory)
-            matching_files = []
-            
-            for file in files:
-                if query.lower() in file.lower():
-                    # Check extensions if specified
-                    if extension_list:
-                        file_ext = os.path.splitext(file)[1].lower().replace(".", "")
-                        if file_ext in [ext.lower() for ext in extension_list]:
-                            matching_files.append(file)
-                    else:
-                        matching_files.append(file)
-            
-            # Process search results with flexible typing
-            result: Dict[str, Any] = {
-                "matches": matching_files,
-                "count": len(matching_files),
-                "metadata": {} # Using Any for unknown metadata
-            }
-            
-            return {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"Found {len(matching_files)} files matching '{query}':\\n" + 
-                               "\\n".join(matching_files)
-                    }
-                ]
-            }
-        except Exception as e:
-            return {
-                "isError": True,
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"Error in file search: {str(e)}"
-                    }
-                ]
-            }
     elif tool_name == "content_search":
         query = arguments.get("query", "")
         file_paths = arguments.get("filePath", "")
@@ -1743,13 +1671,13 @@ async def call_tool(request):
                             all_matches.append(f"{file_path} (Line {i+1}): {line.strip()}")
                             
                 except Exception as file_error:
-                    all_matches.append(f"Error reading {file_path}: {str(file_error)}")
+                    all_matches.push(\`Error reading \${file_path}: \${file_error}\`);
               
               return {
                 "content": [
                     {
                         "type": "text",
-                        "text": f"Found {len(all_matches)} instances of '{query}'" + 
+                        "text": f"Found \${len(all_matches)} instances of '{query}'" + 
                                (f":\\n{chr(10).join(all_matches)}" if all_matches else "")
                     }
                 ]
@@ -1760,7 +1688,7 @@ async def call_tool(request):
                 "content": [
                     {
                         "type": "text",
-                        "text": f"Error in content search: {str(e)}"
+                        "text": f"Error in content search: \${str(e)}"
                     }
                 ]
             }
@@ -1789,7 +1717,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except Exception as e:
-        print(f"Fatal error: {e}", file=sys.stderr)
+        print(f"Fatal error: \${e}", file=sys.stderr)
         sys.exit(1)
 `;
   }

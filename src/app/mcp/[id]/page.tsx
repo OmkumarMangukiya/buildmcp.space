@@ -137,15 +137,23 @@ export default function McpDetailsPage() {
         throw new Error('Authentication required to download MCP');
       }
 
+      console.log('Downloading with token:', token.substring(0, 10) + '...');
+
       // Create a blob URL for the file with the auth token in the headers
       const response = await fetch(`/api/mcp/download/${params.id}/bundle`, {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
-        }
+        },
+        credentials: 'include' // Include cookies in the request
       });
+
+      // Log the response status for debugging
+      console.log('Download response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Download error data:', errorData);
         throw new Error(errorData.error || 'Failed to download MCP');
       }
 

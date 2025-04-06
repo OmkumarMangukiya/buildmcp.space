@@ -246,10 +246,64 @@ echo "Run 'npm start' to start the server"
   };
 }
 
+// Improved function to extract token from request
+async function authenticate(request: Request): Promise<{ user: any | null, error: string | null }> {
+  try {
+    // Method 1: Try the Authorization header
+    const authHeader = request.headers.get('authorization');
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      console.log('Auth token found in header');
+      
+      const { data, error } = await supabaseAdmin!.auth.getUser(token);
+      
+      if (error) {
+        console.error('Auth error from header token:', error);
+        return { user: null, error: 'Invalid authentication' };
+      }
+      
+      return { user: data.user, error: null };
+    }
+    
+    // Method 2: Try cookies
+    const cookieHeader = request.headers.get('cookie');
+    if (cookieHeader) {
+      // Try several possible cookie names
+      const cookieMatches = [
+        cookieHeader.match(/sb-access-token=([^;]+)/),
+        cookieHeader.match(/sb-access-token-client=([^;]+)/)
+      ];
+      
+      for (const match of cookieMatches) {
+        if (match && match[1]) {
+          const token = match[1];
+          console.log('Auth token found in cookie');
+          
+          const { data, error } = await supabaseAdmin!.auth.getUser(token);
+          
+          if (error) {
+            console.error('Auth error from cookie token:', error);
+            continue; // Try next cookie
+          }
+          
+          return { user: data.user, error: null };
+        }
+      }
+    }
+    
+    console.log('No valid authentication method found');
+    return { user: null, error: 'Authorization required' };
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return { user: null, error: 'Authentication failed' };
+  }
+}
+
 // GET /api/mcp/download/[id]/[type]
 export async function GET(request: Request, { params }: { params: { id: string, type: string } }) {
   try {
     const { id, type } = params;
+    console.log(`Download request for MCP ${id}, type: ${type}`);
     
     // Check if download exists in cache
     if (!downloadCache[id]) {
@@ -281,57 +335,27 @@ export async function GET(request: Request, { params }: { params: { id: string, 
           
           // Check if MCP is public or verify authentication
           if (!mcpData.is_public) {
-            // Get the auth header and verify user's permission to download
-            const authHeader = request.headers.get('authorization');
+            // Authenticate the user
+            const { user, error: authError } = await authenticate(request);
             
-            if (!authHeader) {
-              // Try to get token from cookie as a fallback
-              const cookieHeader = request.headers.get('cookie');
-              const accessToken = cookieHeader?.match(/sb-access-token=([^;]+)/)?.[1];
-              
-              if (!accessToken) {
-                return NextResponse.json({ 
-                  error: 'Authorization required', 
-                  isPrivate: true 
-                }, { status: 401 });
-              }
-              
-              // Use token from cookie
-              const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(accessToken);
-              
-              if (authError || !user) {
-                return NextResponse.json({ 
-                  error: 'Invalid authentication', 
-                  isPrivate: true 
-                }, { status: 401 });
-              }
-              
-              // Verify user has permission
-              if (user.id !== mcpData.user_id) {
-                return NextResponse.json({ 
-                  error: 'You do not have permission to download this MCP', 
-                  isPrivate: true 
-                }, { status: 403 });
-              }
-            } else {
-              const token = authHeader.replace('Bearer ', '');
-              const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-              
-              if (authError || !user) {
-                return NextResponse.json({ 
-                  error: 'Invalid authentication', 
-                  isPrivate: true 
-                }, { status: 401 });
-              }
-              
-              // Verify user has permission
-              if (user.id !== mcpData.user_id) {
-                return NextResponse.json({ 
-                  error: 'You do not have permission to download this MCP', 
-                  isPrivate: true 
-                }, { status: 403 });
-              }
+            if (authError || !user) {
+              console.error('Authentication failed:', authError);
+              return NextResponse.json({ 
+                error: authError || 'Authentication failed', 
+                isPrivate: true 
+              }, { status: 401 });
             }
+            
+            // Verify user has permission
+            if (user.id !== mcpData.user_id) {
+              console.error('Permission denied for user:', user.id, 'trying to access MCP owned by:', mcpData.user_id);
+              return NextResponse.json({ 
+                error: 'You do not have permission to download this MCP', 
+                isPrivate: true 
+              }, { status: 403 });
+            }
+            
+            console.log('User authenticated and authorized to download MCP');
           }
           
           // Add the original code to the config if it exists
@@ -352,57 +376,27 @@ export async function GET(request: Request, { params }: { params: { id: string, 
           
           // Check if MCP is public or verify authentication
           if (!mcpData.is_public) {
-            // Get the auth header and verify user's permission to download
-            const authHeader = request.headers.get('authorization');
+            // Authenticate the user
+            const { user, error: authError } = await authenticate(request);
             
-            if (!authHeader) {
-              // Try to get token from cookie as a fallback
-              const cookieHeader = request.headers.get('cookie');
-              const accessToken = cookieHeader?.match(/sb-access-token=([^;]+)/)?.[1];
-              
-              if (!accessToken) {
-                return NextResponse.json({ 
-                  error: 'Authorization required', 
-                  isPrivate: true 
-                }, { status: 401 });
-              }
-              
-              // Use token from cookie
-              const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(accessToken);
-              
-              if (authError || !user) {
-                return NextResponse.json({ 
-                  error: 'Invalid authentication', 
-                  isPrivate: true 
-                }, { status: 401 });
-              }
-              
-              // Verify user has permission
-              if (user.id !== mcpData.user_id) {
-                return NextResponse.json({ 
-                  error: 'You do not have permission to download this MCP', 
-                  isPrivate: true 
-                }, { status: 403 });
-              }
-            } else {
-              const token = authHeader.replace('Bearer ', '');
-              const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-              
-              if (authError || !user) {
-                return NextResponse.json({ 
-                  error: 'Invalid authentication', 
-                  isPrivate: true 
-                }, { status: 401 });
-              }
-              
-              // Verify user has permission
-              if (user.id !== mcpData.user_id) {
-                return NextResponse.json({ 
-                  error: 'You do not have permission to download this MCP', 
-                  isPrivate: true 
-                }, { status: 403 });
-              }
+            if (authError || !user) {
+              console.error('Authentication failed:', authError);
+              return NextResponse.json({ 
+                error: authError || 'Authentication failed', 
+                isPrivate: true 
+              }, { status: 401 });
             }
+            
+            // Verify user has permission
+            if (user.id !== mcpData.user_id) {
+              console.error('Permission denied for user:', user.id, 'trying to access MCP owned by:', mcpData.user_id);
+              return NextResponse.json({ 
+                error: 'You do not have permission to download this MCP', 
+                isPrivate: true 
+              }, { status: 403 });
+            }
+            
+            console.log('User authenticated and authorized to download MCP');
           }
           
           // Add the original code to the config if it exists

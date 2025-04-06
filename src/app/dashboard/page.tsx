@@ -2,11 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Code } from "lucide-react";
+import { Plus, Code, Star, AlertTriangle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import supabase from "@/lib/supaClient";
+import supabase, { getSessionWithRefresh } from "@/lib/supaClient";
 import { useEffect, useState } from "react";
+import { handleAuthRedirect, isJwtExpiredError } from "@/lib/authRedirect";
 
 // Types for our data
 interface MCP {
@@ -23,18 +24,45 @@ interface User {
   avatar_url?: string;
 }
 
+interface Plan {
+  id: string;
+  name: string;
+  interval: string;
+  mcp_limit: number | null;
+}
+
+interface UserPlan {
+  id: string;
+  expires_at: string;
+  plans: Plan;
+}
+
+interface Subscription {
+  id: string;
+  plan_name: string;
+  plan_interval: string;
+  mcp_limit: number | null;
+  expires_at: string;
+  mcp_remaining?: number;
+  is_active: boolean;
+}
+
 export default function Dashboard() {
   const [mcps, setMcps] = useState<MCP[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // Get current user
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-          window.location.href = '/auth/signin?redirect=/dashboard';
+        // Get current user with token refresh
+        const { data: { session }, error: sessionError } = await getSessionWithRefresh();
+        
+        if (sessionError || !session) {
+          console.error('Session error:', sessionError);
+          // Use our new auth helper for redirection
+          await handleAuthRedirect('/dashboard');
           return;
         }
 
@@ -49,6 +77,49 @@ export default function Dashboard() {
           console.error('Error fetching user:', userError);
         } else if (userData) {
           setUser(userData);
+        }
+
+        // Get active subscription
+        const { data: subscriptionData, error: subscriptionError } = await supabase
+          .from('user_plans')
+          .select(`
+            id,
+            expires_at,
+            plans (
+              id,
+              name,
+              interval,
+              mcp_limit
+            )
+          `)
+          .eq('user_id', session.user.id)
+          .gte('expires_at', new Date().toISOString())
+          .order('expires_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (subscriptionError && subscriptionError.code !== 'PGRST116') { // PGRST116 is "Results Not Found"
+          console.error('Error fetching subscription:', subscriptionError);
+        } else if (subscriptionData) {
+          const userPlan = subscriptionData as unknown as UserPlan;
+          // Get remaining MCPs if applicable
+          let mcpRemaining;
+          if (userPlan.plans && userPlan.plans.mcp_limit) {
+            const { data: remaining } = await supabase.rpc('get_user_mcp_remaining', {
+              user_uuid: session.user.id
+            });
+            mcpRemaining = remaining;
+          }
+
+          setSubscription({
+            id: userPlan.id,
+            plan_name: userPlan.plans.name,
+            plan_interval: userPlan.plans.interval,
+            mcp_limit: userPlan.plans.mcp_limit,
+            expires_at: userPlan.expires_at,
+            mcp_remaining: mcpRemaining,
+            is_active: new Date(userPlan.expires_at) > new Date()
+          });
         }
 
         // Get user's MCPs - using the correct table name 'mcp_projects'
@@ -95,6 +166,15 @@ export default function Dashboard() {
     return 'Just now';
   }
 
+  // Function to format expiration date
+  function formatExpirationDate(timestamp: string) {
+    return new Date(timestamp).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Main content */}
@@ -127,6 +207,70 @@ export default function Dashboard() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight">Welcome back{user?.name ? `, ${user.name}` : ''}!</h1>
             <p className="text-muted-foreground">Your MCP dashboard overview</p>
+          </div>
+
+          {/* Subscription Status */}
+          <div className="mb-8">
+            <h2 className="text-xl font-bold mb-4">Subscription Status</h2>
+            <Card>
+              <CardContent className="p-6">
+                {loading ? (
+                  <div className="text-center py-4">Loading subscription details...</div>
+                ) : subscription ? (
+                  <div>
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold flex items-center">
+                          <Star className="h-5 w-5 text-yellow-500 mr-2" />
+                          {subscription.plan_name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Active until {formatExpirationDate(subscription.expires_at)}
+                        </p>
+                      </div>
+                      <Link href="/pricing">
+                        <Button size="sm" variant="outline">Change Plan</Button>
+                      </Link>
+                    </div>
+
+                    {subscription.mcp_limit !== null && (
+                      <div className="mt-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium">MCP Generations Remaining</span>
+                          <span className="text-sm font-bold">{subscription.mcp_remaining} / {subscription.mcp_limit}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div 
+                            className="bg-blue-600 h-2.5 rounded-full" 
+                            style={{ width: `${(subscription.mcp_remaining! / subscription.mcp_limit!) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+
+                    {subscription.mcp_limit === null && (
+                      <div className="mt-4 flex items-center text-green-600">
+                        <Star className="h-4 w-4 mr-2" />
+                        <span className="font-medium">Unlimited MCP generations</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <div className="flex justify-center mb-4">
+                      <AlertTriangle className="h-12 w-12 text-amber-500" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">No Active Subscription</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Subscribe to a plan to unlock MCP generation capabilities.
+                    </p>
+                    <Link href="/pricing">
+                      <Button>View Pricing Plans</Button>
+                    </Link>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* My MCPs */}

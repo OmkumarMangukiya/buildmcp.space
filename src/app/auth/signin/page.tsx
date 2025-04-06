@@ -25,27 +25,33 @@ function SignInForm() {
     setError('');
 
     try {
-      // Try to initialize Supabase client with error handling
-      let supabase;
-      try {
-        supabase = (await import('@/lib/supaClient')).default;
-      } catch (initError: any) {
-        console.error("Supabase initialization error:", initError);
-        throw new Error('Failed to initialize authentication. Please check your internet connection and try again.');
-      }
-      
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      // Call our API route instead of directly using Supabase client
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          redirect: redirectPath
+        }),
       });
 
-      if (signInError) {
-        throw new Error(signInError.message || 'Failed to sign in');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to sign in');
       }
 
-      console.log(`Sign in successful, redirecting to: ${redirectPath}`);
-      // On success, redirect to the original requested page or dashboard
-      router.push(redirectPath);
+      // If we have a redirect URL from the server, use it
+      if (data.redirect) {
+        console.log(`Sign in successful, redirecting to: ${data.redirect}`);
+        router.push(data.redirect);
+      } else {
+        console.log('Sign in successful, redirecting to dashboard');
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       console.error("Sign in error:", err);
       setError(err.message || 'An error occurred during sign in');

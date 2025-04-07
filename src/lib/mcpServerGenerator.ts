@@ -6,7 +6,6 @@ export interface ServerRequirements {
   serverDescription: string;
   targetClients: string[];
   authRequirements: string;
-  deploymentPreference: 'local' | 'cloud' | 'both';
   languagePreference?: string;
 }
 
@@ -32,7 +31,6 @@ function constructBasePrompt(
   serverDescription: string,
   targetClients: string[],
   authRequirements: string,
-  deploymentPreference: string,
   languagePreference?: string
 ): string {
   return `
@@ -47,13 +45,10 @@ ${targetClients.join(', ')}
 3. AUTHENTICATION NEEDS:
 ${authRequirements}
 
-4. DEPLOYMENT PREFERENCE:
-${deploymentPreference}
-
-5. PROGRAMMING LANGUAGE:
+4. PROGRAMMING LANGUAGE:
 ${languagePreference || "Choose the most appropriate language"}
 
-6. TOOL REQUIREMENTS:
+5. TOOL REQUIREMENTS:
 - Tools must have descriptive names that clearly indicate their purpose
 - Each tool description should be detailed (3-5 lines minimum)
 - Descriptions should explain what the tool does, when to use it, and its key features
@@ -638,148 +633,6 @@ Place this in your .cursor/mcp.json file:
 }
 
 /**
- * Package the server for cloud deployment
- */
-function packageForCloudDeployment(serverCode: string, language?: string): Record<string, string> {
-  // Base files for cloud deployment
-  const baseFiles = {
-    'Dockerfile': '',
-    'docker-compose.yml': '',
-    '.env.example': '',
-    'README.md': '# MCP Server Cloud Deployment\n\nThis MCP server is configured for cloud deployment.\n'
-  };
-  
-  if (language?.toLowerCase().includes('python')) {
-    return {
-      ...baseFiles,
-      'server.py': serverCode,
-      'requirements.txt': 'modelcontextprotocol>=1.0.0\ngunicorn>=20.0.0\nuvicorn>=0.15.0\n',
-      'Dockerfile': 'FROM python:3.9-slim\n\nWORKDIR /app\n\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\n\nCOPY . .\n\nCMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]\n',
-      'docker-compose.yml': 'version: "3"\nservices:\n  mcp-server:\n    build: .\n    ports:\n      - "8000:8000"\n    env_file:\n      - .env\n'
-    };
-  } else if (language?.toLowerCase().includes('typescript')) {
-    return {
-      ...baseFiles,
-      'server.ts': serverCode,
-      'tsconfig.json': `{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "esModuleInterop": true,
-    "outDir": "dist",
-    "strict": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["*.ts"],
-  "exclude": ["node_modules"]
-}`,
-      'package.json': `{
-  "name": "mcp-server",
-  "version": "1.0.0",
-  "main": "dist/server.js",
-  "type": "module",
-  "scripts": {
-    "build": "tsc",
-    "start": "node dist/server.js"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "express": "^4.17.1",
-    "zod": "^3.22.4"
-  },
-  "devDependencies": {
-    "@types/node": "^18.0.0",
-    "@types/express": "^4.17.13",
-    "typescript": "^5.0.4"
-  }
-}`,
-      'Dockerfile': `FROM node:18-slim
-
-WORKDIR /app
-
-# Install dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy source code
-COPY . .
-
-# Build TypeScript
-RUN npm run build
-
-# Run server
-CMD ["npm", "start"]`,
-      'docker-compose.yml': `version: "3"
-services:
-  mcp-server:
-    build: .
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    restart: unless-stopped`,
-      '.env.example': `# MCP Server Configuration
-NODE_ENV=production
-
-# Add your API keys and secrets here
-# API_KEY=your_api_key_here`
-    };
-  } else if (language?.toLowerCase().includes('node') || language?.toLowerCase().includes('javascript')) {
-    return {
-      ...baseFiles,
-      'server.js': serverCode,
-      'package.json': `{
-  "name": "mcp-server",
-  "version": "1.0.0",
-  "main": "server.js",
-  "type": "module",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "express": "^4.17.1"
-  }
-}`,
-      'Dockerfile': `FROM node:18-slim
-
-WORKDIR /app
-
-# Install dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy source code
-COPY . .
-
-# Run server
-CMD ["npm", "start"]`,
-      'docker-compose.yml': `version: "3"
-services:
-  mcp-server:
-    build: .
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    restart: unless-stopped`
-    };
-  }
-  
-  // Default to TypeScript if language not specified
-  return {
-    ...baseFiles,
-    'server.ts': serverCode,
-    'tsconfig.json': '{\n  "compilerOptions": {\n    "target": "ES2018",\n    "module": "CommonJS",\n    "esModuleInterop": true,\n    "outDir": "dist",\n    "strict": true\n  },\n  "include": ["*.ts"],\n  "exclude": ["node_modules"]\n}',
-    'package.json': '{\n  "name": "mcp-server",\n  "version": "1.0.0",\n  "main": "dist/server.js",\n  "scripts": {\n    "build": "tsc",\n    "start": "node dist/server.js"\n  },\n  "dependencies": {\n    "@modelcontextprotocol/sdk": "^1.0.0",\n    "express": "^4.17.1"\n  },\n  "devDependencies": {\n    "@types/node": "^18.0.0",\n    "@types/express": "^4.17.13",\n    "typescript": "^4.9.5"\n  }\n}',
-    'Dockerfile': 'FROM node:16-slim\n\nWORKDIR /app\n\nCOPY package*.json ./\nRUN npm install\n\nCOPY . .\nRUN npm run build\n\nCMD ["npm", "start"]\n',
-    'docker-compose.yml': 'version: "3"\nservices:\n  mcp-server:\n    build: .\n    ports:\n      - "3000:3000"\n    env_file:\n      - .env\n'
-  };
-}
-
-/**
  * Generate usage documentation for the server
  */
 function generateUsageDocumentation(serverCode: string, configs: Record<string, ClientConfig>): string {
@@ -832,7 +685,6 @@ export async function generateMcpServer(
   userDescription: string,
   targetClients: string[],
   authRequirements: string,
-  deploymentPreference: 'local' | 'cloud' | 'both',
   languagePreference?: string,
   llmProvider?: any // This would be the actual LLM provider interface
 ): Promise<ServerPackage> {
@@ -846,7 +698,6 @@ export async function generateMcpServer(
     userDescription,
     targetClients,
     authRequirements,
-    deploymentPreference,
     languagePreference
   );
 
@@ -894,7 +745,6 @@ ${mcpDocs}
         userDescription,
         targetClients,
         authRequirements,
-        deploymentPreference,
         languagePreference
       });
       
@@ -1079,14 +929,10 @@ The output should be ONLY the code with NO explanations, markdown formatting, or
     }
   }
 
-  // Package for deployment
-  let packages: { local?: Record<string, string>; cloud?: Record<string, string> } = {};
-  if (deploymentPreference === 'local' || deploymentPreference === 'both') {
-    packages.local = packageForLocalExecution(serverCode, languagePreference);
-  }
-  if (deploymentPreference === 'cloud' || deploymentPreference === 'both') {
-    packages.cloud = packageForCloudDeployment(serverCode, languagePreference);
-  }
+  // Package for local execution only
+  const packages = {
+    local: packageForLocalExecution(serverCode, languagePreference)
+  };
 
   // Generate documentation
   const documentation = generateUsageDocumentation(serverCode, clientConfigs);

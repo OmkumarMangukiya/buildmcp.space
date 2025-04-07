@@ -152,8 +152,8 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/login" className="text-sm text-white/70 hover:text-white transition-colors">Log in</Link>
-              <Link href="/signup">
+              <Link href="/auth/signin" className="text-sm text-white/70 hover:text-white transition-colors">Log in</Link>
+              <Link href="/auth/signup">
                 <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600">Sign up</Button>
               </Link>
             </div>
@@ -479,80 +479,96 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-rose-400">
-              Built with Modern Technology
+              Simple, Transparent Pricing
             </h2>
             <p className="text-white/60">
-              Powerful tools for a seamless development experience
+              Choose the plan that works best for you
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-16">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-white/5 backdrop-blur-md rounded-lg p-4 hover:bg-white/10 transition-all duration-300 group flex flex-col items-center justify-center"
+              className="bg-white/5 backdrop-blur-md rounded-lg p-6 border border-white/10 relative"
             >
-              <div className="text-rose-400 group-hover:text-white transition-colors mb-2">
-                <div className="text-lg font-semibold">Next.js</div>
+              <h3 className="text-xl font-semibold mb-4">Basic</h3>
+              <div className="flex items-end mb-4">
+                <span className="text-3xl font-bold">$11.99</span>
+                <span className="ml-1 text-white/60">/month</span>
               </div>
-              <p className="text-xs text-white/50 text-center">React framework</p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>Up to 120 MCP generations per month</span>
+                </li>
+                <li className="flex items-center">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>Access to all features</span>
+                </li>
+                <li className="flex items-center">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>Email support</span>
+                </li>
+              </ul>
+              <Link href="/auth/signup">
+                <Button className="w-full bg-indigo-500 hover:bg-indigo-600">Get Started</Button>
+              </Link>
             </motion.div>
-            
+
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="bg-white/5 backdrop-blur-md rounded-lg p-4 hover:bg-white/10 transition-all duration-300 group flex flex-col items-center justify-center"
+              className="bg-white/5 backdrop-blur-md rounded-lg p-6 border border-indigo-500/50 relative"
             >
-              <div className="text-rose-400 group-hover:text-white transition-colors mb-2">
-                <div className="text-lg font-semibold">TypeScript</div>
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-indigo-500 text-white px-4 py-1 rounded-full text-xs font-bold">
+                POPULAR
               </div>
-              <p className="text-xs text-white/50 text-center">Type-safe JS</p>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="bg-white/5 backdrop-blur-md rounded-lg p-4 hover:bg-white/10 transition-all duration-300 group flex flex-col items-center justify-center"
-            >
-              <div className="text-rose-400 group-hover:text-white transition-colors mb-2">
-                <div className="text-lg font-semibold">Tailwind</div>
+              <h3 className="text-xl font-semibold mb-4">Premium</h3>
+              <div className="flex items-end mb-4">
+                <span className="text-3xl font-bold">$15.99</span>
+                <span className="ml-1 text-white/60">/month</span>
               </div>
-              <p className="text-xs text-white/50 text-center">CSS framework</p>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.4 }}
-              viewport={{ once: true }}
-              className="bg-white/5 backdrop-blur-md rounded-lg p-4 hover:bg-white/10 transition-all duration-300 group flex flex-col items-center justify-center"
-            >
-              <div className="text-rose-400 group-hover:text-white transition-colors mb-2">
-                <div className="text-lg font-semibold">Supabase</div>
-              </div>
-              <p className="text-xs text-white/50 text-center">Backend & Auth</p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>Unlimited MCP generations</span>
+                </li>
+                <li className="flex items-center">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>Access to all features</span>
+                </li>
+                <li className="flex items-center">
+                  <svg className="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>Priority email support</span>
+                </li>
+              </ul>
+              <Link href="/auth/signup">
+                <Button className="w-full bg-indigo-500 hover:bg-indigo-600">Get Started</Button>
+              </Link>
             </motion.div>
           </div>
 
-          <div className="max-w-lg mx-auto">
-            <div className="bg-gradient-to-r from-indigo-500/20 to-rose-500/20 rounded-xl p-1">
-              <div className="bg-black rounded-lg p-8 text-center">
-                <h3 className="text-2xl font-bold mb-4">Ready to Get Started?</h3>
-                <p className="text-white/60 mb-6">Create your first Model Context Protocol in minutes</p>
-                <Link href="/dashboard">
-                  <Button size="lg" className="bg-indigo-500 hover:bg-indigo-600 text-white">
-                    Start Building
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
+          <div className="mt-12 text-center">
+            <p className="text-white/60">
+              Save 20% with annual billing. Premium yearly plan available for $159.90/year.
+            </p>
           </div>
         </div>
       </section>

@@ -3,8 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Privacy Policy | MCP.Build",
-  description: "Privacy policy for MCP.Build users",
+  title: "Privacy Policy | buildmcp.space",
+  description: "Privacy policy for buildmcp.space users",
 };
 
 export default function PrivacyPolicyPage() {
@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
           <div className="flex items-center gap-2">
             <Link href="/">
               <span className="font-bold text-xl group">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">MCP.Build</span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">buildmcp.space</span>
               </span>
             </Link>
           </div>
@@ -44,7 +44,7 @@ export default function PrivacyPolicyPage() {
           <div className="prose prose-invert max-w-none">
             <h2>1. Introduction</h2>
             <p>
-              At MCP.Build, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform and services, including our website, applications, APIs, and all offered services (collectively, the "Services"). Please read this Privacy Policy carefully. By accessing or using our Services, you acknowledge that you have read, understood, and agree to be bound by all the terms of this Privacy Policy.
+              At buildmcp.space, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform and services, including our website, applications, APIs, and all offered services (collectively, the "Services"). Please read this Privacy Policy carefully. By accessing or using our Services, you acknowledge that you have read, understood, and agree to be bound by all the terms of this Privacy Policy.
             </p>
             
             <h2>2. Information We Collect</h2>
@@ -129,7 +129,7 @@ export default function PrivacyPolicyPage() {
             <ul>
               <li>Comply with applicable laws, regulations, legal processes, or governmental requests</li>
               <li>Enforce our agreements, policies, and terms of service</li>
-              <li>Protect the rights, property, and safety of MCP.Build, our users, or others</li>
+              <li>Protect the rights, property, and safety of buildmcp.space, our users, or others</li>
             </ul>
             
             <h2>5. Data Retention</h2>

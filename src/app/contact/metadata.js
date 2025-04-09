@@ -1,4 +1,4 @@
 export const metadata = {
-  title: "Contact Us | MCP.Build",
-  description: "Get in touch with the MCP.Build team for support, partnerships, or feedback",
+  title: "Contact Us | buildmcp.space",
+  description: "Get in touch with the buildmcp.space team for support, partnerships, or feedback",
 }; 

@@ -141,7 +141,7 @@ export default function Home() {
           <div className="container mx-auto px-4 flex items-center justify-between h-16">
             <div className="flex items-center gap-6">
               <Link href="/" className="font-bold text-xl group">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">MCP.Build</span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">buildmcp.space</span>
               </Link>
               <div className="hidden md:flex gap-6">
                 <Link href="#features" className="text-sm text-white/70 hover:text-white transition-colors">Features</Link>
@@ -578,7 +578,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex justify-center mb-8">
             <Link href="/" className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400">
-              MCP.Build
+              buildmcp.space
             </Link>
           </div>
           
@@ -630,7 +630,7 @@ export default function Home() {
             <ul className="space-y-2 text-white/60 text-sm">
               <li className="flex items-start gap-2">
                 <span className="text-rose-400 mt-1">•</span>
-                <span>MCP.Build is a <span className="text-white font-medium">subscription-based service</span> with monthly or annual billing options</span>
+                <span>buildmcp.space is a <span className="text-white font-medium">subscription-based service</span> with monthly or annual billing options</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-rose-400 mt-1">•</span>
@@ -653,7 +653,7 @@ export default function Home() {
           
           <div className="flex flex-col md:flex-row justify-between items-center text-white/50 text-sm border-t border-white/10 pt-8">
             <div className="mb-4 md:mb-0">
-              © 2023 MCP Builder. All rights reserved.
+              © 2023 buildmcp.space. All rights reserved.
             </div>
             <div className="flex items-center gap-4">
               <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>

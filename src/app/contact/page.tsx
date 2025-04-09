@@ -55,7 +55,7 @@ export default function ContactPage() {
           <div className="flex items-center gap-2">
             <Link href="/">
               <span className="font-bold text-xl group">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">MCP.Build</span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">buildmcp.space</span>
               </span>
             </Link>
           </div>
@@ -77,7 +77,7 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <p className="text-white/60 max-w-2xl mx-auto">
-            Have questions about MCP.Build or need help with your MCPs? We'd love to hear from you. 
+            Have questions about buildmcp.space or need help with your MCPs? We'd love to hear from you. 
             Fill out the form below and our team will get back to you as soon as possible.
           </p>
         </div>
@@ -123,7 +123,7 @@ export default function ContactPage() {
                   <h3 className="font-medium mb-1">Office</h3>
                   <p className="text-white/70 text-sm mb-2">Visit us at our headquarters</p>
                   <address className="not-italic text-amber-400">
-                    MCP.Build<br />
+                    buildmcp.space<br />
                   </address>
                 </div>
               </div>

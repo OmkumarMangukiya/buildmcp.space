@@ -3,8 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Refund Policy | MCP.Build",
-  description: "Refund and cancellation policy for MCP.Build subscriptions",
+  title: "Refund Policy | buildmcp.space",
+  description: "Refund and cancellation policy for buildmcp.space subscriptions",
 };
 
 export default function RefundPolicyPage() {
@@ -16,7 +16,7 @@ export default function RefundPolicyPage() {
           <div className="flex items-center gap-2">
             <Link href="/">
               <span className="font-bold text-xl group">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">MCP.Build</span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">buildmcp.space</span>
               </span>
             </Link>
           </div>
@@ -45,7 +45,7 @@ export default function RefundPolicyPage() {
             <div className="bg-white/5 p-6 rounded-lg border border-white/10 mb-8">
               <h2 className="text-xl text-indigo-400 mt-0">Summary</h2>
               <ul className="mt-4">
-                <li>MCP.Build is a subscription-based service</li>
+                <li>buildmcp.space is a subscription-based service</li>
                 <li>All subscription payments are non-refundable</li>
                 <li>You can cancel your subscription at any time to prevent future charges</li>
                 <li>No refunds are provided for partial billing periods</li>
@@ -54,12 +54,12 @@ export default function RefundPolicyPage() {
             
             <h2>1. Subscription Model</h2>
             <p>
-              MCP.Build operates on a subscription-based model. We offer monthly and annual subscription plans, each providing specific features and usage limitations. By subscribing to our service, you agree to the recurring payment schedule based on your chosen plan.
+              buildmcp.space operates on a subscription-based model. We offer monthly and annual subscription plans, each providing specific features and usage limitations. By subscribing to our service, you agree to the recurring payment schedule based on your chosen plan.
             </p>
             
             <h2>2. No-Refund Policy</h2>
             <p>
-              <strong>All payments made for MCP.Build subscriptions are non-refundable.</strong> This includes both monthly and annual subscriptions. Once a payment has been processed, we do not offer refunds for:
+              <strong>All payments made for buildmcp.space subscriptions are non-refundable.</strong> This includes both monthly and annual subscriptions. Once a payment has been processed, we do not offer refunds for:
             </p>
             <ul>
               <li>Unused portions of your subscription period</li>
@@ -86,7 +86,7 @@ export default function RefundPolicyPage() {
               To cancel your subscription:
             </p>
             <ol>
-              <li>Log in to your MCP.Build account</li>
+              <li>Log in to your buildmcp.space account</li>
               <li>Navigate to "Account Settings"</li>
               <li>Select "Subscription"</li>
               <li>Click "Cancel Subscription"</li>

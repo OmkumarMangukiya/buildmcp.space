@@ -3,8 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Terms of Service | MCP.Build",
-  description: "Terms and conditions for using the MCP.Build platform",
+  title: "Terms of Service | buildmcp.space",
+  description: "Terms and conditions for using the buildmcp.space platform",
 };
 
 export default function TermsPage() {
@@ -16,7 +16,7 @@ export default function TermsPage() {
           <div className="flex items-center gap-2">
             <Link href="/">
               <span className="font-bold text-xl group">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">MCP.Build</span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">buildmcp.space</span>
               </span>
             </Link>
           </div>
@@ -44,12 +44,12 @@ export default function TermsPage() {
           <div className="prose prose-invert max-w-none">
             <h2>1. Introduction</h2>
             <p>
-              Welcome to MCP.Build. These Terms of Service ("Terms") govern your access to and use of the MCP.Build platform and services, including our website, applications, APIs, and all offered services (collectively, the "Services"). By accessing or using our Services, you agree to be bound by these Terms.
+              Welcome to buildmcp.space. These Terms of Service ("Terms") govern your access to and use of the buildmcp.space platform and services, including our website, applications, APIs, and all offered services (collectively, the "Services"). By accessing or using our Services, you agree to be bound by these Terms.
             </p>
             
             <h2>2. Definitions</h2>
             <p>
-              <strong>"MCP.Build"</strong>, <strong>"we"</strong>, <strong>"us"</strong>, and <strong>"our"</strong> refer to the MCP.Build platform, its owners, operators, and affiliates.
+              <strong>"buildmcp.space"</strong>, <strong>"we"</strong>, <strong>"us"</strong>, and <strong>"our"</strong> refer to the buildmcp.space platform, its owners, operators, and affiliates.
             </p>
             <p>
               <strong>"User"</strong>, <strong>"you"</strong>, and <strong>"your"</strong> refer to any individual or entity that accesses or uses our Services.
@@ -68,7 +68,7 @@ export default function TermsPage() {
             
             <h2>4. Subscription and Payment Terms</h2>
             <p>
-              <strong>4.1 Subscription Model</strong>: MCP.Build operates on a subscription basis. We offer various subscription plans, each with different features, limitations, and pricing.
+              <strong>4.1 Subscription Model</strong>: buildmcp.space operates on a subscription basis. We offer various subscription plans, each with different features, limitations, and pricing.
             </p>
             <p>
               <strong>4.2 Payment</strong>: When you subscribe to our paid services, you agree to pay all fees in accordance with the pricing and payment terms presented to you. All payments are non-refundable except as expressly stated in these Terms or as required by applicable law.
@@ -106,7 +106,7 @@ export default function TermsPage() {
             
             <h2>7. Intellectual Property Rights</h2>
             <p>
-              <strong>7.1 Our Intellectual Property</strong>: Our Services, including all content, features, and functionality, are owned by MCP.Build and are protected by copyright, trademark, and other intellectual property laws. You may not reproduce, distribute, modify, create derivative works of, publicly display, or use our intellectual property without our explicit permission.
+              <strong>7.1 Our Intellectual Property</strong>: Our Services, including all content, features, and functionality, are owned by buildmcp.space and are protected by copyright, trademark, and other intellectual property laws. You may not reproduce, distribute, modify, create derivative works of, publicly display, or use our intellectual property without our explicit permission.
             </p>
             <p>
               <strong>7.2 MCPs</strong>: While you retain ownership of your User Content, the MCPs generated through our Services are subject to the specific licensing terms associated with your subscription plan.
@@ -130,12 +130,12 @@ export default function TermsPage() {
             
             <h2>10. Limitation of Liability</h2>
             <p>
-              TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL MCP.BUILD BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATING TO YOUR USE OF OR INABILITY TO USE OUR SERVICES.
+              TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL BUILDMCP.SPACE BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATING TO YOUR USE OF OR INABILITY TO USE OUR SERVICES.
             </p>
             
             <h2>11. Indemnification</h2>
             <p>
-              You agree to indemnify, defend, and hold harmless MCP.Build and its officers, directors, employees, agents, and affiliates from and against any claims, liabilities, damages, losses, and expenses, including, without limitation, reasonable legal and accounting fees, arising out of or in any way connected with your access to or use of our Services or your violation of these Terms.
+              You agree to indemnify, defend, and hold harmless buildmcp.space and its officers, directors, employees, agents, and affiliates from and against any claims, liabilities, damages, losses, and expenses, including, without limitation, reasonable legal and accounting fees, arising out of or in any way connected with your access to or use of our Services or your violation of these Terms.
             </p>
             
             <h2>12. Modifications to Terms</h2>
@@ -145,12 +145,12 @@ export default function TermsPage() {
             
             <h2>13. Governing Law and Dispute Resolution</h2>
             <p>
-              These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which MCP.Build is registered, without regard to its conflict of law provisions. Any dispute arising from or relating to these Terms or your use of our Services shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association.
+              These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which buildmcp.space is registered, without regard to its conflict of law provisions. Any dispute arising from or relating to these Terms or your use of our Services shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association.
             </p>
             
             <h2>14. Miscellaneous</h2>
             <p>
-              <strong>14.1 Entire Agreement</strong>: These Terms constitute the entire agreement between you and MCP.Build regarding your use of our Services and supersede all prior agreements and understandings.
+              <strong>14.1 Entire Agreement</strong>: These Terms constitute the entire agreement between you and buildmcp.space regarding your use of our Services and supersede all prior agreements and understandings.
             </p>
             <p>
               <strong>14.2 Severability</strong>: If any provision of these Terms is found to be unenforceable, that provision shall be enforced to the maximum extent possible, and the remaining provisions shall remain in full force and effect.

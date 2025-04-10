@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { BrainCircuit, Terminal, Code, Users, ExternalLink, ArrowRight, Server, Database, Github, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DashboardMockup } from "@/components/ui/dashboard-mockup";
+import { RainbowButton } from "@/components/ui/rainbow-button";
 
 interface ElegantShapeProps {
   className?: string;
@@ -210,11 +211,11 @@ export default function Home() {
               animate="visible"
               className="flex flex-wrap gap-4 justify-center"
             >
-              <Link href="/dashboard">
-                <Button size="lg" className="bg-indigo-500 hover:bg-indigo-600 text-white">
+              <Link href="/auth/signup">
+                <RainbowButton>
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                </RainbowButton>
               </Link>
               <Link href="#learn-more">
                 <Button size="lg" variant="outline" className="border-white/20 hover:bg-white/10">
@@ -520,7 +521,7 @@ export default function Home() {
                 </li>
               </ul>
               <Link href="/auth/signup">
-                <Button className="w-full bg-indigo-500 hover:bg-indigo-600">Get Started</Button>
+                <RainbowButton className="w-full">Get Started</RainbowButton>
               </Link>
             </motion.div>
 
@@ -560,7 +561,7 @@ export default function Home() {
                 </li>
               </ul>
               <Link href="/auth/signup">
-                <Button className="w-full bg-indigo-500 hover:bg-indigo-600">Get Started</Button>
+                <RainbowButton className="w-full">Get Started</RainbowButton>
               </Link>
             </motion.div>
           </div>

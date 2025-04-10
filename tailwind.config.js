@@ -49,6 +49,11 @@ module.exports = {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",
         },
+        "color-1": "hsl(var(--color-1))",
+        "color-2": "hsl(var(--color-2))",
+        "color-3": "hsl(var(--color-3))",
+        "color-4": "hsl(var(--color-4))",
+        "color-5": "hsl(var(--color-5))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -64,6 +69,7 @@ module.exports = {
         "gradient-slow": "gradientBackground 8s ease infinite",
         "sparkle": "sparkle 2s ease-in-out infinite",
         "ping-slow": "ping 3s cubic-bezier(0, 0, 0.2, 1) infinite",
+        "rainbow": "rainbow 2s linear infinite",
       },
       keyframes: {
         shimmer: {
@@ -94,6 +100,10 @@ module.exports = {
         sparkle: {
           "0%, 100%": { opacity: 0.8, transform: "scale(1)" },
           "50%": { opacity: 1, transform: "scale(1.2)" }
+        },
+        rainbow: {
+          "0%": { backgroundPosition: "0% center" },
+          "100%": { backgroundPosition: "200% center" }
         }
       },
       backgroundSize: {

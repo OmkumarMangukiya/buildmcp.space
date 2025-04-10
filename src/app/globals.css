@@ -32,6 +32,13 @@
   --ring: #1a73e8;
   
   --radius: 0.5rem;
+  
+  /* Rainbow button colors */
+  --color-1: 240 100% 60%;
+  --color-2: 330 100% 60%;
+  --color-3: 170 100% 40%;
+  --color-4: 30 100% 50%;
+  --color-5: 280 100% 60%;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -82,10 +89,36 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* Rainbow button animation */
+@keyframes rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.5s ease-in-out;
 }
 
 .animate-slide-up {
   animation: slideInUp 0.5s ease-in-out;
+}
+
+.animate-rainbow {
+  animation: rainbow 5s linear infinite;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

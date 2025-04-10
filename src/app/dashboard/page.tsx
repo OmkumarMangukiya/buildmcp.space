@@ -390,12 +390,8 @@ export default function Dashboard() {
 
           {/* My MCPs */}
           <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center mb-4">
               <h2 className="text-xl font-bold">My MCPs</h2>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Code className="h-4 w-4" />
-                View All
-              </Button>
             </div>
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">Loading your MCPs...</div>

@@ -64,10 +64,10 @@ export default function PricingPage() {
   }
   
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="min-h-screen bg-zinc-950 container mx-auto px-4 py-12">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">Choose Your Plan</h1>
-        <p className="mt-4 text-lg text-gray-600">
+        <h1 className="text-3xl font-bold text-zinc-100 sm:text-4xl">Choose Your Plan</h1>
+        <p className="mt-4 text-lg text-zinc-400">
           Select the right plan to unlock the full potential of MCP generation
         </p>
       </div>
@@ -90,29 +90,29 @@ export default function PricingPage() {
       </div>
       
       <div className="mt-16 text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Frequently Asked Questions</h2>
+        <h2 className="text-2xl font-bold text-zinc-100">Frequently Asked Questions</h2>
         <div className="mt-8 max-w-3xl mx-auto text-left space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">What happens when I reach my MCP generation limit?</h3>
-            <p className="mt-2 text-gray-600">
+          <div className="bg-zinc-900 p-5 rounded-lg border border-zinc-800">
+            <h3 className="text-lg font-semibold text-zinc-100">What happens when I reach my MCP generation limit?</h3>
+            <p className="mt-2 text-zinc-400">
               When you reach your monthly limit, you'll need to wait until your next billing cycle or upgrade to a Premium plan for unlimited generations.
             </p>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">Can I change plans later?</h3>
-            <p className="mt-2 text-gray-600">
+          <div className="bg-zinc-900 p-5 rounded-lg border border-zinc-800">
+            <h3 className="text-lg font-semibold text-zinc-100">Can I change plans later?</h3>
+            <p className="mt-2 text-zinc-400">
               Yes, you can upgrade or downgrade your plan at any time. Changes will take effect on your next billing cycle.
             </p>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">How is "unlimited" defined?</h3>
-            <p className="mt-2 text-gray-600">
+          <div className="bg-zinc-900 p-5 rounded-lg border border-zinc-800">
+            <h3 className="text-lg font-semibold text-zinc-100">How is "unlimited" defined?</h3>
+            <p className="mt-2 text-zinc-400">
               Unlimited means you can create as many MCPs as you need, provided you're using the service fairly and not programmatically generating excessive amounts.
             </p>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">How secure is my payment information?</h3>
-            <p className="mt-2 text-gray-600">
+          <div className="bg-zinc-900 p-5 rounded-lg border border-zinc-800">
+            <h3 className="text-lg font-semibold text-zinc-100">How secure is my payment information?</h3>
+            <p className="mt-2 text-zinc-400">
               All payments are processed through PayPal. We never store your payment information on our servers.
             </p>
           </div>

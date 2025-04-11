@@ -88,7 +88,7 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Hero Section */}
       <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#030303]">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.05] via-transparent to-rose-500/[0.05] blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.02] via-transparent to-rose-500/[0.02] blur-3xl" />
 
         <div className="absolute inset-0 overflow-hidden">
           <ElegantShape
@@ -96,7 +96,7 @@ export default function Home() {
             width={600}
             height={140}
             rotate={12}
-            gradient="from-indigo-500/[0.15]"
+            gradient="from-indigo-500/[0.08]"
             className="left-[-10%] md:left-[-5%] top-[15%] md:top-[20%]"
           />
 
@@ -105,7 +105,7 @@ export default function Home() {
             width={500}
             height={120}
             rotate={-15}
-            gradient="from-rose-500/[0.15]"
+            gradient="from-rose-500/[0.08]"
             className="right-[-5%] md:right-[0%] top-[70%] md:top-[75%]"
           />
 
@@ -114,7 +114,7 @@ export default function Home() {
             width={300}
             height={80}
             rotate={-8}
-            gradient="from-violet-500/[0.15]"
+            gradient="from-violet-500/[0.08]"
             className="left-[5%] md:left-[10%] bottom-[5%] md:bottom-[10%]"
           />
 
@@ -123,7 +123,7 @@ export default function Home() {
             width={200}
             height={60}
             rotate={20}
-            gradient="from-amber-500/[0.15]"
+            gradient="from-amber-500/[0.08]"
             className="right-[15%] md:right-[20%] top-[10%] md:top-[15%]"
           />
 
@@ -132,7 +132,7 @@ export default function Home() {
             width={150}
             height={40}
             rotate={-25}
-            gradient="from-cyan-500/[0.15]"
+            gradient="from-cyan-500/[0.08]"
             className="left-[20%] md:left-[25%] top-[5%] md:top-[10%]"
           />
         </div>
@@ -142,7 +142,7 @@ export default function Home() {
           <div className="container mx-auto px-4 flex items-center justify-between h-16">
             <div className="flex items-center gap-6">
               <Link href="/" className="font-bold text-xl group">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">buildmcp.space</span>
+                <span className="text-white">buildmcp.space</span>
               </Link>
               <div className="hidden md:flex gap-6">
                 <Link href="#features" className="text-sm text-white/70 hover:text-white transition-colors">Features</Link>
@@ -155,7 +155,7 @@ export default function Home() {
             <div className="flex items-center gap-4">
               <Link href="/auth/signin" className="text-sm text-white/70 hover:text-white transition-colors">Log in</Link>
               <Link href="/auth/signup">
-                <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600">Sign up</Button>
+                <Button size="sm" className="bg-white text-black hover:bg-white/90">Sign up</Button>
               </Link>
             </div>
           </div>
@@ -168,9 +168,8 @@ export default function Home() {
               variants={fadeUpVariants}
               initial="hidden"
               animate="visible"
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] mb-8 md:mb-12"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] mb-4 md:mb-6 mt-12"
             >
-              <div className="h-2 w-2 rounded-full bg-rose-500/80" />
               <span className="text-sm text-white/60 tracking-wide">
                 MODEL CONTEXT PROTOCOL BUILDER
               </span>
@@ -183,12 +182,8 @@ export default function Home() {
               animate="visible"
             >
               <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold mb-6 md:mb-8 tracking-tight">
-                <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/80">
-                  Build and Deploy
-                </span>
-                <br />
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-white/90 to-rose-300">
-                  Model Context Protocols
+                <span className="text-white">
+                  Build Model Context Protocols
                 </span>
               </h1>
             </motion.div>
@@ -248,7 +243,7 @@ export default function Home() {
       <section className="py-24 bg-black" id="features">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-400">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
               Powerful Features for AI Developers
             </h2>
             <p className="text-white/60">
@@ -328,7 +323,7 @@ export default function Home() {
       <section className="py-24 bg-gradient-to-b from-black to-[#050505]" id="platforms">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-rose-400">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
               Compatible with Popular AI Platforms
             </h2>
             <p className="text-white/60">
@@ -418,7 +413,7 @@ export default function Home() {
       <section className="py-24 bg-[#050505]" id="about">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-400">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
               How MCP Builder Works
             </h2>
             <p className="text-white/60">
@@ -479,7 +474,7 @@ export default function Home() {
       <section className="py-24 bg-black" id="pricing">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-rose-400">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
               Simple, Transparent Pricing
             </h2>
             <p className="text-white/60">
@@ -578,7 +573,7 @@ export default function Home() {
       <footer className="py-12 border-t border-white/10 bg-black">
         <div className="container mx-auto px-4">
           <div className="flex justify-center mb-8">
-            <Link href="/" className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400">
+            <Link href="/" className="font-bold text-xl text-white">
               buildmcp.space
             </Link>
           </div>
@@ -595,16 +590,6 @@ export default function Home() {
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4 text-white">Company</h4>
-              <ul className="space-y-2 text-white/50">
-                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-                <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
-              </ul>
-            </div>
-            
-            <div>
               <h4 className="font-semibold mb-4 text-white">Legal</h4>
               <ul className="space-y-2 text-white/50">
                 <li><Link href="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
@@ -617,7 +602,6 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4 text-white">Connect</h4>
               <ul className="space-y-2 text-white/50">
-                <li><Link href="https://github.com/mcp-builder" className="hover:text-white transition-colors flex items-center gap-2"><Github className="h-4 w-4" /> GitHub</Link></li>
                 <li><Link href="https://twitter.com/mcpbuilder" className="hover:text-white transition-colors">Twitter</Link></li>
                 <li><Link href="https://discord.gg/mcpbuilder" className="hover:text-white transition-colors">Discord</Link></li>
                 <li><a href="mailto:support@buildmcp.space" className="hover:text-white transition-colors">Email Us</a></li>

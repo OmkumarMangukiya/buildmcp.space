@@ -87,56 +87,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Hero Section */}
-      <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#030303]">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.02] via-transparent to-rose-500/[0.02] blur-3xl" />
-
-        <div className="absolute inset-0 overflow-hidden">
-          <ElegantShape
-            delay={0.3}
-            width={600}
-            height={140}
-            rotate={12}
-            gradient="from-indigo-500/[0.08]"
-            className="left-[-10%] md:left-[-5%] top-[15%] md:top-[20%]"
-          />
-
-          <ElegantShape
-            delay={0.5}
-            width={500}
-            height={120}
-            rotate={-15}
-            gradient="from-rose-500/[0.08]"
-            className="right-[-5%] md:right-[0%] top-[70%] md:top-[75%]"
-          />
-
-          <ElegantShape
-            delay={0.4}
-            width={300}
-            height={80}
-            rotate={-8}
-            gradient="from-violet-500/[0.08]"
-            className="left-[5%] md:left-[10%] bottom-[5%] md:bottom-[10%]"
-          />
-
-          <ElegantShape
-            delay={0.6}
-            width={200}
-            height={60}
-            rotate={20}
-            gradient="from-amber-500/[0.08]"
-            className="right-[15%] md:right-[20%] top-[10%] md:top-[15%]"
-          />
-
-          <ElegantShape
-            delay={0.7}
-            width={150}
-            height={40}
-            rotate={-25}
-            gradient="from-cyan-500/[0.08]"
-            className="left-[20%] md:left-[25%] top-[5%] md:top-[10%]"
-          />
-        </div>
-
+      <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-black">
         {/* Navigation */}
         <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
           <div className="container mx-auto px-4 flex items-center justify-between h-16">
@@ -231,12 +182,8 @@ export default function Home() {
             <div className="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl">
               <DashboardMockup />
             </div>
-            <div className="absolute -top-10 -left-10 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl"></div>
-            <div className="absolute -bottom-10 -right-10 w-20 h-20 bg-rose-500/10 rounded-full blur-xl"></div>
           </motion.div>
         </div>
-
-        <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 pointer-events-none" />
       </section>
 
       {/* Features Section */}
@@ -288,34 +235,6 @@ export default function Home() {
               <p className="text-white/70 text-sm">View all your created MCPs and access comprehensive MCP information from one place.</p>
             </motion.div>
           </div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="max-w-4xl mx-auto mt-20 relative"
-          >
-            <div className="bg-gradient-to-r from-indigo-500/10 to-rose-500/10 rounded-xl p-1 shadow-lg hover:shadow-indigo-500/20 transition-all duration-500">
-              <div className="bg-black rounded-lg overflow-hidden">
-                <div className="bg-white/5 p-5">
-                  <div className="font-mono text-xs space-y-2">
-                    <p className="text-white/70">// Generate an MCP for code completion</p>
-                    <p className="text-indigo-400">const mcp = new MCP(<span className="text-rose-400">'code-completion'</span>);</p>
-                    <p className="text-indigo-400">mcp.enableIntegration(<span className="text-rose-400">'github'</span>);</p>
-                    <p className="text-indigo-400">mcp.addSupport([<span className="text-rose-400">'typescript'</span>, <span className="text-rose-400">'python'</span>]);</p>
-                    <p className="text-indigo-400">mcp.deploy();</p>
-                  </div>
-                </div>
-                <div className="p-4 border-t border-white/10 flex justify-between items-center">
-                  <span className="text-xs text-white/50">// AI-assisted MCP generation</span>
-                  <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600 text-white">
-                    Generate MCP
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </section>
 
@@ -369,43 +288,6 @@ export default function Home() {
               <span className="text-rose-400 font-semibold group-hover:text-white transition-colors duration-300">ChatGPT</span>
             </motion.div>
           </div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="max-w-lg mx-auto relative"
-          >
-            <div className="absolute -top-12 -left-12 animate-pulse z-10">
-              <div className="bg-rose-500/20 backdrop-blur-md rounded-full p-2 shadow-lg shadow-rose-500/30">
-                <Code className="w-6 h-6 text-rose-400" />
-              </div>
-            </div>
-            <div className="absolute -bottom-8 -right-8 animate-pulse z-10">
-              <div className="bg-indigo-500/20 backdrop-blur-md rounded-full p-2 shadow-lg shadow-indigo-500/30">
-                <Terminal className="w-6 h-6 text-indigo-400" />
-              </div>
-            </div>
-            <div className="bg-gradient-to-r from-rose-500/20 to-indigo-500/20 rounded-xl p-1 shadow-lg hover:shadow-rose-500/30 transition-all duration-500 hover:scale-[1.02] transform">
-              <div className="bg-black/80 backdrop-blur-sm rounded-lg overflow-hidden">
-                <div className="p-8">
-                  <div className="rounded-lg overflow-hidden bg-white/5 p-4 mb-4 hover:bg-white/10 transition-all duration-300">
-                    <div className="text-sm text-white/70">
-                      <p className="mb-2">Create an MCP for Cursor that provides:</p>
-                      <p className="bg-rose-500/10 p-2 rounded">Code review assistance, automatic documentation generation, and repository analysis</p>
-                    </div>
-                  </div>
-                  <div className="flex justify-end">
-                    <Button variant="outline" size="sm" className="gap-2 hover:bg-white/10 transition-colors group border-white/20">
-                      <ArrowRight className="w-3 h-3 group-hover:text-rose-400 transition-colors" />
-                      <span className="group-hover:text-rose-400 transition-colors">Create MCP</span>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </section>
 

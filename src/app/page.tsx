@@ -272,8 +272,8 @@ export default function Home() {
               className="bg-white/5 backdrop-blur-md rounded-lg p-6 hover:bg-white/10 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-lg hover:shadow-indigo-500/20 group"
             >
               <Terminal className="w-10 h-10 text-indigo-400 mb-4 group-hover:text-indigo-300" />
-              <h3 className="text-xl font-semibold mb-2 group-hover:text-indigo-300 transition-colors">One-Click Deployment</h3>
-              <p className="text-white/70 text-sm">Deploy your MCPs to your local environment with detailed setup instructions.</p>
+              <h3 className="text-xl font-semibold mb-2 group-hover:text-indigo-300 transition-colors">Instant Downloads</h3>
+              <p className="text-white/70 text-sm">Download ready-to-use MCPs in multiple formats with cross-platform compatibility.</p>
             </motion.div>
 
             <motion.div 

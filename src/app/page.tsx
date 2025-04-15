@@ -204,12 +204,12 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-white/5 backdrop-blur-md rounded-lg p-8 hover:bg-white/10 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-lg hover:shadow-indigo-500/20 group h-full flex flex-col"
+              className="bg-white/5 backdrop-blur-md rounded-lg p-8 hover:bg-white/10 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-lg hover:shadow-zinc-300/30 group h-full flex flex-col"
             >
-              <div className="text-indigo-400 mb-6">
-                <BrainCircuit className="w-12 h-12 group-hover:text-indigo-300" />
+              <div className="text-zinc-300 mb-6">
+                <BrainCircuit className="w-12 h-12 group-hover:text-zinc-100" />
               </div>
-              <h3 className="text-xl font-semibold mb-4 group-hover:text-indigo-300 transition-colors whitespace-nowrap">AI-Powered Creation</h3>
+              <h3 className="text-xl font-semibold mb-4 group-hover:text-zinc-100 transition-colors whitespace-nowrap">AI-Powered Creation</h3>
               <p className="text-white/70 text-base leading-relaxed mt-auto">Generate platform-specific MCPs with natural language prompts and custom feature integration.</p>
             </motion.div>
 
@@ -218,12 +218,12 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="bg-white/5 backdrop-blur-md rounded-lg p-8 hover:bg-white/10 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-lg hover:shadow-indigo-500/20 group h-full flex flex-col"
+              className="bg-white/5 backdrop-blur-md rounded-lg p-8 hover:bg-white/10 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-lg hover:shadow-zinc-300/30 group h-full flex flex-col"
             >
-              <div className="text-indigo-400 mb-6">
-                <Terminal className="w-12 h-12 group-hover:text-indigo-300" />
+              <div className="text-zinc-300 mb-6">
+                <Terminal className="w-12 h-12 group-hover:text-zinc-100" />
               </div>
-              <h3 className="text-xl font-semibold mb-4 group-hover:text-indigo-300 transition-colors whitespace-nowrap">Instant Downloads</h3>
+              <h3 className="text-xl font-semibold mb-4 group-hover:text-zinc-100 transition-colors whitespace-nowrap">Instant Downloads</h3>
               <p className="text-white/70 text-base leading-relaxed mt-auto">Download ready-to-use MCPs in multiple formats with cross-platform compatibility.</p>
             </motion.div>
 
@@ -232,12 +232,12 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
-              className="bg-white/5 backdrop-blur-md rounded-lg p-8 hover:bg-white/10 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-lg hover:shadow-indigo-500/20 group h-full flex flex-col"
+              className="bg-white/5 backdrop-blur-md rounded-lg p-8 hover:bg-white/10 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-lg hover:shadow-zinc-300/30 group h-full flex flex-col"
             >
-              <div className="text-indigo-400 mb-6">
-                <Users className="w-12 h-12 group-hover:text-indigo-300" />
+              <div className="text-zinc-300 mb-6">
+                <Users className="w-12 h-12 group-hover:text-zinc-100" />
               </div>
-              <h3 className="text-xl font-semibold mb-4 group-hover:text-indigo-300 transition-colors whitespace-nowrap">Interactive Dashboard</h3>
+              <h3 className="text-xl font-semibold mb-4 group-hover:text-zinc-100 transition-colors whitespace-nowrap">Interactive Dashboard</h3>
               <p className="text-white/70 text-base leading-relaxed mt-auto">View all your created MCPs and access MCP information from one place.</p>
             </motion.div>
           </div>
@@ -264,7 +264,7 @@ export default function Home() {
               viewport={{ once: true }}
               className="bg-white/5 backdrop-blur-md rounded-lg p-8 hover:bg-white/10 transition-all duration-300 hover:scale-105 flex items-center justify-center aspect-square group"
             >
-              <span className="text-rose-400 font-semibold text-xl group-hover:text-white transition-colors duration-300">Cursor</span>
+              <span className="text-zinc-300 font-semibold text-xl group-hover:text-white transition-colors duration-300">Cursor</span>
             </motion.div>
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
@@ -273,7 +273,7 @@ export default function Home() {
               viewport={{ once: true }}
               className="bg-white/5 backdrop-blur-md rounded-lg p-8 hover:bg-white/10 transition-all duration-300 hover:scale-105 flex items-center justify-center aspect-square group"
             >
-              <span className="text-rose-400 font-semibold text-xl group-hover:text-white transition-colors duration-300">Claude Desktop</span>
+              <span className="text-zinc-300 font-semibold text-xl group-hover:text-white transition-colors duration-300">Claude Desktop</span>
             </motion.div>
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
@@ -282,7 +282,7 @@ export default function Home() {
               viewport={{ once: true }}
               className="bg-white/5 backdrop-blur-md rounded-lg p-8 hover:bg-white/10 transition-all duration-300 hover:scale-105 flex items-center justify-center aspect-square group"
             >
-              <span className="text-rose-400 font-semibold text-xl group-hover:text-white transition-colors duration-300">VSCode</span>
+              <span className="text-zinc-300 font-semibold text-xl group-hover:text-white transition-colors duration-300">VSCode</span>
             </motion.div>
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
@@ -291,7 +291,7 @@ export default function Home() {
               viewport={{ once: true }}
               className="bg-white/5 backdrop-blur-md rounded-lg p-8 hover:bg-white/10 transition-all duration-300 hover:scale-105 flex items-center justify-center aspect-square group"
             >
-              <span className="text-rose-400 font-semibold text-xl group-hover:text-white transition-colors duration-300">ChatGPT</span>
+              <span className="text-zinc-300 font-semibold text-xl group-hover:text-white transition-colors duration-300">ChatGPT</span>
             </motion.div>
           </div>
         </div>
@@ -317,10 +317,10 @@ export default function Home() {
               viewport={{ once: true }}
               className="bg-white/5 backdrop-blur-md rounded-lg p-8 border border-white/10 relative"
             >
-              <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-lg">1</div>
+              <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-zinc-300 flex items-center justify-center text-black font-bold text-lg">1</div>
               <h3 className="text-2xl font-semibold mb-5 mt-2">Design Your MCP</h3>
               <p className="text-white/70 text-base mb-6 leading-relaxed">Describe what you want your MCP to do using natural language or configure detailed options.</p>
-              <div className="text-indigo-400">
+              <div className="text-zinc-300">
                 <Server className="w-8 h-8" />
               </div>
             </motion.div>
@@ -332,10 +332,10 @@ export default function Home() {
               viewport={{ once: true }}
               className="bg-white/5 backdrop-blur-md rounded-lg p-8 border border-white/10 relative"
             >
-              <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-lg">2</div>
+              <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-zinc-300 flex items-center justify-center text-black font-bold text-lg">2</div>
               <h3 className="text-2xl font-semibold mb-5 mt-2">Generate MCP Code</h3>
               <p className="text-white/70 text-base mb-6 leading-relaxed">Our AI will create the necessary code and configurations for your MCP.</p>
-              <div className="text-indigo-400">
+              <div className="text-zinc-300">
                 <Code className="w-8 h-8" />
               </div>
             </motion.div>
@@ -347,10 +347,10 @@ export default function Home() {
               viewport={{ once: true }}
               className="bg-white/5 backdrop-blur-md rounded-lg p-8 border border-white/10 relative"
             >
-              <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-lg">3</div>
+              <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-zinc-300 flex items-center justify-center text-black font-bold text-lg">3</div>
               <h3 className="text-2xl font-semibold mb-5 mt-2">Deploy & Use</h3>
               <p className="text-white/70 text-base mb-6 leading-relaxed">Deploy locally with one click and start using your MCP with your favorite AI platform.</p>
-              <div className="text-indigo-400">
+              <div className="text-zinc-300">
                 <Zap className="w-8 h-8" />
               </div>
             </motion.div>
@@ -413,9 +413,9 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="bg-white/5 backdrop-blur-md rounded-lg p-8 border border-indigo-500/50 relative shadow-lg shadow-indigo-500/10"
+              className="bg-white/5 backdrop-blur-md rounded-lg p-8 border border-zinc-300/50 relative shadow-lg shadow-zinc-300/20"
             >
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-indigo-500 text-white px-6 py-1.5 rounded-full text-sm font-bold">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-zinc-300 text-black px-6 py-1.5 rounded-full text-sm font-bold">
                 POPULAR
               </div>
               <h3 className="text-2xl font-semibold mb-4">Premium</h3>
@@ -502,24 +502,24 @@ export default function Home() {
             <h4 className="font-semibold mb-4 text-white text-lg">Subscription Terms Summary</h4>
             <ul className="space-y-3 text-white/70 text-base">
               <li className="flex items-start gap-3">
-                <span className="text-rose-400 mt-1 text-lg">•</span>
+                <span className="text-zinc-300 mt-1 text-lg">•</span>
                 <span>buildmcp.space is a <span className="text-white font-medium">subscription-based service</span> with monthly or annual billing options</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-rose-400 mt-1 text-lg">•</span>
+                <span className="text-zinc-300 mt-1 text-lg">•</span>
                 <span>Our service has <span className="text-white font-medium">usage limitations</span> for MCP generation based on your subscription plan</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-rose-400 mt-1 text-lg">•</span>
+                <span className="text-zinc-300 mt-1 text-lg">•</span>
                 <span>Subscriptions can be cancelled at any time through your account dashboard</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-rose-400 mt-1 text-lg">•</span>
+                <span className="text-zinc-300 mt-1 text-lg">•</span>
                 <span><span className="text-white font-medium">No refunds are provided</span> for subscription payments or unused portions of subscriptions</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-rose-400 mt-1 text-lg">•</span>
-                <span>By using our service, you agree to our <Link href="/terms" className="text-indigo-400 hover:text-indigo-300 underline">Terms & Conditions</Link> and <Link href="/privacy" className="text-indigo-400 hover:text-indigo-300 underline">Privacy Policy</Link></span>
+                <span className="text-zinc-300 mt-1 text-lg">•</span>
+                <span>By using our service, you agree to our <Link href="/terms" className="text-zinc-300 hover:text-zinc-100 underline">Terms & Conditions</Link> and <Link href="/privacy" className="text-zinc-300 hover:text-zinc-100 underline">Privacy Policy</Link></span>
               </li>
             </ul>
           </div>

@@ -138,7 +138,7 @@ export async function POST(req: Request) {
     let response;
     
     try {
-      response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`, {
+      response = await fetch(`https://api-m.live.paypal.com/v2/checkout/orders/${orderId}/capture`, {
         method: 'POST',
         headers: {
           'Authorization': `Basic ${auth}`,
@@ -155,7 +155,7 @@ export async function POST(req: Request) {
             responseData.details[0].issue === 'ORDER_ALREADY_CAPTURED') {
           
           // Get the order details instead
-          const orderResponse = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}`, {
+          const orderResponse = await fetch(`https://api-m.live.paypal.com/v2/checkout/orders/${orderId}`, {
             method: 'GET',
             headers: {
               'Authorization': `Basic ${auth}`,

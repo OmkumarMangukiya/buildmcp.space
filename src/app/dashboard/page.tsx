@@ -132,6 +132,9 @@ export default function Dashboard() {
             console.error('Error fetching subscription:', subscriptionError);
           } else {
             console.log('No active subscription found.');
+            // Redirect users without a subscription to the pricing page
+            window.location.href = '/pricing?needSubscription=true';
+            return;
           }
         } else if (subscriptionData) {
           const userPlan = subscriptionData as unknown as UserPlan;
@@ -257,7 +260,7 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-5">
             <button onClick={handleSignOut} className="text-gray-500 font-medium hover:text-white transition-colors">Sign out</button>
-            <div className="text-white font-medium">John</div>
+            <div className="text-white font-medium">{user?.name || 'User'}</div>
           </div>
         </div>
       </nav>
@@ -268,11 +271,11 @@ export default function Dashboard() {
           {/* Header */}
           <div className="flex justify-between items-center mb-10 pb-6 border-b border-white/5 relative">
             <div>
-              <h1 className="text-2xl font-semibold mb-1 text-white">Welcome back, {user?.name || 'John'}!</h1>
+              <h1 className="text-2xl font-semibold mb-1 text-white">Welcome back, {user?.name || 'User'}!</h1>
               <p className="text-gray-500 text-sm">Your MCP dashboard overview</p>
             </div>
             <div className="flex items-center gap-5">
-              <Link href="/create">
+              <Link href="/create-mcp">
                 <Button className="flex items-center gap-2 bg-[#E1623D] text-white px-5 py-2.5 rounded-md font-medium">
                   <span>+</span> Create MCP
                 </Button>
@@ -289,9 +292,11 @@ export default function Dashboard() {
                   {subscription?.plan_name || 'Basic'} {subscription?.plan_interval || 'Monthly'}
                 </span>
               </div>
-              <Button variant="ghost" size="sm" className="text-sm text-gray-500 font-medium hover:text-white">
-                Change Plan
-              </Button>
+              <Link href="/pricing">
+                <Button variant="ghost" size="sm" className="text-sm text-gray-500 font-medium hover:text-white">
+                  Change Plan
+                </Button>
+              </Link>
             </div>
             <p className="text-gray-500 text-sm mb-4">
               {subscription ? `Active until ${formatExpirationDate(subscription.expires_at)}` : 'Active until May 6, 2025'}
@@ -332,7 +337,7 @@ export default function Dashboard() {
             {mcps.length === 0 && !loading ? (
               <div className="text-center py-16 bg-[#1A1A1A] rounded-lg border border-white/5">
                 <p className="text-gray-500 mb-4">You haven't created any MCPs yet</p>
-                <Link href="/create">
+                <Link href="/create-mcp">
                   <Button className="bg-[#E1623D] text-white hover:bg-[#E1623D]/90">
                     Create your first MCP
                   </Button>

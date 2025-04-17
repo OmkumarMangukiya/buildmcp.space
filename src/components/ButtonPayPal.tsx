@@ -14,7 +14,7 @@ interface ButtonPayPalProps {
 
 declare global {
   interface Window {
-    paypal?: any;
+    paypal: any;
   }
 }
 
@@ -64,6 +64,12 @@ export default function ButtonPayPal({ planId, userId, planName, planPrice, plan
                 }),
               });
               
+              // Store the real plan UUID if it's returned
+              if (orderData.planUuid) {
+                // We can store this for later use with onApprove
+                window.sessionStorage.setItem(`pp_plan_${orderData.id}`, orderData.planUuid);
+              }
+              
               return orderData.id;
             } catch (err) {
               if (isMounted) {
@@ -79,11 +85,15 @@ export default function ButtonPayPal({ planId, userId, planName, planPrice, plan
           onApprove: async (data: any) => {
             setIsLoading(true);
             try {
+              // Check if we have a stored plan UUID
+              const storedPlanUuid = window.sessionStorage.getItem(`pp_plan_${data.orderID}`);
+              const finalPlanId = storedPlanUuid || planId;
+              
               const result = await fetchWithAuth('/api/payments/verify', {
                 method: 'POST',
                 body: JSON.stringify({
                   orderId: data.orderID,
-                  planId,
+                  planId: finalPlanId,
                   userId
                 }),
               });

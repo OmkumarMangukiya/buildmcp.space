@@ -54,7 +54,8 @@ function SignUpForm() {
         options: {
           data: {
             name
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/auth/signin?verified=true&redirect=/pricing`
         }
       });
 
@@ -62,9 +63,11 @@ function SignUpForm() {
         throw new Error(signUpError.message || 'Failed to sign up');
       }
 
-      console.log('Sign up successful, redirecting to signin with redirect parameter');
-      // On success, redirect to sign in with the redirect parameter
-      router.push(`/auth/signin?registered=true&redirect=${encodeURIComponent(redirectPath)}`);
+      // Show success message about verification email
+      setIsLoading(false);
+      setError('');
+      // Instead of redirecting, show a message about email verification
+      router.push(`/auth/signin?registered=true&verify=true&email=${encodeURIComponent(email)}`);
     } catch (err: any) {
       console.error("Sign up error:", err);
       setError(err.message || 'An error occurred during sign up');

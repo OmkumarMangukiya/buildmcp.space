@@ -6,10 +6,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, FileText, Code, CheckCircle2, Download } from "lucide-react";
+import { Loader2, FileText, Code, CheckCircle2, Download, ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MCPConfigViewer from '@/components/mcp/MCPConfigViewer';
 import supabase from '@/lib/supaClient';
+import Link from 'next/link';
 
 export default function CreateMcpPage() {
   const [description, setDescription] = useState('');
@@ -102,12 +103,37 @@ export default function CreateMcpPage() {
     setError(null);
     
     try {
+      // Get the current session token
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error('Session error:', sessionError);
+        throw new Error('Authentication required to download MCP. Please sign in again.');
+      }
+      
+      const token = session.access_token;
+      
+      // Get CSRF token from cookie
+      const csrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrf-token='))
+        ?.split('=')[1];
+      
+      if (!csrfToken) {
+        console.warn('CSRF token not found in cookies');
+      }
+      
       // First ensure the MCP is saved
       if (generatedConfig) {
         const saveResponse = await fetch(`/api/mcp/${mcpId}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'X-CSRF-Token': csrfToken || ''
+          },
           body: JSON.stringify({ config: generatedConfig }),
+          credentials: 'include'
         });
 
         if (!saveResponse.ok) {
@@ -116,11 +142,36 @@ export default function CreateMcpPage() {
         }
       }
 
-      // Then trigger the download
-      window.location.href = `/api/mcp/download/${mcpId}/${type}`;
+      // Create download element with proper authentication
+      const a = document.createElement('a');
+      a.href = `/api/mcp/download/${mcpId}/${type}`;
+      a.setAttribute('download', `mcp-${mcpId.substring(0, 6)}.zip`);
+      
+      // Set up fetch request with authentication
+      const downloadResponse = await fetch(`/api/mcp/download/${mcpId}/${type}?userId=${session.user.id}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/zip'
+        },
+        credentials: 'include'
+      });
+      
+      if (!downloadResponse.ok) {
+        const errorData = await downloadResponse.json();
+        throw new Error(errorData.error || `Failed to download MCP (${downloadResponse.status})`);
+      }
+      
+      const blob = await downloadResponse.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      a.href = downloadUrl;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(downloadUrl);
+      document.body.removeChild(a);
     } catch (error) {
       console.error('Download error:', error);
-      setError('Failed to download MCP files. Please try again.');
+      setError(error instanceof Error ? error.message : 'Failed to download MCP files. Please try again.');
     } finally {
       setIsDownloading(false);
     }
@@ -129,7 +180,15 @@ export default function CreateMcpPage() {
   return (
     <div className="min-h-screen bg-[var(--mcp-background-primary)] text-[var(--mcp-text)]">
       <div className="container mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6 text-white">MCP Server Builder</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-white">MCP Server Builder</h1>
+          <Link href="/dashboard">
+            <Button className="flex items-center gap-2 px-4 py-2 bg-[#252525] text-[#DEDDDC]/80 hover:text-white font-medium text-sm rounded-md border border-white/10 shadow-inner shadow-black/10">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
         <Card className="max-w-4xl mx-auto bg-[var(--mcp-background-secondary)] border border-[var(--mcp-border)] shadow-lg">
           <CardHeader>
             <CardTitle className="text-[var(--mcp-text)]">Create AI-Powered MCP Server</CardTitle>

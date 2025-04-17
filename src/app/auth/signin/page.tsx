@@ -16,14 +16,65 @@ function SignInForm() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '/dashboard';
+  const isRegistered = searchParams.get('registered') === 'true';
+  const isVerified = searchParams.get('verified') === 'true';
+  const needsVerificationParam = searchParams.get('verify') === 'true';
+  const verificationEmail = searchParams.get('email') || '';
+
+  useEffect(() => {
+    // Show success message if the user just registered
+    if (isRegistered && needsVerificationParam) {
+      setSuccessMessage(`Please check your email (${verificationEmail}) to verify your account. You'll need to verify your email before signing in.`);
+      setNeedsVerification(true);
+      setEmail(verificationEmail);
+    } else if (isVerified) {
+      setSuccessMessage('Your email has been verified! You can now sign in.');
+    }
+  }, [isRegistered, isVerified, needsVerificationParam, verificationEmail]);
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      setError('Please enter your email address to resend verification');
+      return;
+    }
+    
+    setResendingEmail(true);
+    
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/signin?verified=true&redirect=/pricing`,
+        }
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      setSuccessMessage(`Verification email resent to ${email}. Please check your inbox.`);
+      setError('');
+      setNeedsVerification(true);
+    } catch (err: any) {
+      console.error("Resend verification error:", err);
+      setError(err.message || 'Failed to resend verification email');
+    } finally {
+      setResendingEmail(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setNeedsVerification(false);
 
     try {
       // Call our API route instead of directly using Supabase client
@@ -43,6 +94,9 @@ function SignInForm() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (data.error && data.error.includes('verify your email')) {
+          setNeedsVerification(true);
+        }
         throw new Error(data.error || 'Failed to sign in');
       }
       
@@ -110,6 +164,33 @@ function SignInForm() {
             {error && (
               <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400">
                 <AlertDescription>{error}</AlertDescription>
+                {needsVerification && (
+                  <div className="mt-3">
+                    <Button 
+                      onClick={handleResendVerification} 
+                      disabled={resendingEmail}
+                      className="text-sm bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/20"
+                    >
+                      {resendingEmail ? 'Sending...' : 'Resend verification email'}
+                    </Button>
+                  </div>
+                )}
+              </Alert>
+            )}
+            {successMessage && (
+              <Alert variant="default" className="bg-green-500/10 border-green-500/20 text-green-400">
+                <AlertDescription>{successMessage}</AlertDescription>
+                {needsVerification && (
+                  <div className="mt-3">
+                    <Button 
+                      onClick={handleResendVerification} 
+                      disabled={resendingEmail}
+                      className="text-sm bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/20"
+                    >
+                      {resendingEmail ? 'Sending...' : 'Resend verification email'}
+                    </Button>
+                  </div>
+                )}
               </Alert>
             )}
             <div className="space-y-2">

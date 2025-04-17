@@ -1,10 +1,56 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ArrowRight, CheckCircle2, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSearchParams, useRouter } from "next/navigation";
+import supabase from "@/lib/supaClient";
 
 export default function PricingPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const needsSubscription = searchParams.get('needSubscription') === 'true';
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error checking auth status:', error);
+          return;
+        }
+        
+        if (data.session) {
+          setIsLoggedIn(true);
+          setUserId(data.session.user.id);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkAuthStatus();
+  }, []);
+
+  const handleSubscribe = (planId: string) => {
+    if (!isLoggedIn) {
+      // If not logged in, redirect to signup
+      router.push('/auth/signup');
+      return;
+    }
+    
+    // If logged in, implement payment flow
+    // For now, we'll redirect to a payment initiation page
+    router.push(`/payment?planId=${planId}&userId=${userId}`);
+  };
+
   return (
     <div className="min-h-screen bg-[#1F1F1F] text-[#DEDDDC] overflow-hidden">
       {/* Navigation */}
@@ -20,63 +66,77 @@ export default function PricingPage() {
             </div>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/auth/signin">
-              <div className="px-3.5 py-1.5 bg-[#252525] text-[#DEDDDC]/80 hover:text-white font-medium text-sm rounded-md border border-white/10 shadow-inner shadow-black/10">
-                Log in
-              </div>
-            </Link>
-            <Link href="/auth/signup">
-              <Button size="sm" className="px-3.5 py-1 bg-[#C45736] text-white hover:bg-[#C45736]/90 font-medium text-sm">Sign up</Button>
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard">
+                <div className="px-3.5 py-1.5 bg-[#252525] text-[#DEDDDC]/80 hover:text-white font-medium text-sm rounded-md border border-white/10 shadow-inner shadow-black/10">
+                  Dashboard
+                </div>
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth/signin">
+                  <div className="px-3.5 py-1.5 bg-[#252525] text-[#DEDDDC]/80 hover:text-white font-medium text-sm rounded-md border border-white/10 shadow-inner shadow-black/10">
+                    Log in
+                  </div>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button size="sm" className="px-3.5 py-1 bg-[#C45736] text-white hover:bg-[#C45736]/90 font-medium text-sm">Sign up</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
 
       {/* Pricing Section */}
-      <section className="pt-32 pb-32 bg-[#1F1F1F]">
+      <section className="pt-32 pb-20">
         <div className="container mx-auto px-6">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white leading-tight">
-              Choose Your Plan
-            </h1>
-            <p className="text-xl text-[#DEDDDC]/70 max-w-2xl mx-auto mb-10">
-              Select the right plan to unlock the full potential of MCP generation
-            </p>
-            
-            {/* Toggle Switch */}
-            <div className="flex items-center justify-center mt-8 mb-16 space-x-3">
-              <span id="monthly-label" className="text-white font-medium">Monthly</span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="sr-only peer" 
-                  onChange={(e) => {
-                    const monthlyPlans = document.getElementById('monthly-plans');
-                    const annualPlans = document.getElementById('annual-plans');
-                    const monthlyLabel = document.getElementById('monthly-label');
-                    const annualLabel = document.getElementById('annual-label');
-                    
-                    if (e.target.checked && monthlyPlans && annualPlans && monthlyLabel && annualLabel) {
-                      monthlyPlans.classList.add('hidden');
-                      annualPlans.classList.remove('hidden');
-                      monthlyLabel.classList.remove('text-white');
-                      monthlyLabel.classList.add('text-gray-400');
-                      annualLabel.classList.add('text-white');
-                      annualLabel.classList.remove('text-gray-400');
-                    } else if (monthlyPlans && annualPlans && monthlyLabel && annualLabel) {
-                      monthlyPlans.classList.remove('hidden');
-                      annualPlans.classList.add('hidden');
-                      monthlyLabel.classList.add('text-white');
-                      monthlyLabel.classList.remove('text-gray-400');
-                      annualLabel.classList.remove('text-white');
-                      annualLabel.classList.add('text-gray-400');
-                    }
-                  }}
-                />
-                <div className="w-14 h-7 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#C45736]"></div>
-              </label>
-              <span id="annual-label" className="text-gray-400 font-medium">Annual <span className="text-[#C45736] text-xs font-bold">Save 15%</span></span>
+          {needsSubscription && (
+            <div className="mb-12 max-w-3xl mx-auto bg-[#C45736]/10 border border-[#C45736]/30 rounded-lg p-4">
+              <p className="text-center text-[#DEDDDC]">
+                <span className="font-bold">You need a subscription to continue.</span> Please select a plan below to access all features of buildmcp.space.
+              </p>
             </div>
+          )}
+          
+          <h1 className="text-4xl font-bold text-center text-white mb-5">Choose Your Plan</h1>
+          <p className="text-center text-[#DEDDDC]/70 text-lg max-w-3xl mx-auto mb-12">
+            Select the plan that best fits your needs. All plans include access to our core features and updates.
+          </p>
+          
+          {/* Toggle Switch */}
+          <div className="flex items-center justify-center mt-8 mb-16 space-x-3">
+            <span id="monthly-label" className="text-white font-medium">Monthly</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer" 
+                onChange={(e) => {
+                  const monthlyPlans = document.getElementById('monthly-plans');
+                  const annualPlans = document.getElementById('annual-plans');
+                  const monthlyLabel = document.getElementById('monthly-label');
+                  const annualLabel = document.getElementById('annual-label');
+                  
+                  if (e.target.checked && monthlyPlans && annualPlans && monthlyLabel && annualLabel) {
+                    monthlyPlans.classList.add('hidden');
+                    annualPlans.classList.remove('hidden');
+                    monthlyLabel.classList.remove('text-white');
+                    monthlyLabel.classList.add('text-gray-400');
+                    annualLabel.classList.add('text-white');
+                    annualLabel.classList.remove('text-gray-400');
+                  } else if (monthlyPlans && annualPlans && monthlyLabel && annualLabel) {
+                    monthlyPlans.classList.remove('hidden');
+                    annualPlans.classList.add('hidden');
+                    monthlyLabel.classList.add('text-white');
+                    monthlyLabel.classList.remove('text-gray-400');
+                    annualLabel.classList.remove('text-white');
+                    annualLabel.classList.add('text-gray-400');
+                  }
+                }}
+              />
+              <div className="w-14 h-7 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#C45736]"></div>
+            </label>
+            <span id="annual-label" className="text-gray-400 font-medium">Annual <span className="text-[#C45736] text-xs font-bold">Save 15%</span></span>
           </div>
 
           {/* Monthly Plans */}
@@ -106,11 +166,13 @@ export default function PricingPage() {
                 </li>
               </ul>
               
-              <Link href="/auth/signup">
-                <Button className="w-full py-3 text-base font-medium bg-[#252525] text-white hover:bg-[#303030] border border-white/10">
-                  Subscribe Now
-                </Button>
-              </Link>
+              <Button 
+                className="w-full py-3 text-base font-medium bg-[#252525] text-white hover:bg-[#303030] border border-white/10"
+                onClick={() => handleSubscribe('basic-monthly')}
+                disabled={loading}
+              >
+                {loading ? 'Loading...' : 'Subscribe Now'}
+              </Button>
             </div>
 
             {/* Premium Monthly */}
@@ -141,11 +203,13 @@ export default function PricingPage() {
                 </li>
               </ul>
               
-              <Link href="/auth/signup">
-                <Button className="w-full py-3 text-base font-medium bg-[#C45736] text-white hover:bg-[#C45736]/90">
-                  Subscribe Now
-                </Button>
-              </Link>
+              <Button 
+                className="w-full py-3 text-base font-medium bg-[#C45736] text-white hover:bg-[#C45736]/90"
+                onClick={() => handleSubscribe('premium-monthly')}
+                disabled={loading}
+              >
+                {loading ? 'Loading...' : 'Subscribe Now'}
+              </Button>
             </div>
           </div>
 
@@ -176,11 +240,13 @@ export default function PricingPage() {
                 </li>
               </ul>
               
-              <Link href="/auth/signup">
-                <Button className="w-full py-3 text-base font-medium bg-[#252525] text-white hover:bg-[#303030] border border-white/10">
-                  Subscribe Now
-                </Button>
-              </Link>
+              <Button 
+                className="w-full py-3 text-base font-medium bg-[#252525] text-white hover:bg-[#303030] border border-white/10"
+                onClick={() => handleSubscribe('basic-yearly')}
+                disabled={loading}
+              >
+                {loading ? 'Loading...' : 'Subscribe Now'}
+              </Button>
             </div>
 
             {/* Premium Yearly */}
@@ -211,11 +277,13 @@ export default function PricingPage() {
                 </li>
               </ul>
               
-              <Link href="/auth/signup">
-                <Button className="w-full py-3 text-base font-medium bg-[#C45736] text-white hover:bg-[#C45736]/90">
-                  Subscribe Now
-                </Button>
-              </Link>
+              <Button 
+                className="w-full py-3 text-base font-medium bg-[#C45736] text-white hover:bg-[#C45736]/90"
+                onClick={() => handleSubscribe('premium-yearly')}
+                disabled={loading}
+              >
+                {loading ? 'Loading...' : 'Subscribe Now'}
+              </Button>
             </div>
           </div>
           

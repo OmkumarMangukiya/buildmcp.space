@@ -153,8 +153,18 @@ export default function McpDetailsPage() {
         }
       }
       
+      // Get CSRF token from cookie
+      const csrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrf-token='))
+        ?.split('=')[1];
+      
+      if (!csrfToken) {
+        console.warn('CSRF token not found in cookies');
+      }
+      
       // Create a URL for the file download
-      const downloadUrl = `/api/mcp/download/${params.id}/bundle`;
+      const downloadUrl = `/api/mcp/download/${params.id}/bundle?userId=${session.user.id}`;
       console.log('Download URL:', downloadUrl);
       
       // Make the request with auth header
@@ -162,7 +172,8 @@ export default function McpDetailsPage() {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Accept': 'application/zip'
+          'Accept': 'application/zip',
+          'X-CSRF-Token': csrfToken || ''
         },
         credentials: 'include'
       });
@@ -200,6 +211,7 @@ export default function McpDetailsPage() {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
       
       toast({
         title: "Download Started",

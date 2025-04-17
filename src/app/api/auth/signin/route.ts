@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { csrf } from '@/lib/csrf';
 import { rateLimit } from '@/lib/rateLimit';
+import supabase, { supabaseAdmin } from '@/lib/supaClient';
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,8 +53,24 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
+      // Add specific handling for unverified email error
+      if (error.message.includes('Email not confirmed')) {
+        return NextResponse.json(
+          { error: 'Please verify your email before signing in. Check your inbox for a verification link.' },
+          { status: 401 }
+        );
+      }
+      
       return NextResponse.json(
         { error: error.message },
+        { status: 401 }
+      );
+    }
+
+    // Check if email is confirmed by looking at user's email_confirmed_at field
+    if (data.user && !data.user.email_confirmed_at) {
+      return NextResponse.json(
+        { error: 'Please verify your email before signing in. Check your inbox for a verification link.' },
         { status: 401 }
       );
     }
@@ -63,6 +80,41 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to create session' },
         { status: 401 }
       );
+    }
+
+    // Update user profile in the database
+    if (data.user) {
+      // Check if supabaseAdmin is available
+      if (!supabaseAdmin) {
+        console.error('Service role client not available. User profile update may fail.');
+        // Try with regular client as fallback
+        const { error: profileError } = await supabase
+          .from('users')
+          .upsert({
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.user_metadata.name || 'User',
+            updated_at: new Date().toISOString(),
+          });
+
+        if (profileError) {
+          console.error('Error updating user profile:', profileError);
+        }
+      } else {
+        // Use admin client to bypass RLS
+        const { error: profileError } = await supabaseAdmin
+          .from('users')
+          .upsert({
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.user_metadata.name || 'User',
+            updated_at: new Date().toISOString(),
+          });
+
+        if (profileError) {
+          console.error('Error updating user profile with admin client:', profileError);
+        }
+      }
     }
 
     // Generate a CSRF token for the session

@@ -293,7 +293,10 @@ export default function Dashboard() {
                 </span>
               </div>
               <Link href="/pricing">
-                <Button variant="ghost" size="sm" className="text-sm text-gray-500 font-medium hover:text-white">
+                <Button 
+                  size="sm" 
+                  className="text-sm bg-[#252525] hover:bg-[#E1623D] text-gray-300 hover:text-white font-medium transition-colors border border-white/5"
+                >
                   Change Plan
                 </Button>
               </Link>

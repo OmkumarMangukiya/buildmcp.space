@@ -28,8 +28,7 @@ export async function POST(req: Request) {
       const errorData = await response.json();
       console.error('PayPal verification error:', errorData);
       return NextResponse.json({ 
-        error: 'PayPal verification failed', 
-        details: errorData 
+        error: 'Payment verification failed. Please try again or contact support.' 
       }, { status: 400 });
     }
 
@@ -74,7 +73,7 @@ export async function POST(req: Request) {
     
     if (paymentError) {
       console.error('Payment record error:', paymentError);
-      return NextResponse.json({ error: 'Failed to record payment' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to process payment record' }, { status: 500 });
     }
     
     // Assign plan to user
@@ -90,7 +89,7 @@ export async function POST(req: Request) {
     
     if (planAssignError) {
       console.error('Plan assignment error:', planAssignError);
-      return NextResponse.json({ error: 'Failed to assign plan to user' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to assign plan' }, { status: 500 });
     }
     
     return NextResponse.json({
@@ -100,6 +99,6 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error('Verification error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Payment verification failed. Please try again later.' }, { status: 500 });
   }
 } 

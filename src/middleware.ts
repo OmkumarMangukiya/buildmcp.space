@@ -53,18 +53,18 @@ export async function middleware(req: NextRequest) {
     // Set the new tokens in cookies
     res.cookies.set('sb-access-token', data.session?.access_token || '', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'strict',
       path: '/',
-      maxAge: 604800, // 7 days in seconds
+      maxAge: 3600 * 8,
     });
 
     res.cookies.set('sb-refresh-token', data.session?.refresh_token || '', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'strict',
       path: '/',
-      maxAge: 30 * 24 * 60 * 60, // 30 days
+      maxAge: 7 * 24 * 60 * 60,
     });
 
     return res;

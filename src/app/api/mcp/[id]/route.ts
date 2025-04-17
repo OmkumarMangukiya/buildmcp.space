@@ -150,6 +150,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const { id } = params;
     const body = await request.json();
     const { config } = body; // Expecting updated config in the body
+    const csrfToken = request.headers.get('X-CSRF-Token');
 
     if (!config) {
       return NextResponse.json({ error: 'Missing config in request body' }, { status: 400 });
@@ -173,6 +174,19 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       
       if (authError || !user) {
         return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 });
+      }
+      
+      // Verify CSRF token if present
+      if (!csrfToken) {
+        return NextResponse.json({ error: 'CSRF token required' }, { status: 403 });
+      }
+      
+      // Import the csrf module directly to avoid circular dependencies
+      const { csrf } = await import('@/lib/csrf');
+      
+      // Validate CSRF token
+      if (!csrf.validate(csrfToken, user.id)) {
+        return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
       }
       
       // Get MCP to verify ownership
@@ -251,10 +265,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
+    const csrfToken = request.headers.get('X-CSRF-Token');
     
     // Check if Supabase admin client is available
     if (supabaseAdmin) {
-      // Verify the user has permission to delete this MCP (only the owner can delete)
+      // Verify the user has permission to delete this MCP
       const { headers } = request;
       const authHeader = headers.get('authorization');
       
@@ -267,6 +282,19 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       
       if (authError || !user) {
         return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 });
+      }
+      
+      // Verify CSRF token if present
+      if (!csrfToken) {
+        return NextResponse.json({ error: 'CSRF token required' }, { status: 403 });
+      }
+      
+      // Import the csrf module directly to avoid circular dependencies
+      const { csrf } = await import('@/lib/csrf');
+      
+      // Validate CSRF token
+      if (!csrf.validate(csrfToken, user.id)) {
+        return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
       }
       
       // Get MCP to verify ownership

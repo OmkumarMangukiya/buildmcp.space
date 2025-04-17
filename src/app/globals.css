@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 :root {
+  /* MCP Color Scheme */
+  --mcp-background-primary: #1F1F1F;
+  --mcp-background-secondary: #0F0F0F;
+  --mcp-primary: #C45736;
+  --mcp-primary-hover: #E1623D;
+  --mcp-text: #DEDDDC;
+  --mcp-text-muted: #DEDDDC80;  /* 50% opacity */
+  --mcp-text-faded: #DEDDDC40;  /* 25% opacity */
+  --mcp-border: #FFFFFF1A;      /* 10% opacity white */
+  
+  /* Default light theme variables */
   --background: #ffffff;
   --foreground: #171717;
   
@@ -41,6 +52,37 @@
   --color-5: 280 100% 60%;
 }
 
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --background: var(--mcp-background-primary);
+  --foreground: var(--mcp-text);
+  
+  --card: var(--mcp-background-secondary);
+  --card-foreground: var(--mcp-text);
+  
+  --popover: var(--mcp-background-secondary);
+  --popover-foreground: var(--mcp-text);
+  
+  --primary: var(--mcp-primary);
+  --primary-foreground: white;
+  
+  --secondary: #3c4043;
+  --secondary-foreground: var(--mcp-text);
+  
+  --muted: #1f2937;
+  --muted-foreground: var(--mcp-text-muted);
+  
+  --accent: var(--mcp-primary);
+  --accent-foreground: white;
+  
+  --destructive: #ef4444;
+  --destructive-foreground: white;
+  
+  --border: var(--mcp-border);
+  --input: var(--mcp-border);
+  --ring: var(--mcp-primary);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -74,8 +116,25 @@
 }
 
 @layer base {
-  body {
+  html, body {
     @apply bg-background text-foreground;
+    min-height: 100vh;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+@layer components {
+  /* Ensure text is white on primary color buttons */
+  .bg-\[var\(--mcp-primary\)\], 
+  .bg-\[\#C45736\] {
+    color: white;
+    font-weight: 500;
+  }
+  
+  button:hover.bg-\[var\(--mcp-primary-hover\)\],
+  button:hover.bg-\[\#E1623D\] {
+    color: white;
   }
 }
 

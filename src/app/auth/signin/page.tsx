@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import supabase from '@/lib/supaClient';
 
 // Create a client component that uses useSearchParams
 function SignInForm() {
@@ -44,9 +45,6 @@ function SignInForm() {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to sign in');
       }
-
-      // Manually initialize the supabase client
-      const supabase = (await import('@/lib/supaClient')).default;
       
       // Use the returned session data to set the session
       if (data.session && data.session.access_token && data.session.refresh_token) {
@@ -83,7 +81,6 @@ function SignInForm() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const supabase = (await import('@/lib/supaClient')).default;
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           // Already logged in, redirect
@@ -100,23 +97,23 @@ function SignInForm() {
   }, [redirectPath, router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center px-4 bg-[var(--mcp-background-primary)] text-[var(--mcp-text)]">
+      <Card className="w-full max-w-md bg-[var(--mcp-background-secondary)] border border-[var(--mcp-border)]">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl font-bold text-[var(--mcp-text)]">Sign In</CardTitle>
+          <CardDescription className="text-[var(--mcp-text-muted)]">
             Enter your email and password to sign in to your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-[var(--mcp-text)]">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -124,14 +121,15 @@ function SignInForm() {
                 value={email}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 required
+                className="bg-[var(--mcp-background-primary)] border-[var(--mcp-border)] text-[var(--mcp-text)] focus:border-[var(--mcp-primary)] focus:ring-[var(--mcp-primary)]"
               />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-[var(--mcp-text)]">Password</Label>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-sm font-medium text-primary hover:underline"
+                  className="text-sm font-medium text-[var(--mcp-primary)] hover:text-[var(--mcp-primary-hover)]"
                 >
                   Forgot password?
                 </Link>
@@ -142,17 +140,18 @@ function SignInForm() {
                 value={password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 required
+                className="bg-[var(--mcp-background-primary)] border-[var(--mcp-border)] text-[var(--mcp-text)] focus:border-[var(--mcp-primary)] focus:ring-[var(--mcp-primary)]"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-[var(--mcp-primary)] hover:bg-[var(--mcp-primary-hover)] text-white font-medium" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-center">
+          <p className="text-sm text-center text-[var(--mcp-text-muted)]">
             Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="font-medium text-primary hover:underline">
+            <Link href="/auth/signup" className="font-medium text-[var(--mcp-primary)] hover:text-[var(--mcp-primary-hover)]">
               Sign up
             </Link>
           </p>

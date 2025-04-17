@@ -1,89 +1,26 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { BrainCircuit, Terminal, Code, Users, ExternalLink, ArrowRight, Server, Database, Github, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DashboardMockup } from "@/components/ui/dashboard-mockup";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 
-interface ElegantShapeProps {
-  className?: string;
-  delay?: number;
-  width?: number;
-  height?: number;
-  rotate?: number;
-  gradient?: string;
-}
-
-function ElegantShape({
-  className,
-  delay = 0,
-  width = 400,
-  height = 100,
-  rotate = 0,
-  gradient = "from-white/[0.08]",
-}: ElegantShapeProps) {
-  return (
-    <motion.div
-      initial={{
-        opacity: 0,
-        y: -150,
-        rotate: rotate - 15,
-      }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        rotate: rotate,
-      }}
-      transition={{
-        duration: 2.4,
-        delay,
-        ease: [0.23, 0.86, 0.39, 0.96],
-        opacity: { duration: 1.2 },
-      }}
-      className={`absolute ${className}`}
-    >
-      <motion.div
-        animate={{
-          y: [0, 15, 0],
-        }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        style={{
-          width,
-          height,
-        }}
-        className="relative"
-      >
-        <div
-          className={`absolute inset-0 rounded-full bg-gradient-to-r to-transparent ${gradient} 
-                    backdrop-blur-[2px] border-2 border-white/[0.15] shadow-[0_8px_32px_0_rgba(255,255,255,0.1)]
-                    after:absolute after:inset-0 after:rounded-full after:bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent_70%)]`}
-        />
-      </motion.div>
-    </motion.div>
-  );
-}
-
-const fadeUpVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 1,
-      delay: 0.5 + i * 0.2,
-      ease: [0.25, 0.4, 0.25, 1],
-    },
-  }),
-};
-
 export default function Home() {
+  useEffect(() => {
+    // Add popup/enlarge animation to Get Started button after a delay
+    const timer = setTimeout(() => {
+      const getStartedBtn = document.querySelector(".get-started-btn");
+      if (getStartedBtn) {
+        getStartedBtn.classList.add("btn-popup");
+      }
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#1F1F1F] text-[#DEDDDC] overflow-hidden">
       {/* Navigation */}
@@ -94,17 +31,18 @@ export default function Home() {
               <span className="text-[#E1623D]">buildmcp.space</span>
             </Link>
             <div className="hidden md:flex gap-8">
-              <Link href="#features" className="text-sm font-medium text-[#DEDDDC]/80 hover:text-white transition-colors">Features</Link>
-              <Link href="#platforms" className="text-sm font-medium text-[#DEDDDC]/80 hover:text-white transition-colors">Platforms</Link>
-              <Link href="#about" className="text-sm font-medium text-[#DEDDDC]/80 hover:text-white transition-colors">About</Link>
-              <Link href="#pricing" className="text-sm font-medium text-[#DEDDDC]/80 hover:text-white transition-colors">Pricing</Link>
-              <Link href="/contact" className="text-sm font-medium text-[#DEDDDC]/80 hover:text-white transition-colors">Contact</Link>
+              <Link href="#features" className="text-sm font-medium text-[#DEDDDC]/80 hover:text-white">Features</Link>
+              <Link href="#pricing" className="text-sm font-medium text-[#DEDDDC]/80 hover:text-white">Pricing</Link>
             </div>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/auth/signin" className="text-sm font-medium text-[#DEDDDC]/80 hover:text-white transition-colors">Log in</Link>
+            <Link href="/auth/signin">
+              <div className="px-3.5 py-1.5 bg-[#252525] text-[#DEDDDC]/80 hover:text-white font-medium text-sm rounded-md border border-white/10 shadow-inner shadow-black/10">
+                Log in
+              </div>
+            </Link>
             <Link href="/auth/signup">
-              <Button size="sm" className="bg-[#C45736] text-white hover:bg-[#C45736]/90 font-medium">Sign up</Button>
+              <Button size="sm" className="px-3.5 py-1 bg-[#C45736] text-white hover:bg-[#C45736]/90 font-medium text-sm">Sign up</Button>
             </Link>
           </div>
         </div>
@@ -114,75 +52,42 @@ export default function Home() {
       <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#1F1F1F] pt-24 pb-32">
         <div className="relative z-10 container mx-auto px-6 md:px-8">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <motion.div
-              custom={0}
-              variants={fadeUpVariants}
-              initial="hidden"
-              animate="visible"
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] mb-5 md:mb-8 mt-12"
-            >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] mb-5 md:mb-8 mt-12">
               <span className="text-sm text-[#E1623D] tracking-wider font-medium">
                 MODEL CONTEXT PROTOCOL BUILDER
               </span>
-            </motion.div>
+            </div>
 
-            <motion.div
-              custom={1}
-              variants={fadeUpVariants}
-              initial="hidden"
-              animate="visible"
-            >
+            <div>
               <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold mb-8 md:mb-10 tracking-tight leading-[1.1]">
                 <span className="text-white">
                   Build Model Context Protocols
                 </span>
               </h1>
-            </motion.div>
+            </div>
 
-            <motion.div
-              custom={2}
-              variants={fadeUpVariants}
-              initial="hidden"
-              animate="visible"
-            >
+            <div>
               <p className="text-lg sm:text-xl md:text-2xl text-[#DEDDDC]/70 mb-10 leading-relaxed font-light tracking-wide max-w-2xl mx-auto px-4">
                 Create, manage, and share MCPs across different AI platforms with a seamless experience.
               </p>
-            </motion.div>
+            </div>
 
-            <motion.div
-              custom={3}
-              variants={fadeUpVariants}
-              initial="hidden"
-              animate="visible"
-              className="flex flex-wrap gap-6 justify-center"
-            >
+            <div className="flex justify-center">
               <Link href="/auth/signup">
-                <Button className="font-medium text-base px-8 py-3 bg-[#C45736] hover:bg-[#C45736]/90 text-white">
+                <Button className="get-started-btn font-medium text-base px-8 py-4 bg-[#E1623D] text-white hover:bg-[#E1623D]/90 border-l-2 border-b-2 border-[#B2512F] transform scale-100 transition-transform duration-300">
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="#learn-more">
-                <Button size="lg" variant="outline" className="border-white/20 hover:bg-white/10 font-medium text-base px-8 py-3">
-                  Learn More
-                </Button>
-              </Link>
-            </motion.div>
+            </div>
           </div>
 
           {/* Mockup Image */}
-          <motion.div
-            custom={4}
-            variants={fadeUpVariants}
-            initial="hidden"
-            animate="visible"
-            className="max-w-5xl mx-auto mt-20 relative filter grayscale hover:grayscale-0 transition-all duration-500"
-          >
-            <div className="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+          <div className="max-w-5xl mx-auto mt-20 relative">
+            <div className="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl filter grayscale hover:grayscale-0 transition-all duration-300">
               <DashboardMockup />
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -199,47 +104,29 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 hover:bg-[#252525] transition-all duration-500 transform hover:-translate-y-2 hover:shadow-lg border border-white/10 group h-full flex flex-col"
-            >
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 group h-full flex flex-col">
               <div className="text-[#C45736] mb-6">
-                <BrainCircuit className="w-12 h-12 group-hover:text-[#E1623D]" />
+                <BrainCircuit className="w-12 h-12" />
               </div>
-              <h3 className="text-xl font-semibold mb-4 group-hover:text-white transition-colors whitespace-nowrap">AI-Powered Creation</h3>
+              <h3 className="text-xl font-semibold mb-4 text-white whitespace-nowrap">AI-Powered Creation</h3>
               <p className="text-[#DEDDDC]/70 text-base leading-relaxed mt-auto">Generate platform-specific MCPs with natural language prompts and custom feature integration.</p>
-            </motion.div>
+            </div>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 hover:bg-[#252525] transition-all duration-500 transform hover:-translate-y-2 hover:shadow-lg border border-white/10 group h-full flex flex-col"
-            >
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 group h-full flex flex-col">
               <div className="text-[#C45736] mb-6">
-                <Terminal className="w-12 h-12 group-hover:text-[#E1623D]" />
+                <Terminal className="w-12 h-12" />
               </div>
-              <h3 className="text-xl font-semibold mb-4 group-hover:text-white transition-colors whitespace-nowrap">Instant Downloads</h3>
+              <h3 className="text-xl font-semibold mb-4 text-white whitespace-nowrap">Instant Downloads</h3>
               <p className="text-[#DEDDDC]/70 text-base leading-relaxed mt-auto">Download ready-to-use MCPs in multiple formats with cross-platform compatibility.</p>
-            </motion.div>
+            </div>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 hover:bg-[#252525] transition-all duration-500 transform hover:-translate-y-2 hover:shadow-lg border border-white/10 group h-full flex flex-col"
-            >
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 group h-full flex flex-col">
               <div className="text-[#C45736] mb-6">
-                <Users className="w-12 h-12 group-hover:text-[#E1623D]" />
+                <Users className="w-12 h-12" />
               </div>
-              <h3 className="text-xl font-semibold mb-4 group-hover:text-white transition-colors whitespace-nowrap">Interactive Dashboard</h3>
+              <h3 className="text-xl font-semibold mb-4 text-white whitespace-nowrap">Interactive Dashboard</h3>
               <p className="text-[#DEDDDC]/70 text-base leading-relaxed mt-auto">View all your created MCPs and access MCP information from one place.</p>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -257,42 +144,18 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto mb-16">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 hover:bg-[#252525] transition-all duration-300 hover:scale-105 flex items-center justify-center aspect-square group border border-white/10"
-            >
-              <span className="text-[#C45736] font-semibold text-xl group-hover:text-[#E1623D] transition-colors duration-300">Cursor</span>
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 hover:bg-[#252525] transition-all duration-300 hover:scale-105 flex items-center justify-center aspect-square group border border-white/10"
-            >
-              <span className="text-[#C45736] font-semibold text-xl group-hover:text-[#E1623D] transition-colors duration-300">Claude Desktop</span>
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 hover:bg-[#252525] transition-all duration-300 hover:scale-105 flex items-center justify-center aspect-square group border border-white/10"
-            >
-              <span className="text-[#C45736] font-semibold text-xl group-hover:text-[#E1623D] transition-colors duration-300">VSCode</span>
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.4 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 hover:bg-[#252525] transition-all duration-300 hover:scale-105 flex items-center justify-center aspect-square group border border-white/10"
-            >
-              <span className="text-[#C45736] font-semibold text-xl group-hover:text-[#E1623D] transition-colors duration-300">ChatGPT</span>
-            </motion.div>
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 flex items-center justify-center aspect-square border border-white/10">
+              <span className="text-[#C45736] font-semibold text-xl">Cursor</span>
+            </div>
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 flex items-center justify-center aspect-square border border-white/10">
+              <span className="text-[#C45736] font-semibold text-xl">Claude Desktop</span>
+            </div>
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 flex items-center justify-center aspect-square border border-white/10">
+              <span className="text-[#C45736] font-semibold text-xl">VSCode</span>
+            </div>
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 flex items-center justify-center aspect-square border border-white/10">
+              <span className="text-[#C45736] font-semibold text-xl">ChatGPT</span>
+            </div>
           </div>
         </div>
       </section>
@@ -310,50 +173,32 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative"
-            >
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative">
               <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-[#C45736] flex items-center justify-center text-white font-bold text-lg">1</div>
               <h3 className="text-2xl font-semibold mb-5 mt-2">Design Your MCP</h3>
               <p className="text-[#DEDDDC]/70 text-base mb-6 leading-relaxed">Describe what you want your MCP to do using natural language or configure detailed options.</p>
               <div className="text-[#C45736]">
                 <Server className="w-8 h-8" />
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative"
-            >
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative">
               <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-[#C45736] flex items-center justify-center text-white font-bold text-lg">2</div>
               <h3 className="text-2xl font-semibold mb-5 mt-2">Generate MCP Code</h3>
               <p className="text-[#DEDDDC]/70 text-base mb-6 leading-relaxed">Our AI will create the necessary code and configurations for your MCP.</p>
               <div className="text-[#C45736]">
                 <Code className="w-8 h-8" />
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative"
-            >
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative">
               <div className="absolute -top-5 -left-5 w-10 h-10 rounded-full bg-[#C45736] flex items-center justify-center text-white font-bold text-lg">3</div>
               <h3 className="text-2xl font-semibold mb-5 mt-2">Deploy & Use</h3>
               <p className="text-[#DEDDDC]/70 text-base mb-6 leading-relaxed">Deploy locally with one click and start using your MCP with your favorite AI platform.</p>
               <div className="text-[#C45736]">
                 <Zap className="w-8 h-8" />
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -361,181 +206,261 @@ export default function Home() {
       {/* Pricing Section */}
       <section className="py-32 bg-[#1F1F1F]" id="pricing">
         <div className="container mx-auto px-6">
-          <div className="max-w-3xl mx-auto text-center mb-20">
+          <div className="max-w-3xl mx-auto text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white leading-tight">
               Simple, Transparent Pricing
             </h2>
-            <p className="text-xl text-[#DEDDDC]/70 max-w-2xl mx-auto">
-              Choose the plan that works best for you
+            <p className="text-xl text-[#DEDDDC]/70 max-w-2xl mx-auto mb-10">
+              Choose the plan that fits your needs
             </p>
+            
+            {/* Price Toggle Switch */}
+            <div className="flex items-center justify-center space-x-3">
+              <span id="home-monthly-label" className="text-white font-medium">Monthly</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  id="pricing-toggle" 
+                  className="sr-only peer" 
+                  onChange={(e) => {
+                    const annualPlans = document.getElementById('annual-plans');
+                    const monthlyPlans = document.getElementById('monthly-plans');
+                    const monthlyLabel = document.getElementById('home-monthly-label');
+                    const annualLabel = document.getElementById('home-annual-label');
+                    
+                    if (e.target.checked && monthlyPlans && annualPlans && monthlyLabel && annualLabel) {
+                      monthlyPlans.classList.add('hidden');
+                      annualPlans.classList.remove('hidden');
+                      monthlyLabel.classList.remove('text-white');
+                      monthlyLabel.classList.add('text-[#DEDDDC]/70');
+                      annualLabel.classList.add('text-white');
+                      annualLabel.classList.remove('text-[#DEDDDC]/70');
+                    } else if (monthlyPlans && annualPlans && monthlyLabel && annualLabel) {
+                      monthlyPlans.classList.remove('hidden');
+                      annualPlans.classList.add('hidden');
+                      monthlyLabel.classList.add('text-white');
+                      monthlyLabel.classList.remove('text-[#DEDDDC]/70');
+                      annualLabel.classList.remove('text-white');
+                      annualLabel.classList.add('text-[#DEDDDC]/70');
+                    }
+                  }}
+                />
+                <div className="w-14 h-7 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#C45736]"></div>
+              </label>
+              <span id="home-annual-label" className="text-[#DEDDDC]/70 font-medium">Annually <span className="text-[#C45736] text-xs font-bold">Save 15%</span></span>
+            </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative"
-            >
-              <h3 className="text-2xl font-semibold mb-4">Basic</h3>
+          {/* Monthly Plans */}
+          <div id="monthly-plans" className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+            {/* Basic Monthly */}
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative">
+              <h3 className="text-2xl font-semibold mb-2 text-white">Basic Monthly</h3>
+              <p className="text-[#DEDDDC]/70 text-sm mb-4">Up to 120 MCP generations per month</p>
+              
               <div className="flex items-end mb-6">
-                <span className="text-4xl font-bold">$11.99</span>
-                <span className="ml-2 text-[#DEDDDC]/60 text-lg">/month</span>
+                <span className="text-4xl font-bold text-white">$11.99</span>
+                <span className="text-[#DEDDDC]/70 ml-2 mb-1">/monthly</span>
               </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center">
-                  <svg className="h-6 w-6 text-[#C45736] mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-base">Up to 120 MCP generations per month</span>
+              
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Up to 120 MCP generations
                 </li>
-                <li className="flex items-center">
-                  <svg className="h-6 w-6 text-[#C45736] mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-base">Access to all features</span>
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Access to all features
                 </li>
-                <li className="flex items-center">
-                  <svg className="h-6 w-6 text-[#C45736] mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-base">Email support</span>
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Email support
                 </li>
               </ul>
+              
               <Link href="/auth/signup">
-                <Button className="w-[95%] py-2 text-base font-medium bg-[#C45736] text-white hover:bg-[#C45736]/90 mx-auto block">Get Started</Button>
+                <Button className="w-full py-3 text-base font-medium bg-[#252525] text-white hover:bg-[#303030] border border-white/10">
+                  Subscribe Now
+                </Button>
               </Link>
-            </motion.div>
+            </div>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative shadow-lg"
-            >
+            {/* Premium Monthly */}
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative shadow-lg ring-2 ring-[#C45736]">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#C45736] text-white px-6 py-1.5 rounded-full text-sm font-bold">
-                POPULAR
+                MOST POPULAR
               </div>
-              <h3 className="text-2xl font-semibold mb-4">Premium</h3>
+              <h3 className="text-2xl font-semibold mb-2 text-white">Premium Monthly</h3>
+              <p className="text-[#DEDDDC]/70 text-sm mb-4">Unlimited MCP generations</p>
+              
               <div className="flex items-end mb-6">
-                <span className="text-4xl font-bold">$15.99</span>
-                <span className="ml-2 text-[#DEDDDC]/60 text-lg">/month</span>
+                <span className="text-4xl font-bold text-white">$15.99</span>
+                <span className="text-[#DEDDDC]/70 ml-2 mb-1">/monthly</span>
               </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center">
-                  <svg className="h-6 w-6 text-[#C45736] mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-base">Unlimited MCP generations</span>
+              
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Unlimited MCP generations
                 </li>
-                <li className="flex items-center">
-                  <svg className="h-6 w-6 text-[#C45736] mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-base">Access to all features</span>
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Access to all features
                 </li>
-                <li className="flex items-center">
-                  <svg className="h-6 w-6 text-[#C45736] mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-base">Priority email support</span>
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Email support
                 </li>
               </ul>
+              
               <Link href="/auth/signup">
-                <Button className="w-full py-3 text-base font-medium bg-[#C45736] text-white hover:bg-[#C45736]/90">Get Started</Button>
+                <Button className="w-full py-3 text-base font-medium bg-[#C45736] text-white hover:bg-[#C45736]/90">
+                  Subscribe Now
+                </Button>
               </Link>
-            </motion.div>
+            </div>
           </div>
 
-          <div className="mt-16 text-center">
-            <p className="text-lg text-[#DEDDDC]/70">
-              Save 20% with annual billing. Premium yearly plan available for $159.90/year.
-            </p>
+          {/* Annual Plans */}
+          <div id="annual-plans" className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto hidden">
+            {/* Basic Yearly */}
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative">
+              <h3 className="text-2xl font-semibold mb-2 text-white">Basic Yearly</h3>
+              <p className="text-[#DEDDDC]/70 text-sm mb-4">Up to 120 MCP generations per month, billed yearly</p>
+              
+              <div className="flex items-end mb-6">
+                <span className="text-4xl font-bold text-white">$119.99</span>
+                <span className="text-[#DEDDDC]/70 ml-2 mb-1">/yearly</span>
+              </div>
+              
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Up to 120 MCP generations
+                </li>
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Access to all features
+                </li>
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Email support
+                </li>
+              </ul>
+              
+              <Link href="/auth/signup">
+                <Button className="w-full py-3 text-base font-medium bg-[#252525] text-white hover:bg-[#303030] border border-white/10">
+                  Subscribe Now
+                </Button>
+              </Link>
+            </div>
+
+            {/* Premium Yearly */}
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 border border-white/10 relative shadow-lg ring-2 ring-[#C45736]">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#C45736] text-white px-6 py-1.5 rounded-full text-sm font-bold">
+                BEST VALUE
+              </div>
+              <h3 className="text-2xl font-semibold mb-2 text-white">Premium Yearly</h3>
+              <p className="text-[#DEDDDC]/70 text-sm mb-4">Unlimited MCP generations, billed yearly</p>
+              
+              <div className="flex items-end mb-6">
+                <span className="text-4xl font-bold text-white">$159.9</span>
+                <span className="text-[#DEDDDC]/70 ml-2 mb-1">/yearly</span>
+              </div>
+              
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Unlimited MCP generations
+                </li>
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Access to all features
+                </li>
+                <li className="flex items-center text-[#DEDDDC]/70">
+                  <span className="w-5 h-5 rounded-full bg-[#C45736]/20 text-[#C45736] flex items-center justify-center mr-3">✓</span>
+                  Email support
+                </li>
+              </ul>
+              
+              <Link href="/auth/signup">
+                <Button className="w-full py-3 text-base font-medium bg-[#C45736] text-white hover:bg-[#C45736]/90">
+                  Subscribe Now
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-16 border-t border-white/10 bg-[#0F0F0F]">
+      <footer className="bg-[#0F0F0F] py-16 border-t border-white/5">
         <div className="container mx-auto px-6">
-          <div className="flex justify-center mb-12">
-            <Link href="/" className="font-bold text-2xl text-[#E1623D]">
-              buildmcp.space
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 text-sm">
+          <div className="grid md:grid-cols-4 gap-10">
             <div>
-              <h4 className="font-semibold mb-5 text-white text-base">Product</h4>
-              <ul className="space-y-3 text-[#DEDDDC]/50">
-                <li><Link href="#features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="#platforms" className="hover:text-white transition-colors">Platforms</Link></li>
-                <li><Link href="#about" className="hover:text-white transition-colors">How It Works</Link></li>
-                <li><Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+              <Link href="/" className="font-bold text-xl tracking-tight mb-6 block">
+                <span className="text-[#E1623D]">buildmcp.space</span>
+              </Link>
+              <p className="text-[#DEDDDC]/60 text-sm leading-relaxed">
+                Create, manage, and share MCPs across different AI platforms with a seamless experience.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-medium text-lg mb-4 text-white">Product</h4>
+              <ul className="space-y-3">
+                <li><Link href="#features" className="text-[#DEDDDC]/60 hover:text-white text-sm">Features</Link></li>
+                <li><Link href="#platforms" className="text-[#DEDDDC]/60 hover:text-white text-sm">Platforms</Link></li>
+                <li><Link href="#pricing" className="text-[#DEDDDC]/60 hover:text-white text-sm">Pricing</Link></li>
               </ul>
             </div>
-            
             <div>
-              <h4 className="font-semibold mb-5 text-white text-base">Legal</h4>
-              <ul className="space-y-3 text-[#DEDDDC]/50">
-                <li><Link href="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
-                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/refund-policy" className="hover:text-white transition-colors">Refund Policy</Link></li>
-                <li><Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
+              <h4 className="font-medium text-lg mb-4 text-white">Company</h4>
+              <ul className="space-y-3">
+                <li><Link href="/about" className="text-[#DEDDDC]/60 hover:text-white text-sm">About</Link></li>
+                <li><Link href="/contact" className="text-[#DEDDDC]/60 hover:text-white text-sm">Contact</Link></li>
+                <li><Link href="/privacy" className="text-[#DEDDDC]/60 hover:text-white text-sm">Privacy</Link></li>
               </ul>
             </div>
-            
             <div>
-              <h4 className="font-semibold mb-5 text-white text-base">Connect</h4>
-              <ul className="space-y-3 text-[#DEDDDC]/50">
-                <li><Link href="https://twitter.com/mcpbuilder" className="hover:text-white transition-colors">Twitter</Link></li>
-                <li><Link href="https://discord.gg/mcpbuilder" className="hover:text-white transition-colors">Discord</Link></li>
-                <li><a href="mailto:support@buildmcp.space" className="hover:text-white transition-colors">Email Us</a></li>
+              <h4 className="font-medium text-lg mb-4 text-white">Connect</h4>
+              <ul className="space-y-3">
+                <li><a href="https://github.com/buildmcpspace" target="_blank" rel="noopener noreferrer" className="text-[#DEDDDC]/60 hover:text-white text-sm flex items-center"><Github className="w-4 h-4 mr-2" /> GitHub</a></li>
+                <li><a href="https://discord.gg/buildmcpspace" target="_blank" rel="noopener noreferrer" className="text-[#DEDDDC]/60 hover:text-white text-sm">Discord</a></li>
+                <li><a href="https://twitter.com/buildmcpspace" target="_blank" rel="noopener noreferrer" className="text-[#DEDDDC]/60 hover:text-white text-sm">Twitter</a></li>
               </ul>
             </div>
           </div>
-          
-          {/* Terms Summary */}
-          <div className="border border-white/10 rounded-lg p-8 mb-12 bg-[#1F1F1F]">
-            <h4 className="font-semibold mb-4 text-white text-lg">Subscription Terms Summary</h4>
-            <ul className="space-y-3 text-[#DEDDDC]/70 text-base">
-              <li className="flex items-start gap-3">
-                <span className="text-[#C45736] mt-1 text-lg">•</span>
-                <span>buildmcp.space is a <span className="text-white font-medium">subscription-based service</span> with monthly or annual billing options</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[#C45736] mt-1 text-lg">•</span>
-                <span>Our service has <span className="text-white font-medium">usage limitations</span> for MCP generation based on your subscription plan</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[#C45736] mt-1 text-lg">•</span>
-                <span>Subscriptions can be cancelled at any time through your account dashboard</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[#C45736] mt-1 text-lg">•</span>
-                <span><span className="text-white font-medium">No refunds are provided</span> for subscription payments or unused portions of subscriptions</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-[#C45736] mt-1 text-lg">•</span>
-                <span>By using our service, you agree to our <Link href="/terms" className="text-[#E1623D] hover:text-white underline">Terms & Conditions</Link> and <Link href="/privacy" className="text-[#E1623D] hover:text-white underline">Privacy Policy</Link></span>
-              </li>
-            </ul>
-          </div>
-          
-          <div className="flex flex-col md:flex-row justify-between items-center text-[#DEDDDC]/50 text-sm border-t border-white/10 pt-8">
-            <div className="mb-4 md:mb-0">
-              © 2023 buildmcp.space. All rights reserved.
-            </div>
-            <div className="flex items-center gap-6">
-              <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-              <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-              <Link href="/refund-policy" className="hover:text-white transition-colors">Refunds</Link>
+          <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-[#DEDDDC]/40 text-sm mb-4 md:mb-0">© 2023 buildmcp.space. All rights reserved.</p>
+            <div className="flex space-x-6">
+              <Link href="/terms" className="text-[#DEDDDC]/40 hover:text-white text-sm">Terms</Link>
+              <Link href="/privacy" className="text-[#DEDDDC]/40 hover:text-white text-sm">Privacy</Link>
+              <Link href="/cookies" className="text-[#DEDDDC]/40 hover:text-white text-sm">Cookies</Link>
             </div>
           </div>
         </div>
       </footer>
+      
+      <style jsx global>{`
+        .btn-popup {
+          animation: popUp 0.3s ease forwards;
+        }
+        
+        @keyframes popUp {
+          0% {
+            transform: scale(0.98);
+            filter: brightness(1);
+          }
+          50% {
+            transform: scale(1.03);
+            filter: brightness(1.1);
+          }
+          100% {
+            transform: scale(1);
+            filter: brightness(1);
+          }
+        }
+      `}</style>
     </div>
   );
 }

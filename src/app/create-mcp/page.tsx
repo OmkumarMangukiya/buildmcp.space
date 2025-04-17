@@ -127,152 +127,110 @@ export default function CreateMcpPage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">MCP Server Builder</h1>
-      <Card className="max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle>Create AI-Powered MCP Server</CardTitle>
-          <CardDescription>
-            Design and download MCP servers powered by AI models. MCP (Model Context Protocol) servers 
-            enable AI models to interact with external systems, access data, and perform actions.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="description" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="description" className="flex items-center gap-1">
-                <FileText className="h-4 w-4" /> Description
-              </TabsTrigger>
-              <TabsTrigger value="config" disabled={!generatedConfig} className="flex items-center gap-1">
-                <Code className="h-4 w-4" /> Configuration
-              </TabsTrigger>
-            </TabsList>
-            
-            {/* Step 1: Description */}
-            <TabsContent value="description" className="space-y-4">
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="description" className="text-sm font-medium">
-                    Describe your MCP Server
-                  </label>
-                  <Textarea
-                    id="description"
-                    placeholder="Describe what your MCP server should do..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="min-h-[200px]"
-                  />
-                </div>
-                
-                <Button 
-                  onClick={handleGenerate} 
-                  disabled={isLoading || !description.trim()}
-                  className="w-full"
+    <div className="min-h-screen bg-[var(--mcp-background-primary)] text-[var(--mcp-text)]">
+      <div className="container mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6 text-white">MCP Server Builder</h1>
+        <Card className="max-w-4xl mx-auto bg-[var(--mcp-background-secondary)] border border-[var(--mcp-border)] shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-[var(--mcp-text)]">Create AI-Powered MCP Server</CardTitle>
+            <CardDescription className="text-[var(--mcp-text-muted)]">
+              Design and download MCP servers powered by AI models. MCP (Model Context Protocol) servers 
+              enable AI models to interact with external systems, access data, and perform actions.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="description" value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="mb-4 bg-[#1F1F1F]">
+                <TabsTrigger 
+                  value="description" 
+                  className="flex items-center gap-1 data-[state=active]:bg-[#C45736] data-[state=active]:text-white"
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Code className="mr-2 h-4 w-4" />
-                      Generate MCP Server
-                    </>
-                  )}
-                </Button>
-              </div>
-            </TabsContent>
-            
-            {/* Step 2: Configuration */}
-            <TabsContent value="config" className="space-y-4">
-              {generatedConfig && (
-                <>
-                  <MCPConfigViewer 
-                    configJson={generatedConfig}
-                    onSave={handleSave}
-                  />
-                  <div className="flex flex-col gap-2 items-end">
-                    <div className="text-sm text-muted-foreground mt-2 mb-1">
-                      Download your MCP server files:
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        onClick={(e: React.MouseEvent) => {
-                          e.preventDefault();
-                          handleDownload('server');
-                        }}
-                        variant="outline"
-                        className="gap-2"
-                        disabled={isDownloading}
-                        size="sm"
-                      >
-                        {isDownloading ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Download className="h-4 w-4" />
-                        )}
-                        Server Files
-                      </Button>
-                      <Button 
-                        onClick={(e: React.MouseEvent) => {
-                          e.preventDefault();
-                          handleDownload('claude');
-                        }}
-                        variant="outline"
-                        className="gap-2"
-                        disabled={isDownloading}
-                        size="sm"
-                      >
-                        {isDownloading ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Download className="h-4 w-4" />
-                        )}
-                        Claude Config
-                      </Button>
-                      <Button 
-                        onClick={(e: React.MouseEvent) => {
-                          e.preventDefault();
-                          handleDownload('cursor');
-                        }}
-                        variant="outline"
-                        className="gap-2"
-                        disabled={isDownloading}
-                        size="sm"
-                      >
-                        {isDownloading ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Download className="h-4 w-4" />
-                        )}
-                        Cursor Config
-                      </Button>
-                      <Button 
-                        onClick={(e: React.MouseEvent) => {
-                          e.preventDefault();
-                          handleDownload('bundle');
-                        }}
-                        variant="default"
-                        className="gap-2"
-                        disabled={isDownloading}
-                        size="sm"
-                      >
-                        {isDownloading ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Download className="h-4 w-4" />
-                        )}
-                        Complete Bundle
-                      </Button>
-                    </div>
+                  <FileText className="h-4 w-4" /> Description
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="config" 
+                  disabled={!generatedConfig} 
+                  className="flex items-center gap-1 data-[state=active]:bg-[#C45736] data-[state=active]:text-white"
+                >
+                  <Code className="h-4 w-4" /> Configuration
+                </TabsTrigger>
+              </TabsList>
+              
+              {/* Step 1: Description */}
+              <TabsContent value="description" className="space-y-4">
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="description" className="text-sm font-medium text-[var(--mcp-text)]">
+                      Describe your MCP Server
+                    </label>
+                    <Textarea
+                      id="description"
+                      placeholder="Describe what your MCP server should do..."
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="min-h-[200px] bg-[#1F1F1F] border-white/10 text-[#DEDDDC] focus:border-[#C45736] placeholder:text-[#DEDDDC]/40"
+                    />
                   </div>
-                </>
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+                  
+                  <Button 
+                    onClick={handleGenerate} 
+                    disabled={isLoading || !description.trim()}
+                    className="w-full bg-[var(--mcp-primary)] hover:bg-[var(--mcp-primary-hover)] text-white font-medium"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Code className="mr-2 h-4 w-4" />
+                        Generate MCP Server
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              {/* Step 2: Configuration */}
+              <TabsContent value="config" className="space-y-4">
+                {generatedConfig && (
+                  <>
+                    <MCPConfigViewer 
+                      configJson={generatedConfig}
+                      onSave={handleSave}
+                    />
+                    <div className="flex flex-col gap-2 items-end">
+                      <div className="text-sm text-[var(--mcp-text-muted)] mt-2 mb-1">
+                        Download your MCP server files:
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={() => handleDownload('bundle')}
+                          disabled={isDownloading}
+                          className="bg-[var(--mcp-primary)] hover:bg-[var(--mcp-primary-hover)] text-white font-medium"
+                        >
+                          {isDownloading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Downloading...
+                            </>
+                          ) : (
+                            <>
+                              <Download className="mr-2 h-4 w-4" />
+                              Download Bundle
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

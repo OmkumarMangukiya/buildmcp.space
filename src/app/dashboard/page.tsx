@@ -246,188 +246,132 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Main content */}
-      <main>
-        {/* Header */}
-        <header className="sticky top-0 z-10 flex h-14 items-center border-b bg-background px-4 animate-fade-in">
-          <h1 className="text-lg font-semibold">Dashboard</h1>
-          
-          <div className="ml-auto flex items-center gap-4">
-            <Link href="/create-mcp">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Create MCP
-              </Button>
+    <div className="min-h-screen bg-[#0F0F0F] text-gray-400">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0F0F0F]/90 backdrop-blur-md">
+        <div className="container mx-auto px-6 flex items-center justify-between h-16">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="font-bold text-xl tracking-tight group">
+              <span className="text-[#E1623D]">buildmcp.space</span>
             </Link>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleSignOut}
-              disabled={loading}
-            >
-              Sign out
-            </Button>
-            <div className="flex items-center gap-2">
-              {user?.name && (
-                <span className="text-sm text-muted-foreground">{user.name}</span>
-              )}
-              <Avatar>
-                <AvatarImage src={user?.avatar_url || "https://avatar.vercel.sh/user.png"} />
-                <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
-              </Avatar>
+          </div>
+          <div className="flex items-center gap-5">
+            <button onClick={handleSignOut} className="text-gray-500 font-medium hover:text-white transition-colors">Sign out</button>
+            <div className="text-white font-medium">John</div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main content */}
+      <div className="container mx-auto px-6 py-20">
+        <div className="mt-8">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-10 pb-6 border-b border-white/5 relative">
+            <div>
+              <h1 className="text-2xl font-semibold mb-1 text-white">Welcome back, {user?.name || 'John'}!</h1>
+              <p className="text-gray-500 text-sm">Your MCP dashboard overview</p>
+            </div>
+            <div className="flex items-center gap-5">
+              <Link href="/create">
+                <Button className="flex items-center gap-2 bg-[#E1623D] text-white px-5 py-2.5 rounded-md font-medium">
+                  <span>+</span> Create MCP
+                </Button>
+              </Link>
             </div>
           </div>
-        </header>
-
-        {/* Page content */}
-        <div className="p-6 animate-slide-up">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">Welcome back{user?.name ? `, ${user.name}` : ''}!</h1>
-            <p className="text-muted-foreground">Your MCP dashboard overview</p>
-          </div>
-
-          {/* Authentication Error */}
-          {authError && (
-            <div className="mb-8">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
-                <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
-                <div>
-                  <h3 className="text-sm font-medium text-red-800">Authentication Error</h3>
-                  <p className="text-sm text-red-700 mt-1">{authError}</p>
-                  <div className="mt-3">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="mr-3"
-                      onClick={() => window.location.reload()}
-                    >
-                      Refresh Page
-                    </Button>
-                    <Button 
-                      size="sm"
-                      onClick={() => window.location.href = "/auth/signin?redirect=/dashboard"}
-                    >
-                      Sign In Again
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
+          
           {/* Subscription Status */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Subscription Status</h2>
-            <Card>
-              <CardContent className="p-6">
-                {loading ? (
-                  <div className="text-center py-4">Loading subscription details...</div>
-                ) : subscription ? (
-                  <div>
-                    <div className="flex justify-between items-center mb-4">
-                      <div>
-                        <h3 className="text-lg font-semibold flex items-center">
-                          <Star className="h-5 w-5 text-yellow-500 mr-2" />
-                          {subscription.plan_name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Active until {formatExpirationDate(subscription.expires_at)}
-                        </p>
-                      </div>
-                      <Link href="/pricing">
-                        <Button size="sm" variant="outline">Change Plan</Button>
-                      </Link>
-                    </div>
-
-                    {subscription.mcp_limit !== null && (
-                      <div className="mt-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium">MCP Generations Remaining</span>
-                          <span className={`text-sm font-bold ${subscription.mcp_remaining! <= 5 ? 'text-red-600' : 'text-blue-600'}`}>
-                            {subscription.mcp_remaining} / {subscription.mcp_limit}
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
-                          <div 
-                            className={`h-2.5 rounded-full ${
-                              subscription.mcp_remaining! / subscription.mcp_limit! < 0.2 ? 'bg-red-600' : 
-                              subscription.mcp_remaining! / subscription.mcp_limit! < 0.5 ? 'bg-orange-500' : 'bg-blue-600'
-                            }`}
-                            style={{ width: `${Math.max(5, (subscription.mcp_remaining! / subscription.mcp_limit!) * 100)}%` }}
-                          ></div>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          This count decreases each time you generate a new MCP.
-                        </p>
-                      </div>
-                    )}
-
-                    {subscription.mcp_limit === null && (
-                      <div className="mt-4 flex items-center text-green-600">
-                        <Star className="h-4 w-4 mr-2" />
-                        <span className="font-medium">Unlimited MCP generations</span>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <div className="flex justify-center mb-4">
-                      <AlertTriangle className="h-12 w-12 text-amber-500" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">No Active Subscription</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Subscribe to a plan to unlock MCP generation capabilities.
-                    </p>
-                    <Link href="/pricing">
-                      <Button>View Pricing Plans</Button>
-                    </Link>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* My MCPs */}
-          <div className="mt-8">
-            <div className="flex items-center mb-4">
-              <h2 className="text-xl font-bold">My MCPs</h2>
+          <div className="mb-10 bg-[#1A1A1A] rounded-lg p-8 border-l-4 border-[#E1623D] border-t border-r border-b border-white/5 shadow-lg">
+            <div className="flex justify-between items-start mb-5">
+              <div className="flex items-center gap-3">
+                <Star className="w-5 h-5 text-[#E1623D]" />
+                <span className="font-semibold text-lg text-white">
+                  {subscription?.plan_name || 'Basic'} {subscription?.plan_interval || 'Monthly'}
+                </span>
+              </div>
+              <Button variant="ghost" size="sm" className="text-sm text-gray-500 font-medium hover:text-white">
+                Change Plan
+              </Button>
             </div>
-            {loading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading your MCPs...</div>
-            ) : mcps.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                You haven't created any MCPs yet.
-                <br />
-                <Link href="/create-mcp">
-                  <Button variant="link" className="mt-2">Create your first MCP</Button>
+            <p className="text-gray-500 text-sm mb-4">
+              {subscription ? `Active until ${formatExpirationDate(subscription.expires_at)}` : 'Active until May 6, 2025'}
+            </p>
+            
+            <div className="space-y-3">
+              {subscription?.mcp_limit && (
+                <>
+                  <div className="flex justify-between items-center text-sm mb-2">
+                    <span className="text-gray-400">MCP Generations Remaining</span>
+                    <span className="text-[#E1623D] font-medium">
+                      {subscription.mcp_remaining || 0} / {subscription.mcp_limit}
+                    </span>
+                  </div>
+                  <div className="w-full h-2.5 bg-black/40 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-[#E1623D] rounded-full"
+                      style={{ 
+                        width: `${subscription.mcp_limit ? (subscription.mcp_remaining || 0) / subscription.mcp_limit * 100 : 0}%` 
+                      }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">This count decreases each time you generate a new MCP.</p>
+                </>
+              )}
+              {!subscription?.mcp_limit && subscription?.plan_name?.toLowerCase().includes('premium') && (
+                <div className="flex items-center text-sm mb-2">
+                  <span className="text-gray-400">Unlimited MCP generations available</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* MCPs */}
+          <div className="relative">
+            <h2 className="text-xl font-semibold mb-6 text-white">My MCPs</h2>
+            
+            {mcps.length === 0 && !loading ? (
+              <div className="text-center py-16 bg-[#1A1A1A] rounded-lg border border-white/5">
+                <p className="text-gray-500 mb-4">You haven't created any MCPs yet</p>
+                <Link href="/create">
+                  <Button className="bg-[#E1623D] text-white hover:bg-[#E1623D]/90">
+                    Create your first MCP
+                  </Button>
                 </Link>
               </div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
-                {mcps.map((mcp) => (
-                  <Link href={`/mcp/${mcp.id}`} key={mcp.id}>
-                    <Card className="overflow-hidden transition-all hover:shadow-md cursor-pointer">
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="font-medium">{mcp.name}</CardTitle>
-                        </div>
-                        <CardDescription>{mcp.description || mcp.platform}</CardDescription>
-                      </CardHeader>
-                      <CardContent className="pb-2">
-                        <div className="flex items-center justify-between text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {loading ? (
+                  Array(3).fill(0).map((_, i) => (
+                    <div key={i} className="bg-[#1A1A1A] rounded-lg p-6 border-l-2 border-l-[#E1623D] border-t border-r border-b border-white/5 animate-pulse">
+                      <div className="h-7 bg-gray-700 rounded w-3/4 mb-3"></div>
+                      <div className="h-16 bg-gray-700 rounded w-full mb-5 opacity-50"></div>
+                      <div className="flex justify-between items-center">
+                        <div className="h-4 bg-gray-700 rounded w-1/3"></div>
+                        <div className="h-4 bg-gray-700 rounded w-1/4"></div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  mcps.map(mcp => (
+                    <Link href={`/mcp/${mcp.id}`} key={mcp.id}>
+                      <div className="bg-[#1A1A1A] rounded-lg p-6 border-l-2 border-l-[#E1623D] border-t border-r border-b border-white/5 cursor-pointer hover:bg-[#222] transition-colors">
+                        <h3 className="font-medium text-lg mb-3 truncate text-white">{mcp.name}</h3>
+                        <p className="text-sm text-gray-500 mb-5 line-clamp-3 leading-relaxed">
+                          {mcp.description || `MCP for ${mcp.platform} with custom configurations and integrations.`}
+                        </p>
+                        <div className="flex justify-between items-center text-sm text-gray-600">
                           <span>Last updated</span>
-                          <span className="text-muted-foreground">{formatLastUpdated(mcp.updated_at)}</span>
+                          <span>{formatLastUpdated(mcp.updated_at)}</span>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
+                      </div>
+                    </Link>
+                  ))
+                )}
               </div>
             )}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

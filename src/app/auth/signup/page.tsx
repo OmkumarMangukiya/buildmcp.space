@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import supabase from '@/lib/supaClient';
 
 // Create a client component that uses useSearchParams
 function SignUpForm() {
@@ -19,12 +21,12 @@ function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '/dashboard';
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // Check if user is already authenticated
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const supabase = (await import('@/lib/supaClient')).default;
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           // Already logged in, redirect
@@ -46,15 +48,6 @@ function SignUpForm() {
     setError('');
 
     try {
-      // Try to initialize Supabase client with error handling
-      let supabase;
-      try {
-        supabase = (await import('@/lib/supaClient')).default;
-      } catch (initError: any) {
-        console.error("Supabase initialization error:", initError);
-        throw new Error('Failed to initialize authentication. Please check your internet connection and try again.');
-      }
-      
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -81,34 +74,34 @@ function SignUpForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center px-4 bg-[var(--mcp-background-primary)] text-[var(--mcp-text)]">
+      <Card className="w-full max-w-md bg-[var(--mcp-background-secondary)] border border-[var(--mcp-border)]">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-          <CardDescription>
-            Enter your details to create your account
+          <CardTitle className="text-2xl font-bold text-[var(--mcp-text)]">Sign Up</CardTitle>
+          <CardDescription className="text-[var(--mcp-text-muted)]">
+            Create an account to start building MCPs
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name" className="text-[var(--mcp-text)]">Name</Label>
               <Input
                 id="name"
-                type="text"
                 placeholder="John Doe"
                 value={name}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
                 required
+                className="bg-[var(--mcp-background-primary)] border-[var(--mcp-border)] text-[var(--mcp-text)] focus:border-[var(--mcp-primary)] focus:ring-[var(--mcp-primary)]"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-[var(--mcp-text)]">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -116,31 +109,53 @@ function SignUpForm() {
                 value={email}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 required
+                className="bg-[var(--mcp-background-primary)] border-[var(--mcp-border)] text-[var(--mcp-text)] focus:border-[var(--mcp-primary)] focus:ring-[var(--mcp-primary)]"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-[var(--mcp-text)]">Password</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 required
-                minLength={8}
+                className="bg-[var(--mcp-background-primary)] border-[var(--mcp-border)] text-[var(--mcp-text)] focus:border-[var(--mcp-primary)] focus:ring-[var(--mcp-primary)]"
               />
-              <p className="text-xs text-muted-foreground">
-                Password must be at least 8 characters long
-              </p>
+              <p className="text-xs text-[var(--mcp-text-faded)]">Password must be at least 8 characters long</p>
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Creating account...' : 'Sign Up'}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="terms" 
+                  checked={agreedToTerms} 
+                  onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                  className="border-[var(--mcp-border)] data-[state=checked]:bg-[var(--mcp-primary)] data-[state=checked]:border-[var(--mcp-primary)]"
+                />
+                <label
+                  htmlFor="terms"
+                  className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[var(--mcp-text-muted)]"
+                >
+                  I agree to the{" "}
+                  <Link href="/terms" className="text-[var(--mcp-primary)] hover:text-[var(--mcp-primary-hover)]">
+                    Terms & Conditions
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className="text-[var(--mcp-primary)] hover:text-[var(--mcp-primary-hover)]">
+                    Privacy Policy
+                  </Link>
+                </label>
+              </div>
+            </div>
+            <Button type="submit" className="w-full bg-[var(--mcp-primary)] hover:bg-[var(--mcp-primary-hover)] text-white font-medium" disabled={isLoading || !agreedToTerms}>
+              {isLoading ? 'Creating account...' : 'Create Account'}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-center">
+          <p className="text-sm text-center text-[var(--mcp-text-muted)]">
             Already have an account?{' '}
-            <Link href="/auth/signin" className="font-medium text-primary hover:underline">
+            <Link href="/auth/signin" className="font-medium text-[var(--mcp-primary)] hover:text-[var(--mcp-primary-hover)]">
               Sign in
             </Link>
           </p>

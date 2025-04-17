@@ -49,6 +49,18 @@ module.exports = {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",
         },
+        mcp: {
+          bg: {
+            primary: "var(--mcp-background-primary)",
+            secondary: "var(--mcp-background-secondary)",
+          },
+          primary: "var(--mcp-primary)",
+          "primary-hover": "var(--mcp-primary-hover)",
+          text: "var(--mcp-text)",
+          "text-muted": "var(--mcp-text-muted)",
+          "text-faded": "var(--mcp-text-faded)",
+          border: "var(--mcp-border)",
+        },
         "color-1": "hsl(var(--color-1))",
         "color-2": "hsl(var(--color-2))",
         "color-3": "hsl(var(--color-3))",

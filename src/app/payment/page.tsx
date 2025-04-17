@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import PaymentClientComponent from './PaymentClientComponent';
+import { Suspense } from 'react';
 
 export default function PaymentPage() {
   return (
@@ -14,7 +15,9 @@ export default function PaymentPage() {
         </CardHeader>
         
         <CardContent>
-          <PaymentClientComponent />
+          <Suspense fallback={<div className="py-6 text-center text-[#DEDDDC]/70">Loading payment options...</div>}>
+            <PaymentClientComponent />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

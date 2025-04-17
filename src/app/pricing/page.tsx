@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PricingClientComponent from "./PricingClientComponent";
+import { Suspense } from "react";
 
 export default function PricingPage() {
   return (
@@ -19,7 +20,9 @@ export default function PricingPage() {
             </div>
           </div>
           <div className="flex items-center gap-6">
-            <PricingClientComponent />
+            <Suspense fallback={<div className="px-3.5 py-1.5 bg-[#252525] text-[#DEDDDC]/80 font-medium text-sm rounded-md border border-white/10 shadow-inner shadow-black/10">Loading...</div>}>
+              <PricingClientComponent />
+            </Suspense>
           </div>
         </div>
       </nav>
@@ -33,7 +36,9 @@ export default function PricingPage() {
           </p>
           
           {/* Client component for pricing plans */}
-          <PricingClientComponent isMain={true} />
+          <Suspense fallback={<div className="py-12 text-center text-[#DEDDDC]/70">Loading pricing plans...</div>}>
+            <PricingClientComponent isMain={true} />
+          </Suspense>
         </div>
       </section>
     </div>

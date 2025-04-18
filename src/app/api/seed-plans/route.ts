@@ -49,7 +49,7 @@ export async function GET(req: Request) {
       {
         name: 'Basic Yearly',
         description: 'Up to 120 MCP generations per month, billed yearly',
-        price: 119.99,
+        price: 83.49,
         currency: 'USD',
         interval: 'yearly',
         mcp_limit: 120
@@ -57,7 +57,7 @@ export async function GET(req: Request) {
       {
         name: 'Premium Yearly',
         description: 'Unlimited MCP generations, billed yearly',
-        price: 159.90,
+        price: 111.39,
         currency: 'USD',
         interval: 'yearly',
         mcp_limit: null

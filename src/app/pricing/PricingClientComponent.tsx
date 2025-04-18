@@ -104,7 +104,7 @@ export default function PricingClientComponent({ isMain }: PricingClientComponen
           />
           <div className="w-14 h-7 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#C45736]"></div>
         </label>
-        <span className={`font-medium ${isYearly ? 'text-white' : 'text-gray-400'}`}>Annual <span className="text-[#C45736] text-xs font-bold">Save 15%</span></span>
+        <span className={`font-medium ${isYearly ? 'text-white' : 'text-gray-400'}`}>Annual <span className="text-[#C45736] text-xs font-bold">Save 42%</span></span>
       </div>
 
       {/* Plans */}
@@ -117,7 +117,7 @@ export default function PricingClientComponent({ isMain }: PricingClientComponen
           </p>
           
           <div className="flex items-end mb-6">
-            <span className="text-4xl font-bold text-white">${isYearly ? '119.99' : '11.99'}</span>
+            <span className="text-4xl font-bold text-white">${isYearly ? '83.49' : '11.99'}</span>
             <span className="text-[#DEDDDC]/70 ml-2 mb-1">/{isYearly ? 'yearly' : 'monthly'}</span>
           </div>
           
@@ -156,7 +156,7 @@ export default function PricingClientComponent({ isMain }: PricingClientComponen
           </p>
           
           <div className="flex items-end mb-6">
-            <span className="text-4xl font-bold text-white">${isYearly ? '159.9' : '15.99'}</span>
+            <span className="text-4xl font-bold text-white">${isYearly ? '111.39' : '15.99'}</span>
             <span className="text-[#DEDDDC]/70 ml-2 mb-1">/{isYearly ? 'yearly' : 'monthly'}</span>
           </div>
           

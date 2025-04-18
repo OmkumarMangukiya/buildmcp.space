@@ -34,9 +34,9 @@ const getPlanDetails = (id: string) => {
     case 'premium-monthly':
       return { name: 'Premium Monthly', price: 15.99, interval: 'monthly', dbId: '2' };
     case 'basic-yearly':
-      return { name: 'Basic Yearly', price: 119.99, interval: 'yearly', dbId: '3' };
+      return { name: 'Basic Yearly', price: 83.49, interval: 'yearly', dbId: '3' };
     case 'premium-yearly':
-      return { name: 'Premium Yearly', price: 159.9, interval: 'yearly', dbId: '4' };
+      return { name: 'Premium Yearly', price: 111.39, interval: 'yearly', dbId: '4' };
     default:
       return null;
   }

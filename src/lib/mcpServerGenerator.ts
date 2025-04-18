@@ -738,6 +738,59 @@ ${llmTextDocs}
 
 ### MCP Implementation Details
 ${mcpDocs}
+
+IMPORTANT IMPLEMENTATION NOTES (do not ignore):
+
+1. Helper Function Naming:
+   - If you need a helper function for directory walking (e.g., walk), define it only once at the module level, or use unique names per tool (e.g., walkForFileSearch, walkForContentSearch).
+   - Never redeclare the same helper function in multiple scopes or tools.
+   - Avoid naming conflicts for helpers.
+
+2. Directory Reading Compatibility:
+   - Do NOT use fs.readdir with the withFileTypes option. It is not supported in all Node.js versions and can cause type errors.
+   - Instead, use fs.readdir to get file names, then use fs.stat or fs.lstat on each entry to determine if it is a file or directory.
+   - This ensures compatibility with older Node.js versions and TypeScript type definitions.
+
+3. Handling string | string[] Types (CRITICAL):
+   - Whenever a function expects a string, and the value could be string | string[], ALWAYS convert to a string before passing it to the function.
+   - If the value is an array, use .join() (e.g., value.join(',')) or select a single element (e.g., value[0]) as appropriate for the context.
+   - Use the ensureString helper everywhere a string is required, not just in some places.
+   - Never pass a string[] directly to a function that expects a string (e.g., fs.readFile, path.join, etc.).
+   - This must be followed for ALL function calls, not just for path operations.
+
+4. TypeScript Safety Guardrails (CRITICAL):
+   - NEVER use .toString() method on variables - it causes 'Property 'toString' does not exist on type 'never'' errors
+   - Always use String(value) instead of value.toString() for type safety
+   - For all function parameters that must be strings, explicitly declare them as string type and convert the input:
+     function validatePath(base: string, path: string): string {
+       // Now TypeScript knows both params must be strings
+     }
+   - When calling functions with type-sensitive parameters, always convert to the exact expected type:
+     validatePath(baseDir, String(notePath)) // explicitly convert to string
+   - Declare explicit return types for ALL functions to avoid implicit 'any' or 'never' type inference
+   - Use explicit type guards before accessing properties on variables of uncertain types:
+     typeof content === "string" ? content : String(content)
+   - For objects that might be undefined or null, use optional chaining: obj?.property
+   - Always provide default values using nullish coalescing: value ?? defaultValue
+   - CRITICAL FOR MCP RESOURCES: Normalize all variables in server.resource callbacks to ensure they're Record<string, string>:
+     In every server.resource callback, normalize variables by:
+     1. Create a new normalizedVariables object of type Record<string, string>
+     2. Iterate through each entry in the variables object
+     3. Convert any array values to comma-separated strings using Array.isArray(value) ? value.join(',') : String(value)
+     4. Use the normalized variables in the rest of the callback
+     5. This prevents "Type 'string[]' is not assignable to type 'string'" errors in resource callbacks
+   - This normalization must be done in EVERY server.resource callback to prevent type errors
+
+5. Type Narrowing Best Practices:
+   - Always narrow types explicitly before use:
+     if (typeof value === "string") { /* use value as string */ }
+     if (Array.isArray(value)) { /* use value as array */ }
+   - For function parameters that can have multiple types, use union types and handle each case:
+     function processValue(value: string | string[]): string {
+       return Array.isArray(value) ? value.join(",") : value;
+     }
+   - Always explicitly check array types with Array.isArray() rather than relying on instanceof or duck typing
+   - Always use explicit type annotations for function parameters and return types
 `;
       
       // Log the full prompt being sent to the LLM
@@ -749,7 +802,7 @@ ${mcpDocs}
       });
       
       const chatCompletion = await openai.chat.completions.create({
-        model: "gpt-4o-2024-08-06", // Using GPT-4o for sophisticated code generation
+        model: "gpt-4.1", // Using GPT-4o for sophisticated code generation
         messages: [
           {
             role: "system",

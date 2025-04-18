@@ -431,7 +431,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-[#DEDDDC]/40 text-sm mb-4 md:mb-0">© 2023 buildmcp.space. All rights reserved.</p>
+            <p className="text-[#DEDDDC]/40 text-sm mb-4 md:mb-0">© 2025 buildmcp.space. All rights reserved.</p>
             <div className="flex space-x-6">
               <Link href="/terms" className="text-[#DEDDDC]/40 hover:text-white text-sm">Terms</Link>
               <Link href="/privacy" className="text-[#DEDDDC]/40 hover:text-white text-sm">Privacy</Link>

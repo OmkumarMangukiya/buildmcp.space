@@ -539,7 +539,7 @@ function packageForLocalExecution(serverCode: string, language?: string): Record
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "npx tsc -b",
     "start": "node dist/server.js"
   },
   "dependencies": {
@@ -624,7 +624,7 @@ Place this in your .cursor/mcp.json file:
   return {
     'server.ts': serverCode,
     'tsconfig.json': '{\n  "compilerOptions": {\n    "target": "ES2018",\n    "module": "CommonJS",\n    "esModuleInterop": true,\n    "outDir": "dist",\n    "strict": true\n  },\n  "include": ["*.ts"],\n  "exclude": ["node_modules"]\n}',
-    'package.json': '{\n  "name": "mcp-server",\n  "version": "1.0.0",\n  "main": "dist/server.js",\n  "scripts": {\n    "build": "tsc",\n    "start": "node dist/server.js"\n  },\n  "dependencies": {\n    "@modelcontextprotocol/sdk": "^1.0.0"\n  },\n  "devDependencies": {\n    "@types/node": "^18.0.0",\n    "ts-node": "^10.9.1",\n    "typescript": "^4.9.5"\n  }\n}',
+    'package.json': '{\n  "name": "mcp-server",\n  "version": "1.0.0",\n  "main": "dist/server.js",\n  "scripts": {\n    "build": "npx tsc -b",\n    "start": "node dist/server.js"\n  },\n  "dependencies": {\n    "@modelcontextprotocol/sdk": "^1.0.0"\n  },\n  "devDependencies": {\n    "@types/node": "^18.0.0",\n    "ts-node": "^10.9.1",\n    "typescript": "^4.9.5"\n  }\n}',
     'setup.sh': '#!/bin/bash\nnpm install\nnpm run build\n',
     'setup.bat': '@echo off\nnpm install\nnpm run build\n',
     'run.sh': '#!/bin/bash\nnpm start\n',

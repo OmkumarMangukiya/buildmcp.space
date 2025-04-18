@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export const metadata = {
   title: "Refund Policy | buildmcp.space",
-  description: "Refund and cancellation policy for buildmcp.space subscriptions",
+  description: "Refund policy for buildmcp.space payments",
 };
 
 export default function RefundPolicyPage() {
@@ -36,111 +36,77 @@ export default function RefundPolicyPage() {
         <div className="space-y-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-400">
-              Refund & Cancellation Policy
+              Refund Policy
             </h1>
-            <p className="text-white/60 mb-2">Last updated: April 4, 2023</p>
+            <p className="text-white/60 mb-2">Last updated: {new Date().toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
           </div>
 
           <div className="prose prose-invert max-w-none">
             <div className="bg-white/5 p-6 rounded-lg border border-white/10 mb-8">
               <h2 className="text-xl text-indigo-400 mt-0">Summary</h2>
               <ul className="mt-4">
-                <li>buildmcp.space is a subscription-based service</li>
-                <li>All subscription payments are non-refundable</li>
-                <li>You can cancel your subscription at any time to prevent future charges</li>
-                <li>No refunds are provided for partial billing periods</li>
+                <li>buildmcp.space offers monthly and yearly payment options</li>
+                <li>All payments are strictly non-refundable</li>
+                <li>No refunds are provided under any circumstances</li>
               </ul>
             </div>
             
-            <h2>1. Subscription Model</h2>
+            <h2>1. Payment Model</h2>
             <p>
-              buildmcp.space operates on a subscription-based model. We offer monthly and annual subscription plans, each providing specific features and usage limitations. By subscribing to our service, you agree to the recurring payment schedule based on your chosen plan.
+              buildmcp.space offers monthly and yearly payment options. Each payment provides access to specific features and usage for the duration of the paid period. By making a payment for our service, you agree to the terms outlined in this refund policy.
             </p>
             
-            <h2>2. No-Refund Policy</h2>
+            <h2>2. Strict No-Refund Policy</h2>
             <p>
-              <strong>All payments made for buildmcp.space subscriptions are non-refundable.</strong> This includes both monthly and annual subscriptions. Once a payment has been processed, we do not offer refunds for:
+              <strong>All payments made for buildmcp.space are strictly non-refundable.</strong> This includes both monthly and yearly payments. Once a payment has been processed, we do not offer refunds under any circumstances, including but not limited to:
             </p>
             <ul>
-              <li>Unused portions of your subscription period</li>
-              <li>Subscription fees after cancellation</li>
+              <li>Unused portions of your paid period</li>
               <li>Charges for additional services or features</li>
-              <li>Accidental purchases or subscription renewals</li>
+              <li>Accidental purchases or payments</li>
               <li>Dissatisfaction with the service</li>
               <li>Changes in your business needs or circumstances</li>
+              <li>Non-usage of the service during the paid period</li>
             </ul>
             
-            <h2>3. Cancellation Policy</h2>
+            <h2>3. Payment Terms</h2>
             <p>
-              You may cancel your subscription at any time through your account dashboard. Once you cancel:
+              When you make a payment:
             </p>
             <ul>
-              <li>Your subscription will remain active until the end of the current billing period</li>
-              <li>You will not be charged for subsequent billing periods</li>
-              <li>You will continue to have access to the service until the end of your current billing period</li>
-              <li>No refund will be issued for the remaining time in your current billing period</li>
+              <li>Your access to the service will be active for the duration of the paid period</li>
+              <li>Each payment is a separate transaction for the specified time period</li>
+              <li>You must make a new payment to continue access after your paid period expires</li>
+              <li>No refund will be issued under any circumstances</li>
             </ul>
             
-            <h2>4. How to Cancel Your Subscription</h2>
+            <h2>4. Exceptions</h2>
             <p>
-              To cancel your subscription:
-            </p>
-            <ol>
-              <li>Log in to your buildmcp.space account</li>
-              <li>Navigate to "Account Settings"</li>
-              <li>Select "Subscription"</li>
-              <li>Click "Cancel Subscription"</li>
-              <li>Follow the prompts to confirm cancellation</li>
-            </ol>
-            <p>
-              After cancellation, you will receive a confirmation email. Please retain this for your records.
-            </p>
-            
-            <h2>5. Exceptions to No-Refund Policy</h2>
-            <p>
-              We may consider refunds in the following limited circumstances:
+              There are <strong>no exceptions</strong> to our no-refund policy. We do not provide refunds for any reason, including:
             </p>
             <ul>
-              <li>Technical issues that prevent access to our service for an extended period (over 24 hours) due to our fault</li>
-              <li>Incorrect billing amount charged to your account</li>
-              <li>Duplicate charges for the same subscription period</li>
+              <li>Technical issues</li>
+              <li>Service interruptions</li>
+              <li>Changes to service features or capabilities</li>
+              <li>User errors or misunderstandings</li>
             </ul>
             <p>
-              To request a refund under these exceptions, please contact our support team at <a href="mailto:billing@buildmcp.space" className="text-indigo-400 hover:text-indigo-300">billing@buildmcp.space</a> within 7 days of the charge. All refund requests will be evaluated on a case-by-case basis.
+              If you have questions about our service before making a payment, please contact our support team at <a href="mailto:billing@buildmcp.space" className="text-indigo-400 hover:text-indigo-300">billing@buildmcp.space</a>.
             </p>
             
-            <h2>6. Subscription Plan Changes</h2>
+            <h2>5. Pricing Changes</h2>
             <p>
-              <strong>Upgrading:</strong> If you upgrade to a higher-tier subscription plan, the new rate will be charged immediately, and your subscription period will be reset starting from the upgrade date.
-            </p>
-            <p>
-              <strong>Downgrading:</strong> If you downgrade to a lower-tier subscription plan, the change will take effect at the end of your current billing period. You will continue to have access to your current plan's features until that time.
-            </p>
-            
-            <h2>7. Free Trial</h2>
-            <p>
-              If we offer a free trial period:
+              We reserve the right to change our prices at any time. If we change pricing:
             </p>
             <ul>
-              <li>You will not be charged during the trial period</li>
-              <li>At the end of the trial period, you will be automatically charged for the subscription plan you selected</li>
-              <li>You can cancel at any time during the trial period to avoid being charged</li>
-              <li>Once the free trial period ends and your payment is processed, our standard no-refund policy applies</li>
+              <li>Existing customers will be notified before any price change takes effect</li>
+              <li>Price changes will apply to your next payment</li>
+              <li>If you do not agree with the new pricing, you may choose not to make future payments</li>
             </ul>
             
-            <h2>8. Pricing Changes</h2>
+            <h2>6. Contact Information</h2>
             <p>
-              We reserve the right to change our subscription prices. If we change pricing:
-            </p>
-            <ul>
-              <li>Existing subscribers will be notified at least 14 days before any price change takes effect</li>
-              <li>Price changes will take effect at the beginning of the next billing cycle</li>
-              <li>If you do not agree with the new pricing, you can cancel your subscription before the next billing cycle</li>
-            </ul>
-            
-            <h2>9. Contact Information</h2>
-            <p>
-              If you have any questions about our Refund & Cancellation Policy, please contact us at:
+              If you have any questions about our Refund Policy, please contact us at:
             </p>
             <p>
               <a href="mailto:billing@buildmcp.space" className="text-indigo-400 hover:text-indigo-300">billing@buildmcp.space</a>
@@ -148,7 +114,7 @@ export default function RefundPolicyPage() {
             
             <div className="bg-white/5 p-6 rounded-lg border border-white/10 mt-8">
               <p className="text-sm text-white/70 mb-0">
-                This Refund & Cancellation Policy is part of our <Link href="/terms" className="text-indigo-400 hover:text-indigo-300">Terms of Service</Link>. By using our Services, you acknowledge that you have read, understood, and agree to be bound by both our Terms of Service and this Refund & Cancellation Policy.
+                This Refund Policy is part of our <Link href="/terms" className="text-indigo-400 hover:text-indigo-300">Terms of Service</Link>. By using our Services, you acknowledge that you have read, understood, and agree to be bound by both our Terms of Service and this Refund Policy.
               </p>
             </div>
           </div>
@@ -160,7 +126,7 @@ export default function RefundPolicyPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center text-white/50 text-sm">
             <div className="mb-4 md:mb-0">
-              © 2023 MCP Builder. All rights reserved.
+              © {new Date().getFullYear()} MCP Builder. All rights reserved.
             </div>
             <div className="flex items-center gap-4">
               <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>

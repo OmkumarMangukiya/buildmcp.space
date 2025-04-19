@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import Script from "next/script";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = GeistSans;
 const geistMono = GeistMono;
@@ -70,6 +71,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <Toaster />
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>

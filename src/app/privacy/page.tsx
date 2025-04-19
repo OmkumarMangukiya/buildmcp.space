@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
           <div className="flex items-center gap-2">
             <Link href="/">
               <span className="font-bold text-xl group">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">buildmcp.space</span>
+                <span className="text-[#E1623D]">buildmcp.space</span>
               </span>
             </Link>
           </div>
@@ -35,10 +35,10 @@ export default function PrivacyPolicyPage() {
 
         <div className="space-y-8">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-rose-400">
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">
               Privacy Policy
             </h1>
-            <p className="text-white/60 mb-2">Last updated: April 4, 2023</p>
+            <p className="text-white/60 mb-2">Last updated: April 7, 2025</p>
           </div>
 
           <div className="prose prose-invert max-w-none">
@@ -203,7 +203,7 @@ export default function PrivacyPolicyPage() {
               If you have any questions or concerns about this Privacy Policy or our privacy practices, please contact us at:
             </p>
             <p>
-              <a href="mailto:contact@buildmcp.space" className="text-rose-400 hover:text-rose-300">contact@buildmcp.space</a>
+              <a href="mailto:contact@buildmcp.space" className="text-[#E1623D] hover:text-[#E1623D]/80">contact@buildmcp.space</a>
             </p>
             
             <p className="mt-8 border-t border-white/10 pt-8 text-sm text-white/50">
@@ -214,16 +214,44 @@ export default function PrivacyPolicyPage() {
       </div>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-white/10 bg-black">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center text-white/50 text-sm">
-            <div className="mb-4 md:mb-0">
-              © 2023 MCP Builder. All rights reserved.
+      <footer className="py-16 border-t border-white/5 bg-[#0F0F0F]">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-10">
+            <div>
+              <Link href="/" className="font-bold text-xl tracking-tight mb-6 block">
+                <span className="text-[#E1623D]">buildmcp.space</span>
+              </Link>
+              <p className="text-[#DEDDDC]/60 text-sm leading-relaxed">
+                Create, manage, and share MCPs across different AI platforms with a seamless experience.
+              </p>
             </div>
-            <div className="flex items-center gap-4">
-              <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-              <Link href="/privacy" className="text-rose-400 hover:text-rose-300 transition-colors">Privacy</Link>
-              <Link href="/refund-policy" className="hover:text-white transition-colors">Refunds</Link>
+            <div>
+              <h4 className="font-medium text-lg mb-4 text-white">Product</h4>
+              <ul className="space-y-3">
+                <li><Link href="/#features" className="text-[#DEDDDC]/60 hover:text-white text-sm">Features</Link></li>
+                <li><Link href="/#platforms" className="text-[#DEDDDC]/60 hover:text-white text-sm">Platforms</Link></li>
+                <li><Link href="/#pricing" className="text-[#DEDDDC]/60 hover:text-white text-sm">Pricing</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-lg mb-4 text-white">Company</h4>
+              <ul className="space-y-3">
+                <li><Link href="/contact" className="text-[#DEDDDC]/60 hover:text-white text-sm">Contact</Link></li>
+                <li><Link href="/privacy" className="text-[#DEDDDC]/60 hover:text-white text-sm">Privacy</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-lg mb-4 text-white">Connect</h4>
+              <ul className="space-y-3">
+                <li><a href="https://x.com/ommaniscoding" target="_blank" rel="noopener noreferrer" className="text-[#DEDDDC]/60 hover:text-white text-sm">X</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-[#DEDDDC]/40 text-sm mb-4 md:mb-0">© 2025 buildmcp.space. All rights reserved.</p>
+            <div className="flex space-x-6">
+              <Link href="/terms" className="text-[#DEDDDC]/40 hover:text-white text-sm">Terms</Link>
+              <Link href="/privacy" className="text-[#DEDDDC]/40 hover:text-white text-sm">Privacy</Link>
             </div>
           </div>
         </div>

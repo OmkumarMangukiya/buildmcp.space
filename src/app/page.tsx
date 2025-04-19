@@ -416,7 +416,6 @@ export default function Home() {
             <div>
               <h4 className="font-medium text-lg mb-4 text-white">Company</h4>
               <ul className="space-y-3">
-                <li><Link href="/about" className="text-[#DEDDDC]/60 hover:text-white text-sm">About</Link></li>
                 <li><Link href="/contact" className="text-[#DEDDDC]/60 hover:text-white text-sm">Contact</Link></li>
                 <li><Link href="/privacy" className="text-[#DEDDDC]/60 hover:text-white text-sm">Privacy</Link></li>
               </ul>
@@ -424,9 +423,7 @@ export default function Home() {
             <div>
               <h4 className="font-medium text-lg mb-4 text-white">Connect</h4>
               <ul className="space-y-3">
-                <li><a href="https://github.com/buildmcpspace" target="_blank" rel="noopener noreferrer" className="text-[#DEDDDC]/60 hover:text-white text-sm flex items-center"><Github className="w-4 h-4 mr-2" /> GitHub</a></li>
-                <li><a href="https://discord.gg/buildmcpspace" target="_blank" rel="noopener noreferrer" className="text-[#DEDDDC]/60 hover:text-white text-sm">Discord</a></li>
-                <li><a href="https://twitter.com/buildmcpspace" target="_blank" rel="noopener noreferrer" className="text-[#DEDDDC]/60 hover:text-white text-sm">Twitter</a></li>
+                <li><a href="https://x.com/ommaniscoding" target="_blank" rel="noopener noreferrer" className="text-[#DEDDDC]/60 hover:text-white text-sm">X</a></li>
               </ul>
             </div>
           </div>
@@ -435,7 +432,6 @@ export default function Home() {
             <div className="flex space-x-6">
               <Link href="/terms" className="text-[#DEDDDC]/40 hover:text-white text-sm">Terms</Link>
               <Link href="/privacy" className="text-[#DEDDDC]/40 hover:text-white text-sm">Privacy</Link>
-              <Link href="/cookies" className="text-[#DEDDDC]/40 hover:text-white text-sm">Cookies</Link>
             </div>
           </div>
         </div>

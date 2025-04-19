@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from "next/link";
-import { ArrowLeft, Mail, Phone, MapPin, Send } from "lucide-react";
+import { ArrowLeft, Mail, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,7 +55,7 @@ export default function ContactPage() {
           <div className="flex items-center gap-2">
             <Link href="/">
               <span className="font-bold text-xl group">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-rose-400 animate-gradient-slow">buildmcp.space</span>
+                <span className="text-[#E1623D]">buildmcp.space</span>
               </span>
             </Link>
           </div>
@@ -73,10 +73,10 @@ export default function ContactPage() {
         </div>
 
         <div className="mb-12 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-400">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">
             Get in Touch
           </h1>
-          <p className="text-white/60 max-w-2xl mx-auto">
+          <p className="text-[#DEDDDC]/60 max-w-2xl mx-auto">
             Have questions about buildmcp.space or need help with your MCPs? We'd love to hear from you. 
             Fill out the form below and our team will get back to you as soon as possible.
           </p>
@@ -84,54 +84,24 @@ export default function ContactPage() {
 
         <div className="grid md:grid-cols-3 gap-8 items-start">
           <div className="space-y-8">
-            <div className="bg-white/5 backdrop-blur-md rounded-lg p-6 hover:bg-white/8 transition-colors">
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 hover:bg-[#252525] transition-colors border border-white/10">
               <div className="flex items-start gap-4">
-                <div className="bg-indigo-500/20 p-3 rounded-full">
-                  <Mail className="h-6 w-6 text-indigo-400" />
+                <div className="bg-[#C45736]/20 p-3 rounded-full">
+                  <Mail className="h-6 w-6 text-[#E1623D]" />
                 </div>
                 <div>
                   <h3 className="font-medium mb-1">Email</h3>
-                  <p className="text-white/70 text-sm mb-2">Our team is here to help</p>
-                  <a href="mailto:contact@buildmcp.space" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                  <p className="text-[#DEDDDC]/70 text-sm mb-2">Our team is here to help</p>
+                  <a href="mailto:contact@buildmcp.space" className="text-[#E1623D] hover:text-[#E1623D]/80 transition-colors">
                     contact@buildmcp.space
                   </a>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-md rounded-lg p-6 hover:bg-white/8 transition-colors">
-              <div className="flex items-start gap-4">
-                <div className="bg-rose-500/20 p-3 rounded-full">
-                  <Phone className="h-6 w-6 text-rose-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium mb-1">Phone</h3>
-                  <p className="text-white/70 text-sm mb-2">Mon-Fri from 9am to 5pm</p>
-                  <a href="tel:+11234567890" className="text-rose-400 hover:text-rose-300 transition-colors">
-                    
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-md rounded-lg p-6 hover:bg-white/8 transition-colors">
-              <div className="flex items-start gap-4">
-                <div className="bg-amber-500/20 p-3 rounded-full">
-                  <MapPin className="h-6 w-6 text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium mb-1">Office</h3>
-                  <p className="text-white/70 text-sm mb-2">Visit us at our headquarters</p>
-                  <address className="not-italic text-amber-400">
-                    buildmcp.space<br />
-                  </address>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="md:col-span-2">
-            <Card className="bg-white/5 border-white/10 backdrop-blur-sm p-6">
+            <Card className="bg-[#1F1F1F] border-white/10 backdrop-blur-sm p-6">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
@@ -142,7 +112,7 @@ export default function ContactPage() {
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="bg-white/5 border-white/10"
+                      className="bg-[#252525] border-white/10"
                       placeholder="John Doe"
                       required
                     />
@@ -156,7 +126,7 @@ export default function ContactPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="bg-white/5 border-white/10"
+                      className="bg-[#252525] border-white/10"
                       placeholder="john@example.com"
                       required
                     />
@@ -170,7 +140,7 @@ export default function ContactPage() {
                     id="subject"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    className="bg-white/5 border-white/10"
+                    className="bg-[#252525] border-white/10"
                     placeholder="How can we help you?"
                     required
                   />
@@ -183,7 +153,7 @@ export default function ContactPage() {
                     id="message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    className="bg-white/5 border-white/10 min-h-[150px]"
+                    className="bg-[#252525] border-white/10 min-h-[150px]"
                     placeholder="Tell us how we can assist you..."
                     required
                   />
@@ -204,7 +174,7 @@ export default function ContactPage() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-indigo-500 to-rose-500 hover:from-indigo-600 hover:to-rose-600"
+                  className="w-full bg-[#C45736] hover:bg-[#C45736]/90 text-white"
                 >
                   {isSubmitting ? 'Sending...' : 'Send Message'}
                   <Send className="ml-2 h-4 w-4" />
@@ -214,22 +184,50 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className="mt-16 border-t border-white/10 pt-8 text-center text-white/60 text-sm">
-          <p>For urgent matters, please email us directly at <a href="mailto:contact@buildmcp.space" className="text-indigo-400 hover:underline">contact@buildmcp.space</a></p>
+        <div className="mt-16 border-t border-white/10 pt-8 text-center text-[#DEDDDC]/60 text-sm">
+          <p>For urgent matters, please email us directly at <a href="mailto:contact@buildmcp.space" className="text-[#E1623D] hover:text-[#E1623D]/80">contact@buildmcp.space</a></p>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-white/10 bg-black mt-12">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center text-white/50 text-sm">
-            <div className="mb-4 md:mb-0">
-              © 2023 MCP Builder. All rights reserved.
+      <footer className="py-16 border-t border-white/5 bg-[#0F0F0F] mt-12">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-10">
+            <div>
+              <Link href="/" className="font-bold text-xl tracking-tight mb-6 block">
+                <span className="text-[#E1623D]">buildmcp.space</span>
+              </Link>
+              <p className="text-[#DEDDDC]/60 text-sm leading-relaxed">
+                Create, manage, and share MCPs across different AI platforms with a seamless experience.
+              </p>
             </div>
-            <div className="flex items-center gap-4">
-              <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-              <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-              <Link href="/refund-policy" className="hover:text-white transition-colors">Refunds</Link>
+            <div>
+              <h4 className="font-medium text-lg mb-4 text-white">Product</h4>
+              <ul className="space-y-3">
+                <li><Link href="/#features" className="text-[#DEDDDC]/60 hover:text-white text-sm">Features</Link></li>
+                <li><Link href="/#platforms" className="text-[#DEDDDC]/60 hover:text-white text-sm">Platforms</Link></li>
+                <li><Link href="/#pricing" className="text-[#DEDDDC]/60 hover:text-white text-sm">Pricing</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-lg mb-4 text-white">Company</h4>
+              <ul className="space-y-3">
+                <li><Link href="/contact" className="text-[#DEDDDC]/60 hover:text-white text-sm">Contact</Link></li>
+                <li><Link href="/privacy" className="text-[#DEDDDC]/60 hover:text-white text-sm">Privacy</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-lg mb-4 text-white">Connect</h4>
+              <ul className="space-y-3">
+                <li><a href="https://x.com/ommaniscoding" target="_blank" rel="noopener noreferrer" className="text-[#DEDDDC]/60 hover:text-white text-sm">X</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-[#DEDDDC]/40 text-sm mb-4 md:mb-0">© 2025 buildmcp.space. All rights reserved.</p>
+            <div className="flex space-x-6">
+              <Link href="/terms" className="text-[#DEDDDC]/40 hover:text-white text-sm">Terms</Link>
+              <Link href="/privacy" className="text-[#DEDDDC]/40 hover:text-white text-sm">Privacy</Link>
             </div>
           </div>
         </div>

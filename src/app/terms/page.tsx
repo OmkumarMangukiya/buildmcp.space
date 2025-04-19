@@ -164,7 +164,7 @@ export default function TermsPage() {
             
             <h2>15. Contact Information</h2>
             <p>
-              If you have any questions about these Terms, please contact us at <a href="mailto:legal@buildmcp.space" className="text-indigo-400 hover:text-indigo-300">legal@buildmcp.space</a>.
+              If you have any questions about these Terms, please contact us at <a href="mailto:contact@buildmcp.space" className="text-indigo-400 hover:text-indigo-300">contact@buildmcp.space</a>.
             </p>
           </div>
         </div>

@@ -92,8 +92,8 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-medium mb-1">Email</h3>
                   <p className="text-white/70 text-sm mb-2">Our team is here to help</p>
-                  <a href="mailto:support@buildmcp.space" className="text-indigo-400 hover:text-indigo-300 transition-colors">
-                    support@buildmcp.space
+                  <a href="mailto:contact@buildmcp.space" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                    contact@buildmcp.space
                   </a>
                 </div>
               </div>
@@ -215,7 +215,7 @@ export default function ContactPage() {
         </div>
 
         <div className="mt-16 border-t border-white/10 pt-8 text-center text-white/60 text-sm">
-          <p>For urgent matters, please email us directly at <a href="mailto:urgent@buildmcp.space" className="text-indigo-400 hover:underline">urgent@buildmcp.space</a></p>
+          <p>For urgent matters, please email us directly at <a href="mailto:contact@buildmcp.space" className="text-indigo-400 hover:underline">contact@buildmcp.space</a></p>
         </div>
       </div>
 

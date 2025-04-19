@@ -91,7 +91,7 @@ export default function RefundPolicyPage() {
               <li>User errors or misunderstandings</li>
             </ul>
             <p>
-              If you have questions about our service before making a payment, please contact our support team at <a href="mailto:billing@buildmcp.space" className="text-indigo-400 hover:text-indigo-300">billing@buildmcp.space</a>.
+              If you have questions about our service before making a payment, please contact our support team at <a href="mailto:contact@buildmcp.space" className="text-indigo-400 hover:text-indigo-300">contact@buildmcp.space</a>.
             </p>
             
             <h2>5. Pricing Changes</h2>
@@ -109,7 +109,7 @@ export default function RefundPolicyPage() {
               If you have any questions about our Refund Policy, please contact us at:
             </p>
             <p>
-              <a href="mailto:billing@buildmcp.space" className="text-indigo-400 hover:text-indigo-300">billing@buildmcp.space</a>
+              <a href="mailto:contact@buildmcp.space" className="text-indigo-400 hover:text-indigo-300">contact@buildmcp.space</a>
             </p>
             
             <div className="bg-white/5 p-6 rounded-lg border border-white/10 mt-8">

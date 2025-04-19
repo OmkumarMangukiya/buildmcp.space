@@ -203,7 +203,7 @@ export default function PrivacyPolicyPage() {
               If you have any questions or concerns about this Privacy Policy or our privacy practices, please contact us at:
             </p>
             <p>
-              <a href="mailto:privacy@buildmcp.space" className="text-rose-400 hover:text-rose-300">privacy@buildmcp.space</a>
+              <a href="mailto:contact@buildmcp.space" className="text-rose-400 hover:text-rose-300">contact@buildmcp.space</a>
             </p>
             
             <p className="mt-8 border-t border-white/10 pt-8 text-sm text-white/50">

@@ -24,25 +24,18 @@ export function DashboardMockup() {
       </div>
 
       {/* Subscription Status */}
-      <div className="mb-10 bg-[#1A1A1A] rounded-lg p-8 border-l-4 border-[#E1623D] border-t border-r border-b border-white/5 shadow-lg">
-        <div className="flex justify-between items-start mb-5">
-          <div className="flex items-center gap-3">
+      <div className="mb-10 bg-[#0F0F0F] rounded-lg p-6 border border-[#1A1A1A]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <Star className="w-5 h-5 text-[#E1623D]" />
-            <span className="font-semibold text-lg text-white">Basic Monthly</span>
+            <span className="font-medium text-lg text-white">Premium Yearly</span>
           </div>
-          <button className="text-sm text-gray-500 font-medium">Change Plan</button>
+          <button className="text-sm text-gray-400 bg-transparent hover:text-white">Change Plan</button>
         </div>
-        <p className="text-gray-500 text-sm mb-4">Active until May 6, 2025</p>
         
-        <div className="space-y-3">
-          <div className="flex justify-between items-center text-sm mb-2">
-            <span className="text-gray-400">MCP Generations Remaining</span>
-            <span className="text-[#E1623D] font-medium">119 / 120</span>
-          </div>
-          <div className="w-full h-2.5 bg-black/40 rounded-full overflow-hidden">
-            <div className="w-[99%] h-full bg-[#E1623D] rounded-full"></div>
-          </div>
-          <p className="text-xs text-gray-500 mt-2">This count decreases each time you generate a new MCP.</p>
+        <div className="mt-4 space-y-2">
+          <p className="text-gray-400 text-sm">Active until April 7, 2026</p>
+          <p className="text-gray-400 text-sm">Unlimited MCP generations available</p>
         </div>
       </div>
 
@@ -83,4 +76,42 @@ export function DashboardMockup() {
       </div>
     </div>
   );
-} 
+}
+
+<style jsx global>{`
+  @keyframes fade-in {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.8s cubic-bezier(0.4,0,0.2,1) both;
+  }
+  @keyframes progress-bar {
+    0% { width: 0; }
+    100% { width: 99%; }
+  }
+  .animate-progress-bar {
+    animation: progress-bar 1.2s cubic-bezier(0.4,0,0.2,1) both;
+  }
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+  .animate-pulse-slow {
+    animation: pulse-slow 2.5s infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes spin-slow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .animate-spin-slow {
+    animation: spin-slow 6s linear infinite;
+  }
+`}</style> 

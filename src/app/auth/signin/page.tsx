@@ -9,6 +9,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import supabase from '@/lib/supaClient';
+import OneTapComponent from '@/components/ui/OneTapComponent';
+import GoogleSignInButton from '@/components/ui/GoogleSignInButton';
+import { Separator } from '@/components/ui/separator';
 
 // Create a client component that uses useSearchParams
 function SignInForm() {
@@ -193,6 +196,19 @@ function SignInForm() {
                 )}
               </Alert>
             )}
+
+            {/* Google Sign In Button */}
+            <GoogleSignInButton mode="signin" />
+            
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full border-[var(--mcp-border)]" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-[var(--mcp-background-secondary)] px-2 text-[var(--mcp-text-muted)]">OR CONTINUE WITH EMAIL</span>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email" className="text-[var(--mcp-text)]">Email</Label>
               <Input
@@ -245,12 +261,15 @@ function SignInForm() {
 // Main page component with Suspense
 export default function SignIn() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    }>
-      <SignInForm />
-    </Suspense>
+    <>
+      <OneTapComponent />
+      <Suspense fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <p>Loading...</p>
+        </div>
+      }>
+        <SignInForm />
+      </Suspense>
+    </>
   );
 }

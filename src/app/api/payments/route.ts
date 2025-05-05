@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     const secret = process.env.PAYPAL_SECRET;
     const auth = Buffer.from(`${clientId}:${secret}`).toString('base64');
     
-    const response = await fetch('https://api-m.live.paypal.com/v2/checkout/orders', {
+    const response = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${auth}`,

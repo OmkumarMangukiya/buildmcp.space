@@ -1,87 +1,101 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   
-  // Only run this middleware for authenticated routes
-  const protectedPaths = ['/dashboard', '/create-mcp', '/mcp/', '/pricing', '/api/payments'];
-  const isProtectedRoute = protectedPaths.some(path => req.nextUrl.pathname.startsWith(path));
+  // Extract the pathname from the request URL
+  const { pathname } = req.nextUrl;
   
+  // Define protected routes that require authentication
+  const protectedPaths = [
+    '/dashboard',
+    '/create-mcp',
+    '/mcp/',
+    '/pricing',
+    '/api/payments'
+  ];
+  
+  // Check if the current path requires authentication
+  const isProtectedRoute = protectedPaths.some(path => pathname.startsWith(path));
+  
+  // Skip auth check for API routes (they'll handle their own auth)
+  if (pathname.startsWith('/api/') && !pathname.startsWith('/api/auth')) {
+    return res;
+  }
+  
+  // Skip authentication check for non-protected routes
   if (!isProtectedRoute) {
     return res;
   }
-
-  // Skip for API routes (they'll handle their own auth)
-  if (req.nextUrl.pathname.startsWith('/api/') && !req.nextUrl.pathname.startsWith('/api/auth')) {
-    return res;
-  }
-
-  // Get the refresh token from the cookies
-  const refreshToken = req.cookies.get('sb-refresh-token')?.value;
-  const accessToken = req.cookies.get('sb-access-token')?.value;
   
-  // If there's no refresh token, redirect to login
-  if (!refreshToken || !accessToken) {
+  // Get cookies from the request
+  const accessToken = req.cookies.get('sb-access-token')?.value;
+  const refreshToken = req.cookies.get('sb-refresh-token')?.value;
+  
+  // Debug cookie presence
+  console.log('Cookies in middleware:', {
+    accessTokenPresent: !!accessToken,
+    refreshTokenPresent: !!refreshToken,
+    requestUrl: pathname,
+  });
+  
+  // Basic validation - if there are no tokens, redirect to sign in
+  if (!accessToken || !refreshToken) {
+    console.log('No tokens found in cookies, redirecting to login');
     return redirectToLogin(req);
   }
-
-  // Create a Supabase client
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  );
-
+  
   try {
-    // Try to refresh the session
-    const { data, error } = await supabase.auth.setSession({
-      refresh_token: refreshToken,
-      access_token: accessToken,
-    });
-
-    if (error) {
-      console.error('Error refreshing session:', error);
+    // Check if the token is valid by decoding and checking expiry
+    if (isTokenExpired(accessToken)) {
+      console.log('Access token is expired, redirecting to login');
       return redirectToLogin(req);
     }
-
-    // Set the new tokens in cookies
-    res.cookies.set('sb-access-token', data.session?.access_token || '', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 3600 * 8,
-    });
-
-    res.cookies.set('sb-refresh-token', data.session?.refresh_token || '', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60,
-    });
-
+    
+    // Token is valid, proceed with the request
     return res;
-  } catch (error) {
-    console.error('Error in auth middleware:', error);
+  } catch (err) {
+    console.error('Middleware auth error:', err);
     return redirectToLogin(req);
   }
 }
 
-function redirectToLogin(req: NextRequest) {
-  const redirectUrl = req.nextUrl.clone();
-  redirectUrl.pathname = '/auth/signin';
+// Helper function to check if token is expired
+function isTokenExpired(token: string): boolean {
+  try {
+    // Split the token and get the payload part (middle)
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return true; // Invalid token format
+    }
+    
+    // Decode the base64 payload
+    const payload = JSON.parse(
+      Buffer.from(parts[1], 'base64').toString()
+    );
+    
+    // Check if the token has an expiry
+    if (!payload.exp) {
+      return false; // No expiry means it doesn't expire
+    }
+    
+    // Compare expiry timestamp (in seconds) with current time
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp < now;
+  } catch (error) {
+    console.error('Error parsing token:', error);
+    return true; // Consider expired on error
+  }
+}
+
+// Helper function to redirect to login page
+function redirectToLogin(req: NextRequest): NextResponse {
+  const redirectUrl = new URL('/auth/signin', req.url);
   redirectUrl.searchParams.set('redirect', req.nextUrl.pathname);
   return NextResponse.redirect(redirectUrl);
 }
 
-// Add paths where this middleware should run
+// Apply middleware to specific routes
 export const config = {
   matcher: [
     '/dashboard/:path*',
@@ -89,5 +103,5 @@ export const config = {
     '/mcp/:path*',
     '/pricing/:path*',
     '/api/payments/:path*',
-  ],
+  ]
 }; 

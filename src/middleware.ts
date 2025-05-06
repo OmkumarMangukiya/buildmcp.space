@@ -3,8 +3,17 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   
-  // Extract the pathname from the request URL
-  const { pathname } = req.nextUrl;
+  // Extract the pathname and search params from the request URL
+  const { pathname, searchParams } = req.nextUrl;
+  
+  // Skip auth check if this is a signout redirect
+  const isSignoutRedirect = searchParams.has('t') || 
+                          searchParams.has('signedout') || 
+                          searchParams.has('error');
+  if (pathname === '/auth/signin' && isSignoutRedirect) {
+    console.log('Detected signout redirect, skipping auth check');
+    return res;
+  }
   
   // Define protected routes that require authentication
   const protectedPaths = [

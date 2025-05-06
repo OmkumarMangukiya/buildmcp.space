@@ -218,31 +218,85 @@ export default function Dashboard() {
     try {
       setLoading(true);
       
-      // Sign out from Supabase
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('Error signing out:', error);
-        return;
-      }
-      
-      // Clear local storage
+      // First, manually clear important cookies from browser
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('sb');
-        localStorage.removeItem('sb-access-token');
-        localStorage.removeItem('sb-refresh-token');
+        const cookies = [
+          'sb-access-token', 
+          'sb-refresh-token',
+          'sb-auth-token',
+          'sb',
+          'supabase-auth-token'
+        ];
         
-        // Clear cookies by setting expiration in the past
-        document.cookie = 'sb-access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'sb-refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'sb-access-token-client=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'sb-refresh-token-client=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        cookies.forEach(name => {
+          document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0`;
+        });
+        
+        // Clear localStorage of any auth-related items
+        localStorage.removeItem('sb-auth-token');
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('sb-refresh-token');
+        localStorage.removeItem('sb-access-token');
+        
+        // Some users in the GitHub issue had success with localStorage.clear()
+        try {
+          localStorage.clear();
+        } catch (clearError) {
+          console.log('Error clearing localStorage:', clearError);
+        }
       }
       
-      // Redirect to sign in page
-      window.location.href = '/auth/signin';
+      // First try to refresh session, which sometimes helps with 403 issues
+      try {
+        await supabase.auth.refreshSession();
+      } catch (refreshError) {
+        console.log('Refresh error (expected, continuing):', refreshError);
+      }
+      
+      // Use our server API to sign out which will properly clear cookies
+      let serverSignoutSuccessful = false;
+      try {
+        const response = await fetch('/api/auth/signout', {
+          method: 'POST',
+          credentials: 'include',
+        });
+        
+        if (response.ok) {
+          serverSignoutSuccessful = true;
+          console.log('Server-side sign out successful');
+        } else {
+          console.log('Server-side sign out returned error but continuing');
+        }
+      } catch (serverError) {
+        console.log('Server-side sign out error (continuing):', serverError);
+      }
+      
+      // Also call client-side signOut to clear local state
+      try {
+        await supabase.auth.signOut();
+        console.log('Client-side sign out successful');
+      } catch (clientError: any) {
+        console.log('Client-side sign out error:', clientError);
+        
+        // Specifically handle the 403 "session_not_found" error
+        if (clientError.status === 403 || 
+            (clientError.message && clientError.message.includes('session_not_found'))) {
+          console.log('Got the known 403 session_not_found error, ignoring');
+        }
+      }
+      
+      // Refresh the page and force redirect to sign in
+      console.log('Sign out process complete, redirecting...');
+      
+      // Force a hard redirect to sign-in page with timestamp to bypass cache/middleware
+      const timestamp = Date.now();
+      window.location.replace(`/auth/signin?t=${timestamp}&signedout=true`);
+      
     } catch (error) {
       console.error('Error in sign out:', error);
+      // Even on error, try to redirect to sign-in with timestamp
+      const timestamp = Date.now();
+      window.location.replace(`/auth/signin?t=${timestamp}&error=true`);
     } finally {
       setLoading(false);
     }

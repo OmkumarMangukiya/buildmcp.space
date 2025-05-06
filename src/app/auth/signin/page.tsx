@@ -29,6 +29,7 @@ function SignInForm() {
   const isVerified = searchParams.get('verified') === 'true';
   const needsVerificationParam = searchParams.get('verify') === 'true';
   const verificationEmail = searchParams.get('email') || '';
+  const isResetSuccess = searchParams.get('resetSuccess') === 'true';
 
   useEffect(() => {
     // Show success message if the user just registered
@@ -38,8 +39,10 @@ function SignInForm() {
       setEmail(verificationEmail);
     } else if (isVerified) {
       setSuccessMessage('Your email has been verified! You can now sign in.');
+    } else if (isResetSuccess) {
+      setSuccessMessage('Your password has been successfully reset! You can now sign in with your new password.');
     }
-  }, [isRegistered, isVerified, needsVerificationParam, verificationEmail]);
+  }, [isRegistered, isVerified, needsVerificationParam, verificationEmail, isResetSuccess]);
 
   const handleResendVerification = async () => {
     if (!email) {

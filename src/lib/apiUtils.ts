@@ -31,7 +31,17 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
     // Handle 401 Unauthorized (possibly expired token even after refresh)
     if (response.status === 401) {
       // Force sign out if still unauthorized after refresh
-      await supabase.auth.signOut();
+      try {
+        // Use server-side signout endpoint to properly clear cookies
+        await fetch('/api/auth/signout', {
+          method: 'POST',
+          credentials: 'include',
+        });
+        // Also call client-side signOut to clear local state
+        await supabase.auth.signOut();
+      } catch (signOutError) {
+        console.error('Error during force sign out:', signOutError);
+      }
       throw new Error('Session expired. Please sign in again.');
     }
     

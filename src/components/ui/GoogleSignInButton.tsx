@@ -18,7 +18,9 @@ export default function GoogleSignInButton({ mode, className = '' }: GoogleSignI
     setIsLoading(true)
     try {
       // Get current URL for consistent redirect
-      const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+      const origin = typeof window !== 'undefined' 
+  ? window.location.origin 
+  : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
       
       // Clear any existing cookies/session before starting new auth flow
       if (typeof document !== 'undefined') {

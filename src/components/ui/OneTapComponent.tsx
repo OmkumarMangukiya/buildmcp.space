@@ -150,14 +150,8 @@ const OneTapComponent = () => {
                 const reason = notification.getNotDisplayedReason();
                 console.log('One Tap not displayed, reason:', reason);
                 
-                // Only consider it an error for certain reasons
-                // Don't show opt_out_or_no_session error to users
-                if (reason !== 'browser_not_supported' && 
-                    reason !== 'same_user_logged_in' && 
-                    reason !== 'secure_http_required' &&
-                    reason !== 'opt_out_or_no_session') {
-                  setError(`One Tap not displayed: ${reason}`);
-                }
+                // Don't show any One Tap errors to users, just log them
+                // setError(`One Tap not displayed: ${reason}`);
               } else if (notification.isSkippedMoment()) {
                 console.log('One Tap skipped:', notification.getSkippedReason());
               } else if (notification.isDismissedMoment()) {

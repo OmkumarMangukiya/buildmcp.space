@@ -123,13 +123,12 @@ function AuthCallbackContent() {
           <>
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--mcp-primary)] mx-auto"></div>
             <p className="mt-4 text-[var(--mcp-text)]">
-              {error ? `Error: ${error}` : 'Completing authentication...'}
+              {error ? 'Processing your request...' : 'Completing authentication...'}
             </p>
           </>
         ) : error ? (
           <div className="p-4 bg-red-50 rounded-lg">
             <p className="text-red-600 font-medium">Authentication Error</p>
-            <p className="text-red-500">{error}</p>
             <p className="text-sm mt-2">Redirecting to login page...</p>
           </div>
         ) : (

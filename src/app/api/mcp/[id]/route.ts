@@ -44,7 +44,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
           
           if (!authHeader) {
             return NextResponse.json({ 
-              error: 'This MCP is private', 
+              error: 'Access restricted', 
               isPrivate: true 
             }, { status: 403 });
           }
@@ -55,7 +55,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
             
             if (authError || !user) {
               return NextResponse.json({ 
-                error: 'This MCP is private', 
+                error: 'Access restricted', 
                 isPrivate: true 
               }, { status: 403 });
             }
@@ -63,7 +63,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
             // Verify user has permission
             if (user.id !== mcpPublicData.user_id) {
               return NextResponse.json({ 
-                error: 'You do not have permission to access this private MCP', 
+                error: 'You do not have permission to access this content', 
                 isPrivate: true 
               }, { status: 403 });
             }
@@ -81,7 +81,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
           } catch (authError) {
             console.error('Auth error:', authError);
             return NextResponse.json({ 
-              error: 'Authentication error', 
+              error: 'Session expired, please sign in again', 
               isPrivate: true 
             }, { status: 401 });
           }
@@ -101,7 +101,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const data = supabaseResult || mcpData;
 
     if (!data) {
-      return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Content not found' }, { status: 404 });
     }
 
     // If the debug parameter is true, return detailed information about where the MCP was found
@@ -140,7 +140,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     });
   } catch (error) {
     console.error(`Error fetching MCP ${params.id}:`, error);
-    return NextResponse.json({ error: 'Failed to fetch MCP configuration' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to load content' }, { status: 500 });
   }
 }
 
@@ -153,7 +153,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const csrfToken = request.headers.get('X-CSRF-Token');
 
     if (!config) {
-      return NextResponse.json({ error: 'Missing config in request body' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
     }
 
     // Parse the config to ensure it's an object in the database
@@ -166,14 +166,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       const authHeader = headers.get('authorization');
       
       if (!authHeader) {
-        return NextResponse.json({ error: 'Authorization required' }, { status: 401 });
+        return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
       }
       
       const token = authHeader.replace('Bearer ', '');
       const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
       
       if (authError || !user) {
-        return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 });
+        return NextResponse.json({ error: 'Session expired, please sign in again' }, { status: 401 });
       }
       
       // Verify CSRF token if present
@@ -200,12 +200,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         .single();
       
       if (mcpError) {
-        return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Content not found' }, { status: 404 });
       }
       
       // Verify ownership
       if (mcpData.user_id !== user.id) {
-        return NextResponse.json({ error: 'Unauthorized to modify this MCP' }, { status: 403 });
+        return NextResponse.json({ error: 'You do not have permission to modify this content' }, { status: 403 });
       }
       
       // Try to update in Supabase
@@ -250,7 +250,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     
     // Fall back to mock database
     if (!getMcp(id)) {
-      return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Content not found' }, { status: 404 });
     }
     
     // Update the mock database
@@ -260,7 +260,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ mcpId: id, config });
   } catch (error) {
     console.error(`Error updating MCP ${params.id}:`, error);
-    return NextResponse.json({ error: 'Failed to update MCP configuration' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to update content' }, { status: 500 });
   }
 }
 
@@ -277,19 +277,19 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       const authHeader = headers.get('authorization');
       
       if (!authHeader) {
-        return NextResponse.json({ error: 'Authorization required' }, { status: 401 });
+        return NextResponse.json({ error: 'Please sign in to continue' }, { status: 401 });
       }
       
       const token = authHeader.replace('Bearer ', '');
       const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
       
       if (authError || !user) {
-        return NextResponse.json({ error: 'Invalid authentication' }, { status: 401 });
+        return NextResponse.json({ error: 'Session expired, please sign in again' }, { status: 401 });
       }
       
       // Verify CSRF token if present
       if (!csrfToken) {
-        return NextResponse.json({ error: 'CSRF token required' }, { status: 403 });
+        return NextResponse.json({ error: 'Security verification failed' }, { status: 403 });
       }
       
       // Import the csrf module directly to avoid circular dependencies
@@ -297,7 +297,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       
       // Validate CSRF token
       if (!csrf.validate(csrfToken, user.id)) {
-        return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
+        return NextResponse.json({ error: 'Security verification failed' }, { status: 403 });
       }
       
       // Get MCP to verify ownership
@@ -308,12 +308,12 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         .single();
       
       if (mcpError) {
-        return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
+        return NextResponse.json({ error: 'Content not found' }, { status: 404 });
       }
       
       // Verify ownership
       if (mcpData.user_id !== user.id) {
-        return NextResponse.json({ error: 'Unauthorized to delete this MCP' }, { status: 403 });
+        return NextResponse.json({ error: 'You do not have permission to delete this content' }, { status: 403 });
       }
       
       // Try to delete from Supabase
@@ -324,7 +324,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
       if (!error) {
         console.log(`MCP deleted from Supabase: ${id}`);
-        return NextResponse.json({ message: 'MCP deleted successfully' });
+        return NextResponse.json({ message: 'Content deleted successfully' });
       }
       
       if (error) {
@@ -336,16 +336,16 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     
     // Fall back to mock database
     if (!getMcp(id)) {
-      return NextResponse.json({ error: 'MCP not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Content not found' }, { status: 404 });
     }
     
     // Delete from the mock database
     deleteMcp(id);
     console.log(`MCP deleted from mock DB: ${id}`);
     
-    return NextResponse.json({ message: 'MCP deleted successfully' });
+    return NextResponse.json({ message: 'Content deleted successfully' });
   } catch (error) {
     console.error(`Error deleting MCP ${params.id}:`, error);
-    return NextResponse.json({ error: 'Failed to delete MCP configuration' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to delete content' }, { status: 500 });
   }
 }

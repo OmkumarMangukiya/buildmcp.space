@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,27 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import supabase from '@/lib/supaClient';
 
-export default function ResetPassword() {
+// Loading component for Suspense fallback
+function ResetPasswordLoading() {
+  return (
+    <div className="flex min-h-screen items-center justify-center px-4 bg-[var(--mcp-background-primary)] text-[var(--mcp-text)]">
+      <Card className="w-full max-w-md bg-[var(--mcp-background-secondary)] border border-[var(--mcp-border)]">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-[var(--mcp-text)]">Reset Password</CardTitle>
+          <CardDescription className="text-[var(--mcp-text-muted)]">
+            Loading...
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex justify-center py-8">
+          <div className="animate-pulse h-8 w-8 rounded-full bg-[var(--mcp-primary)]"></div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Main component content
+function ResetPasswordContent() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +38,6 @@ export default function ResetPassword() {
   const [successMessage, setSuccessMessage] = useState('');
   const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Extract token from URL hash fragment
   useEffect(() => {
@@ -44,7 +63,6 @@ export default function ResetPassword() {
       
       // Continue with token extraction...
       const accessToken = params.get('access_token');
-      const type = params.get('type');
       
       if (accessToken) {
         setToken(accessToken);
@@ -204,5 +222,14 @@ export default function ResetPassword() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+// Main export that wraps the component in Suspense
+export default function ResetPassword() {
+  return (
+    <Suspense fallback={<ResetPasswordLoading />}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 } 

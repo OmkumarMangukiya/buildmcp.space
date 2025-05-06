@@ -126,12 +126,7 @@ function AuthCallbackContent() {
               {error ? 'Processing your request...' : 'Completing authentication...'}
             </p>
           </>
-        ) : error ? (
-          <div className="p-4 bg-red-50 rounded-lg">
-            <p className="text-red-600 font-medium">Authentication Error</p>
-            <p className="text-sm mt-2">Redirecting to login page...</p>
-          </div>
-        ) : (
+        ) :  (
           <div className="p-4 bg-green-50 rounded-lg">
             <p className="text-green-600 font-medium">Authentication Successful</p>
             <p className="text-sm">Redirecting to dashboard...</p>

@@ -152,7 +152,7 @@ export default function Home() {
                 height={80}
                 className="h-14 w-auto"
               />
-              <span className="text-[#C45736] font-semibold text-base mt-2">Cursor</span>
+              <span className="text-[#C45736] font-semibold text-base mt-2"></span>
             </div>
             <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
               <Image
@@ -162,7 +162,7 @@ export default function Home() {
                 height={80}
                 className="h-14 w-auto"
               />
-              <span className="text-[#C45736] font-semibold text-base mt-2">Claude Desktop</span>
+              <span className="text-[#C45736] font-semibold text-base mt-2"></span>
             </div>
             <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
               <Image
@@ -172,7 +172,7 @@ export default function Home() {
                 height={80}
                 className="h-14 w-auto"
               />
-              <span className="text-[#C45736] font-semibold text-base mt-2">VSCode</span>
+              <span className="text-[#C45736] font-semibold text-base mt-2"></span>
             </div>
             <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
               <Image
@@ -182,7 +182,7 @@ export default function Home() {
                 height={80}
                 className="h-14 w-auto"
               />
-              <span className="text-[#C45736] font-semibold text-base mt-2">ChatGPT</span>
+              <span className="text-[#C45736] font-semibold text-base mt-2"></span>
             </div>
           </div>
         </div>

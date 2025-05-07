@@ -144,17 +144,45 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto mb-16">
-            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 flex items-center justify-center aspect-square border border-white/10">
-              <span className="text-[#C45736] font-semibold text-xl">Cursor</span>
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
+              <Image
+                src="/cursor.svg"
+                alt="Cursor"
+                width={80}
+                height={80}
+                className="h-14 w-auto"
+              />
+              <span className="text-[#C45736] font-semibold text-base mt-2">Cursor</span>
             </div>
-            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 flex items-center justify-center aspect-square border border-white/10">
-              <span className="text-[#C45736] font-semibold text-xl">Claude Desktop</span>
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
+              <Image
+                src="/claude.svg"
+                alt="Claude Desktop"
+                width={80}
+                height={80}
+                className="h-14 w-auto"
+              />
+              <span className="text-[#C45736] font-semibold text-base mt-2">Claude Desktop</span>
             </div>
-            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 flex items-center justify-center aspect-square border border-white/10">
-              <span className="text-[#C45736] font-semibold text-xl">VSCode</span>
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
+              <Image
+                src="/vscode.svg"
+                alt="VSCode"
+                width={80}
+                height={80}
+                className="h-14 w-auto"
+              />
+              <span className="text-[#C45736] font-semibold text-base mt-2">VSCode</span>
             </div>
-            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-8 flex items-center justify-center aspect-square border border-white/10">
-              <span className="text-[#C45736] font-semibold text-xl">ChatGPT</span>
+            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
+              <Image
+                src="/openai.svg"
+                alt="ChatGPT"
+                width={80}
+                height={80}
+                className="h-14 w-auto"
+              />
+              <span className="text-[#C45736] font-semibold text-base mt-2">ChatGPT</span>
             </div>
           </div>
         </div>

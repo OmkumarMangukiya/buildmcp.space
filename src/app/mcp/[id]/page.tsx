@@ -211,7 +211,7 @@ export default function McpDetailsPage() {
       if (mcp && mcp.name) {
         // Normalize name to remove spaces and special characters
         const normalizedName = mcp.name.replace(/[^a-zA-Z0-9-_]/g, '');
-        fileName = `${normalizedName}-bundle.zip`;
+        fileName = `${normalizedName}.zip`;
       } else {
         // Fallback to ID-based name
         const mcpId = typeof params.id === 'string' ? params.id : params.id[0];

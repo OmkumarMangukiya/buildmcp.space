@@ -142,11 +142,20 @@ export default function CreateMcpPage() {
         }
       }
 
-      // Create download element with proper authentication
-      const a = document.createElement('a');
-      a.href = `/api/mcp/download/${mcpId}/${type}`;
-      a.setAttribute('download', `mcp-${mcpId.substring(0, 6)}.zip`);
-      
+      // Parse the config to get the MCP name
+      let mcpName = 'mcp';
+      if (generatedConfig) {
+        try {
+          const config = JSON.parse(generatedConfig);
+          if (config.metadata && config.metadata.name) {
+            // Normalize the name to remove spaces and special characters
+            mcpName = config.metadata.name.replace(/[^a-zA-Z0-9-_]/g, '');
+          }
+        } catch (err) {
+          console.warn('Could not parse config for MCP name:', err);
+        }
+      }
+
       // Set up fetch request with authentication
       const downloadResponse = await fetch(`/api/mcp/download/${mcpId}/${type}?userId=${session.user.id}`, {
         method: 'GET',
@@ -164,9 +173,14 @@ export default function CreateMcpPage() {
       
       const blob = await downloadResponse.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
+      
+      // Create download element with the normalized MCP name
+      const a = document.createElement('a');
       a.href = downloadUrl;
+      a.setAttribute('download', `${mcpName}-${type}.zip`);
       document.body.appendChild(a);
       a.click();
+      
       window.URL.revokeObjectURL(downloadUrl);
       document.body.removeChild(a);
     } catch (error) {

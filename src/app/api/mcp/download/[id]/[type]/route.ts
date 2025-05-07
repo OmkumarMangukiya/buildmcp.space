@@ -501,6 +501,12 @@ export async function GET(request: Request, { params }: { params: { id: string, 
       return NextResponse.json({ error: 'Download not available' }, { status: 404 });
     }
     
+    // Get the normalized MCP name from the config if available
+    const mcpConfig = downloadData.config || {};
+    const mcpName = mcpConfig.metadata?.name || `mcp-${id.substring(0, 6)}`;
+    // Normalize the MCP name for folder and file names
+    const normalizedMcpName = mcpName.replace(/[^a-zA-Z0-9-_]/g, '');
+    
     // Create a zip file based on the requested type
     const zip = new JSZip();
     
@@ -599,9 +605,9 @@ export async function GET(request: Request, { params }: { params: { id: string, 
     // Prepare the response with appropriate headers
     const response = new NextResponse(zipContent);
     
-    // Set headers
+    // Set headers with normalized name
     response.headers.set('Content-Type', 'application/zip');
-    response.headers.set('Content-Disposition', `attachment; filename="mcp-${type}-${id.substring(0, 6)}.zip"`);
+    response.headers.set('Content-Disposition', `attachment; filename="${normalizedMcpName}-${type}.zip"`);
     
     return response;
   } catch (error) {

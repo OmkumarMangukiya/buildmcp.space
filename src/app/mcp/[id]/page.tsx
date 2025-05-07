@@ -205,9 +205,20 @@ export default function McpDetailsPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      // Ensure params.id is treated as a string
-      const mcpId = typeof params.id === 'string' ? params.id : params.id[0];
-      a.download = `mcp-${mcpId.substring(0, 6)}.zip`;
+      
+      // Get a normalized name from the MCP data
+      let fileName;
+      if (mcp && mcp.name) {
+        // Normalize name to remove spaces and special characters
+        const normalizedName = mcp.name.replace(/[^a-zA-Z0-9-_]/g, '');
+        fileName = `${normalizedName}-bundle.zip`;
+      } else {
+        // Fallback to ID-based name
+        const mcpId = typeof params.id === 'string' ? params.id : params.id[0];
+        fileName = `mcp-${mcpId.substring(0, 6)}.zip`;
+      }
+      
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

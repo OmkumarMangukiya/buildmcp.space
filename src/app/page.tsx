@@ -446,6 +446,8 @@ export default function Home() {
               <ul className="space-y-3">
                 <li><Link href="/contact" className="text-[#DEDDDC]/60 hover:text-white text-sm">Contact</Link></li>
                 <li><Link href="/privacy" className="text-[#DEDDDC]/60 hover:text-white text-sm">Privacy</Link></li>
+                <li><Link href="/terms" className="text-[#DEDDDC]/60 hover:text-white text-sm">Terms</Link></li>
+                <li><Link href="/refund-policy" className="text-[#DEDDDC]/60 hover:text-white text-sm">Refund Policy</Link></li>
               </ul>
             </div>
             <div>
@@ -460,6 +462,7 @@ export default function Home() {
             <div className="flex space-x-6">
               <Link href="/terms" className="text-[#DEDDDC]/40 hover:text-white text-sm">Terms</Link>
               <Link href="/privacy" className="text-[#DEDDDC]/40 hover:text-white text-sm">Privacy</Link>
+              <Link href="/refund-policy" className="text-[#DEDDDC]/40 hover:text-white text-sm">Refund Policy</Link>
             </div>
           </div>
         </div>

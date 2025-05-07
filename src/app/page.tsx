@@ -144,7 +144,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto mb-16">
-            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
+            <div className="p-6 flex flex-col items-center justify-center aspect-square gap-4">
               <Image
                 src="/cursor.svg"
                 alt=""
@@ -154,7 +154,7 @@ export default function Home() {
               />
               <span className="text-[#C45736] font-semibold text-base mt-2"></span>
             </div>
-            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
+            <div className="p-6 flex flex-col items-center justify-center aspect-square gap-4">
               <Image
                 src="/claude.svg"
                 alt=""
@@ -164,7 +164,7 @@ export default function Home() {
               />
               <span className="text-[#C45736] font-semibold text-base mt-2"></span>
             </div>
-            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
+            <div className="p-6 flex flex-col items-center justify-center aspect-square gap-4">
               <Image
                 src="/vscode.svg"
                 alt=""
@@ -174,7 +174,7 @@ export default function Home() {
               />
               <span className="text-[#C45736] font-semibold text-base mt-2"></span>
             </div>
-            <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
+            <div className="p-6 flex flex-col items-center justify-center aspect-square gap-4">
               <Image
                 src="/openai.svg"
                 alt=""

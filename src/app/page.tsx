@@ -147,7 +147,7 @@ export default function Home() {
             <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
               <Image
                 src="/cursor.svg"
-                alt="Cursor"
+                alt=""
                 width={80}
                 height={80}
                 className="h-14 w-auto"
@@ -157,7 +157,7 @@ export default function Home() {
             <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
               <Image
                 src="/claude.svg"
-                alt="Claude Desktop"
+                alt=""
                 width={80}
                 height={80}
                 className="h-14 w-auto"
@@ -167,7 +167,7 @@ export default function Home() {
             <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
               <Image
                 src="/vscode.svg"
-                alt="VSCode"
+                alt=""
                 width={80}
                 height={80}
                 className="h-14 w-auto"
@@ -177,7 +177,7 @@ export default function Home() {
             <div className="bg-[#1F1F1F] backdrop-blur-md rounded-lg p-6 flex flex-col items-center justify-center aspect-square border border-white/10 gap-4">
               <Image
                 src="/openai.svg"
-                alt="ChatGPT"
+                alt=""
                 width={80}
                 height={80}
                 className="h-14 w-auto"

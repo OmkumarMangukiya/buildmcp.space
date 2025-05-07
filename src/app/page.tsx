@@ -74,7 +74,7 @@ export default function Home() {
 
             <div className="flex justify-center">
               <Link href="/auth/signup">
-                <Button className="get-started-btn font-medium text-base px-8 py-4 bg-[#E1623D] text-white hover:bg-[#E1623D]/90 border-l-2 border-b-2 border-[#B2512F] transform scale-100 transition-transform duration-300">
+                <Button className="get-started-btn font-medium text-base px-8 py-4 bg-[#E1623D] text-white hover:bg-[#E1623D]/90 border-l-2 border-b-2 border-[#B2512F] transform scale-100 transition-transform duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]">
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>

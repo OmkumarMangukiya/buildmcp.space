@@ -25,6 +25,16 @@ export interface ServerPackage {
 }
 
 /**
+ * Helper function to safely handle toLowerCase for string | string[] union types
+ */
+function safeToLowerCase(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) {
+    return value.join(',').toLowerCase();
+  }
+  return (value || '').toLowerCase();
+}
+
+/**
  * Construct the base prompt for the LLM to generate the MCP server
  */
 function constructBasePrompt(
@@ -64,7 +74,7 @@ Please generate a complete, working MCP server implementation that follows all M
  * Get client-specific instructions based on the target client
  */
 function getClientSpecificInstructions(client: string): string {
-  if (client.toLowerCase().includes('claude')) {
+  if (safeToLowerCase(client).includes('claude')) {
     return `
 Since this server will be used with Claude Desktop:
 - Include a sample claude_desktop_config.json configuration
@@ -72,7 +82,7 @@ Since this server will be used with Claude Desktop:
 - Implement appropriate error handling for local execution
 - Follow Claude Desktop's security model for local tools
 `;
-  } else if (client.toLowerCase().includes('cursor')) {
+  } else if (safeToLowerCase(client).includes('cursor')) {
     return `
 Since this server will be used with Cursor AI:
 - Include a sample .cursor/mcp.json configuration
@@ -125,6 +135,20 @@ PROTOCOL SPECIFICATIONS:
 - Resources must have content-type and data fields
 - Error handling must follow protocol-defined formats
 - Transport mechanisms include stdio and sse options
+
+TYPE SAFETY BEST PRACTICES:
+- Always handle string | string[] union types safely:
+  * NEVER call .toLowerCase() directly on parameters that could be arrays
+  * Create and use helper functions like:
+    function safeToLowerCase(value: string | string[] | undefined): string {
+      if (Array.isArray(value)) {
+        return value.join(',').toLowerCase();
+      }
+      return (value || '').toLowerCase();
+    }
+  * Use type guards with Array.isArray() before accessing string methods
+  * When using string methods like .includes(), .toLowerCase(), .trim(), etc.,
+    ALWAYS check the type first or use a safe helper function
 
 MODERN MCP SDK EXAMPLES:
 
@@ -181,24 +205,42 @@ server.resource(
 );
 \`\`\`
 
-3. Prompt Definition:
+3. Proper Type Handling Example:
 \`\`\`typescript
-// Define a code review prompt
-server.prompt(
-  "review_code",
+// Safe type handling for file search
+server.tool(
+  "file_search",
   { 
-    code: z.string().describe("Code to review"),
-    language: z.string().describe("Programming language")
+    query: z.string().describe("Search term to find in files"),
+    caseSensitive: z.boolean().default(false).describe("Whether to use case-sensitive search")
   },
-  ({ code, language }) => ({
-    messages: [{
-      role: "user",
-      content: {
-        type: "text",
-        text: \`Please review this \${language} code and suggest improvements:\n\n\${code}\`
-      }
-    }]
-  })
+  async ({ query, caseSensitive }) => {
+    try {
+      // Implement search logic with proper type handling
+      const results = await searchFiles(query, caseSensitive);
+      
+      // Type-safe processing of results
+      const formattedResults = results.map(result => {
+        // Always check if properties might be arrays using type guards
+        const fileName = Array.isArray(result.name) ? result.name.join('/') : result.name;
+        
+        // Safe toLowerCase usage with type checking
+        const displayName = caseSensitive ? fileName : 
+          (typeof fileName === 'string' ? fileName.toLowerCase() : String(fileName).toLowerCase());
+        
+        return \`\${displayName}: \${result.matches} matches\`;
+      });
+      
+      return {
+        content: [{ type: "text", text: formattedResults.join("\\n") }]
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: \`Error searching files: \${error.message}\` }],
+        isError: true
+      };
+    }
+  }
 );
 \`\`\`
 `;
@@ -263,7 +305,7 @@ function validateMcpCompliance(serverCode: string, language?: string): { isValid
   }
 
   // Check for TypeScript type handling
-  if (language?.toLowerCase().includes('typescript')) {
+  if (language && safeToLowerCase(language).includes('typescript')) {
     const hasComplexTypeHandling = serverCode.includes('interface') || 
                                  serverCode.includes('type ') || 
                                  serverCode.includes('<');
@@ -285,7 +327,7 @@ function validateMcpCompliance(serverCode: string, language?: string): { isValid
                       
   if (hasUnionTypes) {
     // Check for proper type guards in TypeScript
-    if (language?.toLowerCase().includes('typescript') && 
+    if (language && safeToLowerCase(language).includes('typescript') && 
         !serverCode.includes('Array.isArray') &&
         !serverCode.includes('ensureString') &&
         !serverCode.includes('ensureArray')) {
@@ -293,7 +335,7 @@ function validateMcpCompliance(serverCode: string, language?: string): { isValid
     }
     
     // Check for proper type handling in Python
-    if (language?.toLowerCase().includes('python') && 
+    if (language && safeToLowerCase(language).includes('python') && 
         !serverCode.includes('isinstance') &&
         !serverCode.includes('ensure_string') &&
         !serverCode.includes('ensure_list')) {
@@ -313,16 +355,16 @@ function validateMcpCompliance(serverCode: string, language?: string): { isValid
                              serverCode.includes('safe_path_join');
     
     if (!hasStringConversion) {
-      if (language?.toLowerCase().includes('typescript')) {
+      if (language && safeToLowerCase(language).includes('typescript')) {
         issues.push('Path operations (path.join, path.resolve) should use String() conversion for all arguments');
-      } else if (language?.toLowerCase().includes('python')) {
+      } else if (language && safeToLowerCase(language).includes('python')) {
         issues.push('Path operations (os.path.join) should use str() conversion for all arguments');
       }
     }
   }
 
   // Check for TypeScript-specific requirements
-  if (language?.toLowerCase().includes('typescript')) {
+  if (language && safeToLowerCase(language).includes('typescript')) {
     // TypeScript-specific checks
     if (!serverCode.includes('import { McpServer }')) {
       issues.push('Should import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"');
@@ -377,7 +419,7 @@ function createRefinementPrompt(issues: string[], language?: string): string {
   // Add language-specific guidance
   let additionalGuidance = '';
   
-  if (language?.toLowerCase().includes('typescript')) {
+  if (language && safeToLowerCase(language).includes('typescript')) {
     additionalGuidance = `
 When refining TypeScript MCP server implementations:
 1. Ensure all imports use the .js extension (e.g., '@modelcontextprotocol/sdk/server/index.js')
@@ -402,8 +444,21 @@ When refining TypeScript MCP server implementations:
    - When working with Obsidian vault paths, always use String() conversion
 12. CRITICAL: For fs.promises.readdir and other fs functions, ALWAYS use String() conversion:
    - fs.promises.readdir(String(directory)) to prevent 'Argument of type string | string[] is not assignable to parameter of type PathLike' errors
+13. CRITICAL: Never call string methods directly on variables that could be arrays:
+   - WRONG: value.toLowerCase() -- will fail if value is string[]
+   - RIGHT: typeof value === 'string' ? value.toLowerCase() : value.join(',').toLowerCase()
+   - BEST: Use a helper function like safeToLowerCase(value)
+   - Add this helper function to your code:
+     \`\`\`typescript
+     function safeToLowerCase(value: string | string[] | undefined): string {
+       if (Array.isArray(value)) {
+         return value.join(',').toLowerCase();
+       }
+       return (value || '').toLowerCase();
+     }
+     \`\`\`
 `;
-  } else if (language?.toLowerCase().includes('python')) {
+  } else if (language && safeToLowerCase(language).includes('python')) {
     additionalGuidance = `
 When refining Python MCP server implementations:
 1. Use modern Python async/await syntax
@@ -417,6 +472,16 @@ When refining Python MCP server implementations:
    - os.path.join(base_dir, str(variable)) to handle mixed types
    - Use helper functions like safe_path_join to convert all parts to strings
    - Always check types before combining paths
+9. CRITICAL: Never call string methods directly on variables that could be lists:
+   - WRONG: value.lower() -- will fail if value is a list
+   - RIGHT: value.lower() if isinstance(value, str) else ','.join(value).lower()
+   - BEST: Use a helper function like:
+     \`\`\`python
+     def safe_lower(value: Union[str, List[str], None]) -> str:
+         if isinstance(value, list):
+             return ','.join(value).lower()
+         return (value or '').lower()
+     \`\`\`
 `;
   } else {
     additionalGuidance = `
@@ -433,11 +498,14 @@ For TypeScript specifically:
 3. Use type guards to safely narrow types after using 'any' or 'unknown'
 4. IMPORTANT: When using path.join(), ALWAYS convert all arguments to strings with String()
 5. For Obsidian vault paths handling, always use String() to convert note names or paths
+6. CRITICAL: Never call string methods directly on variables that could be arrays:
+   - Create a helper function like safeToLowerCase() that first checks the type
 
 For Python specifically:
 1. Use str() conversion with os.path.join for all path components
 2. Check types with isinstance() before operations
 3. Implement helper functions for path operations
+4. CRITICAL: Never call string methods on variables that could be lists without type checking first
 `;
   }
 
@@ -458,7 +526,7 @@ Please refine the implementation to address these issues, with special attention
 function generateClientConfig(client: string, serverCode: string): ClientConfig {
   const isTypeScript = serverCode.includes('import { Server }') || serverCode.includes('@modelcontextprotocol/sdk');
 
-  if (client.toLowerCase().includes('claude')) {
+  if (safeToLowerCase(client).includes('claude')) {
     return {
       name: 'Claude Desktop',
       configuration: {
@@ -471,7 +539,7 @@ function generateClientConfig(client: string, serverCode: string): ClientConfig 
         ]
       }
     };
-  } else if (client.toLowerCase().includes('cursor')) {
+  } else if (safeToLowerCase(client).includes('cursor')) {
     return {
       name: 'Cursor AI',
       configuration: {
@@ -507,7 +575,7 @@ function packageForLocalExecution(serverCode: string, language?: string): Record
   // This would generate actual files in a real implementation
   // For now, we'll just return placeholders
   
-  if (language?.toLowerCase().includes('python')) {
+  if (language && safeToLowerCase(language).includes('python')) {
     return {
       'server.py': serverCode,
       'requirements.txt': 'modelcontextprotocol>=1.0.0\n',
@@ -516,7 +584,7 @@ function packageForLocalExecution(serverCode: string, language?: string): Record
       'run.sh': '#!/bin/bash\n./venv/bin/python server.py\n',
       'run.bat': '@echo off\nvenv\\Scripts\\python server.py\n'
     };
-  } else if (language?.toLowerCase().includes('typescript')) {
+  } else if (language && safeToLowerCase(language).includes('typescript')) {
     return {
       'server.ts': serverCode,
       'tsconfig.json': `{
@@ -609,7 +677,7 @@ Place this in your .cursor/mcp.json file:
 \`\`\`
 `
     };
-  } else if (language?.toLowerCase().includes('node') || language?.toLowerCase().includes('javascript')) {
+  } else if (language && (safeToLowerCase(language).includes('node') || safeToLowerCase(language).includes('javascript'))) {
     return {
       'server.js': serverCode,
       'package.json': '{\n  "name": "mcp-server",\n  "version": "1.0.0",\n  "main": "server.js",\n  "type": "module",\n  "scripts": {\n    "start": "node server.js"\n  },\n  "dependencies": {\n    "@modelcontextprotocol/sdk": "^1.0.0"\n  }\n}',
@@ -1052,6 +1120,14 @@ function ensureArray<T>(value: T | T[] | undefined): T[] {
   return value ? [value] : [];
 }
 
+// Safely handle toLowerCase on string | string[] union types
+function safeToLowerCase(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) {
+    return value.join(',').toLowerCase();
+  }
+  return (value || '').toLowerCase();
+}
+
 // Safely join paths with proper type handling
 function safePathJoin(base: string, ...parts: (string | string[] | undefined)[]): string {
   // Convert each part to string safely
@@ -1103,7 +1179,8 @@ server.tool(
         if (extensionList.length > 0) {
           const fileExt = path.extname(file).toLowerCase().replace('.', '');
           return matchesQuery && extensionList.some(ext => 
-            ext.toLowerCase() === fileExt
+            // Use safeToLowerCase for safe string | string[] handling
+            safeToLowerCase(ext) === fileExt
           );
         }
         
@@ -1331,7 +1408,8 @@ server.resource(
   "sample_resource",
   new ResourceTemplate("file:///sample/{filename}", { list: undefined }),
   async (uri, { filename }) => {
-    if (filename.toLowerCase() === "resource.txt") { // Case-insensitive matching
+    // Use safeToLowerCase for case-insensitive comparisons
+    if (safeToLowerCase(filename) === "resource.txt") { // Case-insensitive matching
       return {
         contents: [
           {
@@ -1395,6 +1473,15 @@ def ensure_list(value: Union[Any, List[Any], None]) -> List[Any]:
         return value
     return [value]
 
+# Safe lowercase handling
+def safe_lower(value: Union[str, List[str], None]) -> str:
+    """Safely convert string or list of strings to lowercase."""
+    if value is None:
+        return ""
+    if isinstance(value, list):
+        return ",".join(value).lower()
+    return value.lower()
+
 # Safe path joining
 def safe_path_join(base: str, *parts: Any) -> str:
     """Safely join paths, converting all parts to strings."""
@@ -1435,8 +1522,8 @@ async def list_resources(request):
 @server.request_handler(ReadResourceRequestSchema)
 async def read_resource(request):
     uri = request.params.uri
-    # Case-insensitive comparison for resource URI
-    if uri.lower() == "file:///sample/resource.txt".lower():
+    # Case-insensitive comparison for resource URI - using safe_lower helper
+    if safe_lower(uri) == safe_lower("file:///sample/resource.txt"):
         return {
             "contents": [
                 {
@@ -1570,13 +1657,13 @@ async def call_tool(request):
                             all_matches.append(f"{file_path} (Line {i+1}): {line.strip()}")
                             
                 except Exception as file_error:
-                    all_matches.push(\`Error reading \${file_path}: \${file_error}\`);
+                    all_matches.push(f"Error reading {file_path}: {file_error}")
               
               return {
                 "content": [
                     {
                         "type": "text",
-                        "text": f"Found \${len(all_matches)} instances of '{query}'" + 
+                        "text": f"Found {len(all_matches)} instances of '{query}'" + 
                                (f":\\n{chr(10).join(all_matches)}" if all_matches else "")
                     }
                 ]
@@ -1587,7 +1674,7 @@ async def call_tool(request):
                 "content": [
                     {
                         "type": "text",
-                        "text": f"Error in content search: \${str(e)}"
+                        "text": f"Error in content search: {str(e)}"
                     }
                 ]
             }
@@ -1616,7 +1703,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except Exception as e:
-        print(f"Fatal error: \${e}", file=sys.stderr)
+        print(f"Fatal error: {e}", file=sys.stderr)
         sys.exit(1)
 `;
   }

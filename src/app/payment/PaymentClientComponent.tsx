@@ -7,6 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import supabase from '@/lib/supaClient';
 import Link from 'next/link';
 import { CardFooter } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 // PayPal script loader
 const loadPayPalScript = (clientId: string): Promise<void> => {
@@ -42,6 +44,19 @@ const getPlanDetails = (id: string) => {
   }
 };
 
+// Promo code validator
+const validatePromoCode = (code: string, planInterval: string) => {
+  // Currently only supporting the ERBD21 code for monthly plans
+  if (code === 'ERBD21' && planInterval === 'monthly') {
+    return {
+      valid: true,
+      discountPercent: 21,
+      code: 'ERBD21'
+    };
+  }
+  return { valid: false };
+};
+
 export default function PaymentClientComponent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -55,6 +70,13 @@ export default function PaymentClientComponent() {
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
+  
+  // Promo code states
+  const [promoCode, setPromoCode] = useState('');
+  const [promoCodeStatus, setPromoCodeStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
+  const [discount, setDiscount] = useState<{percent: number, amount: number} | null>(null);
+  const [finalPrice, setFinalPrice] = useState<number | null>(null);
+  const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -84,6 +106,7 @@ export default function PaymentClientComponent() {
         }
         
         setPlanDetails(details);
+        setFinalPrice(details.price); // Set initial final price
         
         // Load PayPal script
         const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
@@ -110,9 +133,40 @@ export default function PaymentClientComponent() {
     init();
   }, [planId, router, userId]);
   
+  // Apply promo code
+  const applyPromoCode = () => {
+    if (!promoCode || !planDetails) return;
+    
+    setPromoCodeStatus('validating');
+    
+    // Simulate server validation with the local function
+    setTimeout(() => {
+      const validation = validatePromoCode(promoCode, planDetails.interval);
+      
+      if (validation.valid) {
+        const discountAmount = (planDetails.price * validation.discountPercent / 100);
+        const newFinalPrice = parseFloat((planDetails.price - discountAmount).toFixed(2));
+        
+        setDiscount({
+          percent: validation.discountPercent,
+          amount: discountAmount
+        });
+        setFinalPrice(newFinalPrice);
+        setPromoCodeStatus('valid');
+        setAppliedPromoCode(validation.code);
+      } else {
+        setPromoCodeStatus('invalid');
+        // Reset any previous discounts
+        setDiscount(null);
+        setFinalPrice(planDetails.price);
+        setAppliedPromoCode(null);
+      }
+    }, 500);
+  };
+  
   // Initialize PayPal buttons when script is loaded
   useEffect(() => {
-    if (!paypalLoaded || !planDetails || !window.paypal || !user) return;
+    if (!paypalLoaded || !planDetails || !window.paypal || !user || !finalPrice) return;
     
     const paypalButtonsContainer = document.getElementById('paypal-button-container');
     if (!paypalButtonsContainer) return;
@@ -134,7 +188,7 @@ export default function PaymentClientComponent() {
           purchase_units: [{
             description: `${planDetails.name} Subscription`,
             amount: {
-              value: planDetails.price.toString()
+              value: finalPrice.toString()
             }
           }]
         });
@@ -157,7 +211,11 @@ export default function PaymentClientComponent() {
             body: JSON.stringify({
               orderId: orderDetails.id,
               planId: planDetails.dbId,
-              userId: user.id
+              userId: user.id,
+              promoCode: appliedPromoCode,
+              discountPercent: discount?.percent || 0,
+              originalPrice: planDetails.price,
+              finalPrice: finalPrice
             })
           });
           
@@ -177,7 +235,11 @@ export default function PaymentClientComponent() {
                 body: JSON.stringify({
                   orderId: orderDetails.id,
                   planId: planDetails.dbId,
-                  userId: user.id
+                  userId: user.id,
+                  promoCode: appliedPromoCode,
+                  discountPercent: discount?.percent || 0,
+                  originalPrice: planDetails.price,
+                  finalPrice: finalPrice
                 })
               });
               
@@ -231,7 +293,7 @@ export default function PaymentClientComponent() {
       }
     }).render('#paypal-button-container');
     
-  }, [paypalLoaded, planDetails, user, router]);
+  }, [paypalLoaded, planDetails, user, router, finalPrice, appliedPromoCode, discount]);
 
   return (
     <>
@@ -262,12 +324,71 @@ export default function PaymentClientComponent() {
                 </div>
                 <div className="flex justify-between mb-4">
                   <span className="text-[#DEDDDC]/70">Price:</span>
-                  <span className="text-white font-medium">${planDetails.price} / {planDetails.interval}</span>
+                  <span className="text-white font-medium">
+                    {discount ? (
+                      <span className="flex flex-col items-end">
+                        <span className="line-through text-sm text-[#DEDDDC]/50">${planDetails.price}</span>
+                        <span className="text-green-400">${finalPrice} / {planDetails.interval}</span>
+                      </span>
+                    ) : (
+                      <span>${planDetails.price} / {planDetails.interval}</span>
+                    )}
+                  </span>
                 </div>
+                {discount && (
+                  <div className="flex justify-between mb-4">
+                    <span className="text-[#DEDDDC]/70">Discount:</span>
+                    <span className="text-green-400">{discount.percent}% (${discount.amount.toFixed(2)})</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-[#DEDDDC]/70">Billing Cycle:</span>
                   <span className="text-white font-medium capitalize">{planDetails.interval}</span>
                 </div>
+              </div>
+              
+              {/* Promo code section */}
+              <div className="space-y-3">
+                <div className="text-sm text-[#DEDDDC]/70">Have a promo code?</div>
+                <div className="flex space-x-2">
+                  <div className="relative flex-grow">
+                    <Input 
+                      type="text" 
+                      placeholder="Enter promo code" 
+                      className="bg-[#1F1F1F] border-white/10 text-white w-full"
+                      value={promoCode}
+                      onChange={(e) => {
+                        setPromoCode(e.target.value.toUpperCase());
+                        setPromoCodeStatus('idle');
+                      }}
+                      disabled={promoCodeStatus === 'valid' || promoCodeStatus === 'validating'}
+                    />
+                    {promoCodeStatus === 'valid' && (
+                      <CheckCircle2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-400" />
+                    )}
+                    {promoCodeStatus === 'invalid' && (
+                      <XCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-400" />
+                    )}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="bg-[#1F1F1F] border-white/10 hover:bg-[#252525] text-white"
+                    onClick={applyPromoCode}
+                    disabled={promoCodeStatus === 'valid' || promoCodeStatus === 'validating' || !promoCode}
+                  >
+                    {promoCodeStatus === 'validating' ? 'Applying...' : 'Apply'}
+                  </Button>
+                </div>
+                {promoCodeStatus === 'valid' && (
+                  <div className="text-xs text-green-400">
+                    Promo code applied! You're saving ${discount?.amount.toFixed(2)}.
+                  </div>
+                )}
+                {promoCodeStatus === 'invalid' && (
+                  <div className="text-xs text-red-400">
+                    Invalid promo code. Please try again.
+                  </div>
+                )}
               </div>
               
               <div id="paypal-button-container" className={`${processing ? 'opacity-50 pointer-events-none' : ''}`}></div>

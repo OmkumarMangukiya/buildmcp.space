@@ -343,7 +343,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-3">
                 <Star className="w-5 h-5 text-[#E1623D]" />
                 <span className="font-semibold text-lg text-white">
-                  {subscription?.plan_name || 'Basic'} {subscription?.plan_interval || 'Monthly'}
+                  {subscription?.plan_name || 'Basic'}
                 </span>
               </div>
               <Link href="/pricing">

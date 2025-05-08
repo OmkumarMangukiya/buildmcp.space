@@ -42,9 +42,30 @@ const findPlanById = async (planId: string) => {
   return plan;
 };
 
+// Helper to validate promo codes
+const validatePromoCode = (code: string, planInterval: string) => {
+  // Currently only supporting the ERBD21 code for monthly plans
+  if (code === 'ERBD21' && planInterval === 'monthly') {
+    return {
+      valid: true,
+      discountPercent: 21,
+      code: 'ERBD21'
+    };
+  }
+  return { valid: false, discountPercent: 0 };
+};
+
 export async function POST(req: Request) {
   try {
-    const { orderId, planId, userId } = await req.json();
+    const { 
+      orderId, 
+      planId, 
+      userId, 
+      promoCode, 
+      discountPercent,
+      originalPrice,
+      finalPrice 
+    } = await req.json();
     
     if (!orderId || !planId || !userId) {
       return NextResponse.json({ 
@@ -193,6 +214,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 400 });
     }
     
+    // Validate promo code on server side
+    let validPromoCode = null;
+    let appliedDiscount = 0;
+    let finalAmount = plan.price;
+    
+    if (promoCode) {
+      const promoValidation = validatePromoCode(promoCode, plan.interval);
+      
+      if (promoValidation.valid) {
+        validPromoCode = promoCode;
+        appliedDiscount = promoValidation.discountPercent;
+        
+        // Calculate the discounted amount - ensure it matches what was shown to the user
+        const calculatedFinalPrice = parseFloat((plan.price * (1 - appliedDiscount / 100)).toFixed(2));
+        
+        // Verify the final price matches what was passed from frontend
+        if (Math.abs(calculatedFinalPrice - finalPrice) > 0.01) {
+          console.warn(`Price mismatch: calculated=${calculatedFinalPrice}, received=${finalPrice}`);
+        }
+        
+        finalAmount = finalPrice;
+      }
+    }
+    
     // Calculate expiration date
     const now = new Date();
     let expiresAt = new Date(now);
@@ -211,10 +256,13 @@ export async function POST(req: Request) {
         payment_id: paymentData.id,
         user_id: userId,
         plan_id: plan.id,
-        amount: plan.price,
+        amount: finalAmount,
+        original_amount: plan.price,
         currency: plan.currency,
         status: 'succeeded',
-        payment_method: 'paypal'
+        payment_method: 'paypal',
+        promo_code: validPromoCode,
+        discount_percent: appliedDiscount
       })
       .select()
       .single();
@@ -243,7 +291,9 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       plan: plan.name,
-      expiresAt: expiresAt.toISOString()
+      expiresAt: expiresAt.toISOString(),
+      discountApplied: appliedDiscount > 0,
+      discountPercent: appliedDiscount
     });
   } catch (error) {
     console.error('Verification error:', error);

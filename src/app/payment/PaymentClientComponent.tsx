@@ -54,7 +54,7 @@ const validatePromoCode = (code: string, planInterval: string) => {
       code: 'ERBD21'
     };
   }
-  return { valid: false };
+  return { valid: false, discountPercent: 0 };
 };
 
 export default function PaymentClientComponent() {
